@@ -12,8 +12,8 @@ open Ast
 %token <string> ID FLIT
 %token EOF
 
-%start fdecl
-%type <Ast.func_decl> fdecl
+%start program
+%type <Ast.program> program
 
 %nonassoc NOELSE
 %nonassoc ELSE

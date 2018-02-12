@@ -21,14 +21,17 @@ let rec eval_stmt (res,map) stmt = match stmt with
   | Return(x) -> eval_expr (res,map) x
   | Block(x) -> List.fold_left eval_stmt (res,map) x
 
-(* let eval_program program = match program with
-  | 
-let eval_decls decls = match decls with
-  | *)
+(*only handle one function now*)
+let eval_func func = match func with
+  | x::tl ->x
+
+let eval_program program = match program with
+  | (var,func)-> eval_func func
 
 let () =
   let lex_buf = Lexing.from_channel stdin in
-  let fdecl = Parser.fdecl Scanner.token lex_buf in
+  let program = Parser.program Scanner.token lex_buf in
+  let fdecl =eval_program program  in
   let stmt = fdecl.body in 
   let (result,_) = List.fold_left eval_stmt (0,map) stmt in
   print_endline (string_of_int result)
