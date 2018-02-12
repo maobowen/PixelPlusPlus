@@ -1,4 +1,12 @@
 (*top.ml*)
+(* 
+    Tasks Board:
+
+    1.ast.ml, parser.mly, scanner.mll needs change to Pixel++ grammar
+    2.only handle one function in one program with (res,map) output needs change to List (res,map) 
+    3.only handle int type var needs add more type
+    4.if, for, while statement needs implement
+*)
 open Ast
 module StringMap = Map.Make(String)
 let map = StringMap.empty
