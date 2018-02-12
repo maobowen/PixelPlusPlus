@@ -28,6 +28,7 @@ let eval_decls decls = match decls with
 
 let () =
   let lex_buf = Lexing.from_channel stdin in
-  let stmt = Parser.stmt Scanner.token lex_buf in
-  let (result,_) = eval_stmt (0,map) stmt in
+  let fdecl = Parser.fdecl Scanner.token lex_buf in
+  let stmt = fdecl.body in 
+  let (result,_) = List.fold_left eval_stmt (0,map) stmt in
   print_endline (string_of_int result)
