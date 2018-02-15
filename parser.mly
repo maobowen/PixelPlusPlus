@@ -4,12 +4,12 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA PLUS MINUS TIMES DIVIDE ASSIGN
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA PLUS MINUS TIMES DIVIDE ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL FLOAT VOID
+%token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID
 %token <int> LITERAL
 %token <bool> BLIT
-%token <string> ID FLIT SLIT
+%token <string> ID FLIT SLIT ARRLITERAL MLITERAL
 %token EOF
 
 %start program
@@ -58,6 +58,9 @@ typ:
   | BOOL  { Bool  }
   | FLOAT { Float }
   | VOID  { Void  }
+  | ARR   { Arr }
+  | MATRIX { Matrix }
+
 
 vdecl_list:
     /* nothing */    { [] }
@@ -88,6 +91,8 @@ expr:
     LITERAL          { Literal($1)            }
   | FLIT	     { Fliteral($1)           }
   | BLIT             { BoolLit($1)            }
+  | ARRLITERAL       { Arrliteral($1)         }
+  | MLITERAL         { Mliteral($1) }
   | ID               { Id($1)                 }
   | SLIT             { Slit($1) }
   | expr PLUS   expr { Binop($1, Add,   $3)   }
@@ -107,6 +112,7 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
+
 
 args_opt:
     /* nothing */ { [] }

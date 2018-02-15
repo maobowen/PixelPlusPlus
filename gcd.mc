@@ -1,13 +1,3 @@
-int main() {
-  int a;
-  int b;
-  a = 1;
-  b = 101;
-  /*a = forLoopTest();*/
-  temp();
-  a;
-}
-
 int i;
 int j;
 int newvar;
@@ -41,4 +31,22 @@ int forLoopTest() {
   a=gcd(5050,100);
   return a;
 }
+
+
+int main() {
+  int a;
+  int b;
+  matrix c;
+  matrix d;   
+  matrix e;
+  a = 1;
+  b = 101;
+  /*a = forLoopTest();*/
+  temp();
+  a;
+  c = [[1,2,3];[4,5,6];[7,3,2]];
+  d = [[12,23,19];[6,5,4];[2,3,7]];
+  e = c * d;
+}
+
 

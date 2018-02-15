@@ -5,7 +5,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Float | Void
+type typ = Int | Bool | Float | Arr | Matrix | Void
 
 type bind = typ * string
 
@@ -13,6 +13,8 @@ type expr =
     Literal of int
   | Slit of string
   | Fliteral of string
+  | Arrliteral of string
+  | Mliteral of string
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
@@ -91,6 +93,8 @@ let string_of_typ = function
   | Bool -> "bool"
   | Float -> "float"
   | Void -> "void"
+  | Arr -> "arr"
+  | Matrix -> "matrix"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
