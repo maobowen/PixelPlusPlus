@@ -13,7 +13,7 @@ type expr =
     Literal of int
   | Slit of string
   | Fliteral of string
-  | Arrliteral of string
+  | Arrliteral of expr list
   | Mliteral of string
   | BoolLit of bool
   | Id of string

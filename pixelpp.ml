@@ -20,13 +20,13 @@ let div_fun a b = a / b;;
 let arr_oper func arr1 arr2 = Array.map2 func arr1 arr2;;
 let matrix_oper func m1 m2 = Array.map2 (arr_oper func) m1 m2;;
 
+
 let string_of_arr arr = let lst = List.map string_of_int (Array.to_list arr) in let temp_str = String.concat "," lst 
 in "[" ^ temp_str ^ "]"
-
-let string_of_matrix m = let temp_list1 = Array.to_list m in 
+(*let string_of_matrix m = let temp_list1 = Array.to_list m in 
 let temp_list2 = List.map string_of_arr temp_list1 in
 let str = String.concat ";" temp_list2
-in "[" ^ str ^ "]"
+in "[" ^ str ^ "]"*)
 
 let rec combineLists l0 l1 l2 = match l2 with
 [] -> []
@@ -49,17 +49,21 @@ let helper locals key v mymap = if (StringMap.mem key mymap && not (List.mem key
 let mapIntersect locals mymap mymap3 = StringMap.fold (helper locals) mymap3 mymap
 
 
-let rec createMap mymap formals (args_opt: Ast.expr list) =
-	match args_opt with
+let rec string_of_arr_args mymap funcMap lst arr =
+let (mymap, funcMap, lst) = List.fold_left eval2 (mymap, funcMap, lst) arr
+in ("[" ^ (String.concat "," (lst)) ^ "]", mymap, funcMap)
+
+and eval2 (mymap, funcMap, lst) e = let (v, mymap, funcMap) = eval mymap funcMap e in (mymap, funcMap, v::lst)
+
+and createMap mymap formals (args_opt: Ast.expr list) =
+	(match args_opt with
 	[] -> mymap
 |   [x] -> let [hd] = formals in let (v, mymap1, _) = eval mymap StringMap.empty x in StringMap.add (snd hd) v mymap1
-|   hd :: tl -> let (v, mymap1, _) = eval mymap StringMap.empty hd in let hd2::tl2 = formals in StringMap.add (snd hd2) v (createMap mymap tl2 tl)
-and
- eval mymap funcMap (expr: Ast.expr) = match expr with
+|   hd :: tl -> let (v, mymap1, _) = eval mymap StringMap.empty hd in let hd2::tl2 = formals in StringMap.add (snd hd2) v (createMap mymap tl2 tl))
+and eval mymap funcMap (expr: Ast.expr) = match expr with
     Literal(x) -> (string_of_int x, mymap, funcMap)
   | Slit(x) -> (x, mymap, funcMap)
-  | Arrliteral(x) -> (x, mymap, funcMap)
-  | Mliteral(x) -> ("["^x^"]", mymap, funcMap)
+  | Arrliteral(x) -> string_of_arr_args mymap funcMap [] x
   | Noexpr -> ("", mymap, funcMap)
   | Id(x) -> (StringMap.find x mymap, mymap, funcMap)
   | BoolLit(x) -> (string_of_bool x, mymap, funcMap)
@@ -68,10 +72,10 @@ and
   | Binop(e1, op, e2) ->
       (let (v1, mymap1, funcMap1) = eval mymap funcMap e1 in let (v2, mymap2, funcMap2) = eval mymap1 funcMap1 e2 in
       match op with
-    	Add -> if String.contains v1 '[' then if (String.sub v1 0 2) = "[[" then (string_of_matrix (matrix_oper plus_fun (matrix_of_string v1) (matrix_of_string v2)), mymap2, funcMap2) else (string_of_arr (arr_oper plus_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 + int_of_string v2), mymap2, funcMap2)
-      | Sub -> if String.contains v1 '[' then if (String.sub v1 0 2) = "[[" then (string_of_matrix (matrix_oper minus_fun (matrix_of_string v1) (matrix_of_string v2)), mymap2, funcMap2) else (string_of_arr (arr_oper minus_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 - int_of_string v2), mymap2, funcMap2)
-      | Mult -> if String.contains v1 '[' then if (String.sub v1 0 2) = "[[" then (string_of_matrix (matrix_oper mult_fun (matrix_of_string v1) (matrix_of_string v2)), mymap2, funcMap2) else (string_of_arr (arr_oper mult_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 * int_of_string v2), mymap2, funcMap2)
-      | Div -> if String.contains v1 '[' then if (String.sub v1 0 2) = "[[" then (string_of_matrix (matrix_oper div_fun (matrix_of_string v1) (matrix_of_string v2)), mymap2, funcMap2) else (string_of_arr (arr_oper div_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 / int_of_string v2), mymap2, funcMap2)
+    	Add -> if String.contains v1 '[' then (string_of_arr (arr_oper plus_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 + int_of_string v2), mymap2, funcMap2)
+      | Sub -> if String.contains v1 '[' then (string_of_arr (arr_oper minus_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 - int_of_string v2), mymap2, funcMap2)
+      | Mult -> if String.contains v1 '[' then (string_of_arr (arr_oper mult_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 * int_of_string v2), mymap2, funcMap2)
+      | Div -> if String.contains v1 '[' then (string_of_arr (arr_oper div_fun (arr_of_string v1) (arr_of_string v2)), mymap2, funcMap2) else (string_of_int (int_of_string v1 / int_of_string v2), mymap2, funcMap2)
       | Equal -> if v1=v2 then ("true", mymap, funcMap2) else ("false", mymap, funcMap2)
       | Neq -> if v1<>v2 then ("true", mymap, funcMap2) else ("false", mymap, funcMap2)
       | Less -> if (v1 = "true" || v1 = "false") then (string_of_bool (v1 < v2), mymap, funcMap2) else (string_of_bool(int_of_string v1 < int_of_string v2), mymap, funcMap2)

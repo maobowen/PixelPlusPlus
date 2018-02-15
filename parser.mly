@@ -9,7 +9,7 @@ open Ast
 %token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID
 %token <int> LITERAL
 %token <bool> BLIT
-%token <string> ID FLIT SLIT ARRLITERAL MLITERAL
+%token <string> ID FLIT SLIT MLITERAL
 %token EOF
 
 %start program
@@ -91,7 +91,6 @@ expr:
     LITERAL          { Literal($1)            }
   | FLIT	     { Fliteral($1)           }
   | BLIT             { BoolLit($1)            }
-  | ARRLITERAL       { Arrliteral($1)         }
   | MLITERAL         { Mliteral($1) }
   | ID               { Id($1)                 }
   | SLIT             { Slit($1) }
@@ -111,6 +110,7 @@ expr:
   | NOT expr         { Unop(Not, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
+  | LBRACKET args_list RBRACKET { Arrliteral($2) }
   | LPAREN expr RPAREN { $2                   }
 
 

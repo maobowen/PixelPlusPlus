@@ -36,17 +36,16 @@ int forLoopTest() {
 int main() {
   int a;
   int b;
-  matrix c;
-  matrix d;   
-  matrix e;
+  arr arr1;
+  arr arr2;
+  
   a = 1;
   b = 101;
-  /*a = forLoopTest();*/
   temp();
   a;
-  c = [[1,2,3];[4,5,6];[7,3,2]];
-  d = [[12,23,19];[6,5,4];[2,3,7]];
-  e = c * d;
+  arr1 = [1,2,3];
+  arr2 = [4,5,6];
+  arr2+arr1;
 }
 
 
