@@ -38,14 +38,17 @@ int main() {
   int b;
   arr arr1;
   arr arr2;
-  
+  arr arr3;
+  arr arr4; 
   a = 1;
   b = 101;
   temp();
   a;
   arr1 = [1,2,3];
   arr2 = [4,5,6];
-  arr2+arr1;
+  arr3 = [arr1, arr2];
+  arr4 = [arr2, arr1];
+  arr3 * [[3,4,5],[0,1,-1]];
 }
 
 
