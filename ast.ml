@@ -1,6 +1,7 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
-type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
+type op = Add | Sub | Mult | Div | Equal | Neq 
+          | Less | Leq | Greater | Geq |
           And | Or
 
 type uop = Neg | Not
@@ -11,10 +12,7 @@ type bind = typ * string
 
 type expr =
     Literal of int
-  | Slit of string
   | Fliteral of string
-  | Arrliteral of expr list
-  | Mliteral of string
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
@@ -22,8 +20,12 @@ type expr =
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr
+  (* add expr *)
+  | Slit of string
+  | Arrliteral of expr list
+  | Mliteral of expr list
 
-type stmt =
+  type stmt =
     Block of stmt list
   | Expr of expr
   | Return of expr
@@ -74,7 +76,10 @@ let rec string_of_expr = function
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
-
+  (* add expr *)
+  | Slit(s)-> s
+  | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
+  | Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
 let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"

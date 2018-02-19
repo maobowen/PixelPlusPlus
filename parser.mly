@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET COMMA PLUS MINUS TIMES DIVIDE ASSIGN
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE COMMA PLUS MINUS TIMES DIVIDE ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
 %token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID
 %token <int> LITERAL
@@ -91,9 +91,7 @@ expr:
     LITERAL          { Literal($1)            }
   | FLIT	     { Fliteral($1)           }
   | BLIT             { BoolLit($1)            }
-  | MLITERAL         { Mliteral($1) }
   | ID               { Id($1)                 }
-  | SLIT             { Slit($1) }
   | expr PLUS   expr { Binop($1, Add,   $3)   }
   | expr MINUS  expr { Binop($1, Sub,   $3)   }
   | expr TIMES  expr { Binop($1, Mult,  $3)   }
@@ -110,9 +108,11 @@ expr:
   | NOT expr         { Unop(Not, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
-  | LBRACKET args_list RBRACKET { Arrliteral($2) }
   | LPAREN expr RPAREN { $2                   }
-
+  /*add expr*/
+  | SLIT             { Slit($1) }
+  | LBRACKET args_list RBRACKET  { Arrliteral($2) }
+  | LBRACKET arr_list RBRACKET { Mliteral($2) }
 
 args_opt:
     /* nothing */ { [] }
@@ -121,3 +121,7 @@ args_opt:
 args_list:
     expr                    { [$1] }
   | args_list COMMA expr { $3 :: $1 }
+
+arr_list:
+  | LBRACKET expr  RBRACKET   { [$2] }
+  | arr_list COMMA LBRACKET expr RBRACKET { $4 :: $1 }

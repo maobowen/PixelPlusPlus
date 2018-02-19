@@ -8,7 +8,7 @@
     4.if, for, while statement needs implement
 *)
 open Ast
-module StringMap = Map.Make(String)
+(* module StringMap = Map.Make(String)
 let map = StringMap.empty
 let rec eval_expr (res,map) expr= match expr with
   | Literal(x) -> (x,map)
@@ -28,18 +28,24 @@ let rec eval_stmt (res,map) stmt = match stmt with
   | Expr(x)-> eval_expr (res,map) x
   | Return(x) -> eval_expr (res,map) x
   | Block(x) -> List.fold_left eval_stmt (res,map) x
-
 (*only handle one function now*)
 let eval_func func = match func with
   | x::tl ->x
 
 let eval_program program = match program with
   | (var,func)-> eval_func func
-
-let () =
+ *)
+(* let () =
   let lex_buf = Lexing.from_channel stdin in
   let program = Parser.program Scanner.token lex_buf in
   let fdecl =eval_program program  in
   let stmt = fdecl.body in 
   let (result,_) = List.fold_left eval_stmt (0,map) stmt in
-  print_endline (string_of_int result)
+  print_endline (string_of_int result) *)
+let () =
+  let lex_buf = Lexing.from_channel stdin in
+  let program = Parser.program Scanner.token lex_buf in
+  let funcs =snd program  in
+  let vars = fst program in
+  let result = string_of_program (vars,funcs)in 
+  print_endline result
