@@ -6,7 +6,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Float | Arr | Matrix | Void
+type typ = Int | Bool | Float | Arr | Matrix | Void |String 
 
 type bind = typ * string
 
@@ -77,9 +77,10 @@ let rec string_of_expr = function
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
   (* add expr *)
-  | Slit(s)-> s
+  | Slit(s)-> String.make 1 '"'^s^String.make 1 '"'
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
   | Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
+
 let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
@@ -94,12 +95,13 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
 
 let string_of_typ = function
-    Int -> "int"
+  | Int -> "int"
   | Bool -> "bool"
   | Float -> "float"
   | Void -> "void"
   | Arr -> "arr"
   | Matrix -> "matrix"
+  | String -> "String"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

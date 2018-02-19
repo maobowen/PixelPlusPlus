@@ -6,10 +6,10 @@ open Ast
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE COMMA PLUS MINUS TIMES DIVIDE ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
-%token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID
+%token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID STRING
 %token <int> LITERAL
 %token <bool> BLIT
-%token <string> ID FLIT SLIT MLITERAL
+%token <string> ID FLIT 
 %token EOF
 
 %start program
@@ -60,6 +60,7 @@ typ:
   | VOID  { Void  }
   | ARR   { Arr }
   | MATRIX { Matrix }
+  | STRING  { String}
 
 
 vdecl_list:
@@ -89,7 +90,7 @@ expr_opt:
 
 expr:
     LITERAL          { Literal($1)            }
-  | FLIT	     { Fliteral($1)           }
+  | FLIT	           { Fliteral($1)           }
   | BLIT             { BoolLit($1)            }
   | ID               { Id($1)                 }
   | expr PLUS   expr { Binop($1, Add,   $3)   }
@@ -110,10 +111,9 @@ expr:
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
-  | SLIT             { Slit($1) }
   | LBRACKET args_list RBRACKET  { Arrliteral($2) }
   | LBRACKET arr_list RBRACKET { Mliteral($2) }
-
+  | QUOTE ID QUOTE {Slit($2)}
 args_opt:
     /* nothing */ { [] }
   | args_list  { List.rev $1 }

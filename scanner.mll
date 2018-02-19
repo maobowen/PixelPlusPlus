@@ -38,6 +38,7 @@ rule token = parse
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
+| "String" { STRING}
 | "arr"    { ARR }
 | "matrix" { MATRIX }
 | "bool"   { BOOL }
