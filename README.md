@@ -1,82 +1,52 @@
 # Pixel++
 
-Pixel++ is an object-oriented programming language for efficient manipulation of images.
+Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a document intended for the compilation and execution instructions.
 
-This is a class project for COMS W4115 Programming Languages and Translators, Spring 2018 at Columbia University.
+## Makefile
 
-Makefile is provided. Use "make clean" to clean intermediate and executable files. Use "make" to produce the top level executable and run it with the following command:
+Makefile is provided. By typing "make" in the terminal, the following commands will be executed automatically to produce the top level executable:
 
-./top.native test_file.xpp
+	rm -f *.o
+	ocamlbuild top.native
 
-You can test the current 4 files with 
+If you wish to build it again, use "make clean" before "make" to clean intermediate and executable files, which is equivalent to the following commands:
 
-Input:
+	ocamlbuild -clean
+	rm -rf top scanner.ml parser.ml parser.mli
+	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
-	int i;
-	int j;
-	int newvar;
-	int superpower;
-	float f;
-	String s;
-	void temp() {
-	  /*int a;
-	  int b;*/
-	  a = 123;
-	  b = 321;
-	  f = 1.21;
-	  s = "anc";
-	}
+## Compilation & Execution
 
-	int gcd(int a, int b) {
-	  while (a!=b) {
-	    if (a > b)
-	      a = a - b;
-	    else
-	      b = b - a;
-	  }
-	  return a;
-	}
+You can compile and execute the codes using our provided Makefile. Detailed procedure is listed as below:
 
-	int forLoopTest() {
-	  int accu;
-	  int i;
-	  i = 0;
-	  accu = 0;
-	  for (i = a; i < b; i = i + 1) {
-	    accu = accu + i;
-	  }
-	  a=gcd(5050,100);
-	  return a;
-	}
+1. Produce the top level executable with the following command:
 
+		make
 
-	int main() {
-	  int a;
-	  int b;
-	  arr arr1;
-	  arr arr2;
-	  arr arr3;
-	  arr arr4; 
-	  matrix m1;
-	  matrix m2;
-	  matrix m3;
-	  a = 1;
-	  b = 101;
-	  temp();
-	  a;
-	  arr1 = [1,2,3];
-	  arr2 = [4,5,6];
-	  arr3 = [arr1, arr2];
-	  arr4 = [arr2, arr1];
-	  arr3 * [[3,4,5],[0,1,-1]];
-	  m1 = [[1],[2],[3]];
+2. Run the program with the following command:
+	
+		./toplevel.native [file.xpp]
 
-	}
+the function takes one argument, which is a .xpp file that contains some pixel++ code.
 
+3. You will get the output immediately.
 
+You casn also clean intermediate and executable files before building again using the following command:
 
+	make clean
 
-EOF
-Output:
-11
+## Test Script
 
+Alternatively, we have provided our own testcases. There are 10 testcases, 5 will compile and execute successfully and the others will not.
+
+To test on our test script instead of your own input, follow the following procedure:
+
+1. Produce the top level executable with the following command:
+   
+		make 
+
+2. Run bash test script with the following command:
+	
+		./testall.sh
+
+For successful test cases, a message of "test succeeded" will be printed. Otherwise, "test failed" will be displayed.
