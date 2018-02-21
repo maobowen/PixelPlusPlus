@@ -1,10 +1,10 @@
 # Pixel++
 
-Pixel++ is an object-oriented programming language for efficient manipulation of images coded in OCaml. This is a document intended for the compilation and execution instructions.
+Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a document intended for the compilation and execution instructions.
 
 ## Makefile
 
-Makefile is provided. By typing "make" in the terminal, the following commands will automatically execute to produce the top level executable:
+Makefile is provided. By typing "make" in the terminal, the following commands will be executed automatically to produce the top level executable:
 
 	rm -f *.o
 	ocamlbuild top.native
@@ -25,18 +25,11 @@ You can compile and execute the codes using our provided Makefile. Detailed proc
 
 2. Run the program with the following command:
 	
-		./top.native
+		./toplevel.native [file.xpp]
 
-3. Type in any valid statements, expressions, or functions you want to run with the program, each line separated with ";", for example:
+the function takes one argument, which is a .xpp file that contains some pixel++ code.
 
-		int a;
-		int foo() {
-			int b;
-			b = a;
-			return b;
-		}
-
-4. Press CTRL+D as an indicationo of EOF. You will get the output immediately.
+3. You will get the output immediately.
 
 You casn also clean intermediate and executable files before building again using the following command:
 
