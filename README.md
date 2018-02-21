@@ -5,9 +5,13 @@ Pixel++ is a programming language for efficient manipulation of images coded in 
 ## Group Members
 
 Jiayang Li	jl4305@columbia.edu
+
 Yilan He	yh2961@columbia.edu
+
 Bowen Mao	bm2734@columbia.edu
+
 Nana Pang	np2630@columbia.edu
+
 Yunxuan Sun	ys3065@columbia.edu
 
 ## Makefile
