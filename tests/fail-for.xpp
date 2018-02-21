@@ -1,0 +1,9 @@
+int foo() {
+  int i;
+  int accu;
+  for ( ;  ; ) {
+    accu = accu + i;
+  }
+  return accu;
+}
+
