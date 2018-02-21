@@ -43,9 +43,10 @@ let eval_program program = match program with
   let (result,_) = List.fold_left eval_stmt (0,map) stmt in
   print_endline (string_of_int result) *)
 let () =
-  let lex_buf = Lexing.from_channel stdin in
+  let usage_msg = "usage: ./top.native [file.xpp]" in
+  let channel = ref stdin in
+  Arg.parse [] (fun file -> channel := open_in file) usage_msg;
+  let lex_buf = Lexing.from_channel !channel in
   let program = Parser.program Scanner.token lex_buf in
-  let funcs =snd program  in
-  let vars = fst program in
-  let result = string_of_program (vars,funcs)in 
-  print_endline result
+  let result = Ast.string_of_program program in 
+  print_string result

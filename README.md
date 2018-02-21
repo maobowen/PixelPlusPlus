@@ -4,6 +4,10 @@ Pixel++ is an object-oriented programming language for efficient manipulation of
 
 This is a class project for COMS W4115 Programming Languages and Translators, Spring 2018 at Columbia University.
 
+Makefile is provided. Use "make clean" to clean intermediate and executable files. Use "make" to produce the top level executable and run it with the following command:
+
+./top.native test_file.xpp
+
 You can test the current 4 files with 
 
 Input:

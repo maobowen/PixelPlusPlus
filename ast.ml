@@ -2,7 +2,7 @@
 
 type op = Add | Sub | Mult | Div | Equal | Neq 
           | Less | Leq | Greater | Geq |
-          And | Or
+          And | Or | At
 
 type uop = Neg | Not
 
@@ -23,7 +23,9 @@ type expr =
   (* add expr *)
   | Slit of string
   | Arrliteral of expr list
-  | Mliteral of expr list
+  | Filter of string
+  | Filterliteral of expr list
+  (*| Mliteral of expr list*)
 
   type stmt =
     Block of stmt list
@@ -58,6 +60,7 @@ let string_of_op = function
   | Geq -> ">="
   | And -> "&&"
   | Or -> "||"
+  | At -> "@"
 
 let string_of_uop = function
     Neg -> "-"
@@ -69,6 +72,7 @@ let rec string_of_expr = function
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | Id(s) -> s
+  | Filter(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
@@ -79,7 +83,8 @@ let rec string_of_expr = function
   (* add expr *)
   | Slit(s)-> String.make 1 '"'^s^String.make 1 '"'
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
-  | Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
+  | Filterliteral(e) -> "(" ^ String.concat "->" (List.map string_of_expr e) ^ ")"
+  (*| Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"*)
 
 let rec string_of_stmt = function
     Block(stmts) ->
@@ -105,9 +110,14 @@ let string_of_typ = function
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
+let string_of_formals formals =
+let string_of_bind bind =
+string_of_typ (fst bind) ^ " " ^ (snd bind) in
+List.map string_of_bind formals
+
 let string_of_fdecl fdecl =
   string_of_typ fdecl.typ ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
+  fdecl.fname ^ "(" ^ String.concat ", " (string_of_formals fdecl.formals) ^
   ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^

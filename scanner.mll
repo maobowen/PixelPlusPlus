@@ -23,6 +23,7 @@ rule token = parse
 | '*'      { TIMES }
 | '/'      { DIVIDE }
 | '='      { ASSIGN }
+| '@'	   { AT }
 | "=="     { EQ }
 | "!="     { NEQ }
 | '<'      { LT }
@@ -32,6 +33,7 @@ rule token = parse
 | "&&"     { AND }
 | "||"     { OR }
 | "!"      { NOT }
+| "->"	   { FIL }
 | "if"     { IF }
 | "else"   { ELSE }
 | "for"    { FOR }
@@ -40,7 +42,6 @@ rule token = parse
 | "int"    { INT }
 | "String" { STRING}
 | "arr"    { ARR }
-| "matrix" { MATRIX }
 | "bool"   { BOOL }
 | "float"  { FLOAT }
 | "void"   { VOID }
@@ -48,6 +49,8 @@ rule token = parse
 | "false"  { BLIT(false) }
 | digits as lxm { LITERAL(int_of_string lxm) }
 | digits '.'  digit* ( ['e' 'E'] ['+' '-']? digits )? as lxm { FLIT(lxm) }
+| "blur" as lxm { FILTER(lxm) }
+| "cobol" as lxm { FILTER(lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*     as lxm { ID(lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
