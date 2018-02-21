@@ -1,4 +1,4 @@
-int forLoopTest() {
+func int forLoopTest() {
   int accu;
   int i;
   i = 0;

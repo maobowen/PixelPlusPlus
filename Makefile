@@ -1,13 +1,13 @@
 .PHONY : all
-all : top.native
+all : toplevel.native
 
-.PHONY : top.native
-top.native :
+.PHONY : toplevel.native
+toplevel.native :
 	rm -f *.o
-	ocamlbuild top.native
+	ocamlbuild toplevel.native
 
 .PHONY : clean
 clean :
 	ocamlbuild -clean
-	rm -rf top scanner.ml parser.ml parser.mli
+	rm -rf toplevel scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe

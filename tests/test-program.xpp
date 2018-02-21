@@ -4,7 +4,7 @@ int newvar;
 int superpower;
 float f;
 String s;
-void temp() {
+func void temp() {
   /*int a;
   int b;*/
   a = 123;
@@ -13,7 +13,7 @@ void temp() {
   s = "anc";
 }
 
-int main() {
+func int main() {
   int a;
   int b;
   int c;
