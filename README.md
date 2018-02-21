@@ -1,6 +1,6 @@
 # Pixel++
 
-Pixel++ is an object-oriented programming language for efficient manipulation of images coded in OCaml. This is a document intended for the compilation and execution instructions.
+Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a document intended for the compilation and execution instructions.
 
 ## Makefile
 
