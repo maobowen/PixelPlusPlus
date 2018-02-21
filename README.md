@@ -1,23 +1,35 @@
 # Pixel++
 
-Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a document intended for the compilation and execution instructions.
+Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a documentation intended for the compilation and execution instructions.
 
-## Makefile
+This is a class project for COMS W4115 Programming Languages and Translators, Spring 2018 at Columbia University.
 
-Makefile is provided. By typing "make" in the terminal, the following commands will be executed automatically to produce the top level executable:
+## Group Members
+
+- Jiayang Li	jl4305@columbia.edu
+- Yilan He	yh2961@columbia.edu
+- Bowen Mao	bm2734@columbia.edu
+- Nana Pang	np2630@columbia.edu
+- Yunxuan Sun	ys3065@columbia.edu
+
+## Scanner and Parser
+
+### Makefile
+
+Makefile is provided. By typing `make` in the terminal, the following commands will be executed automatically to produce the top-level executable:
 
 	rm -f *.o
 	ocamlbuild top.native
 
-If you wish to build it again, use "make clean" before "make" to clean intermediate and executable files, which is equivalent to the following commands:
+If you wish to build it again, use `make clean` before `make` to clean intermediate and executable files, which is equivalent to the following commands:
 
 	ocamlbuild -clean
 	rm -rf top scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
 
-## Compilation & Execution
+### Compilation and Execution
 
-You can compile and execute the codes using our provided Makefile. Detailed procedure is listed as below:
+You can compile and execute the codes using our Makefile. Detailed procedure is listed as below:
 
 1. Produce the top level executable with the following command:
 
@@ -25,24 +37,22 @@ You can compile and execute the codes using our provided Makefile. Detailed proc
 
 2. Run the program with the following command:
 	
-		./toplevel.native [file.xpp]
+		./toplevel.native <file.xpp>
 
-the function takes one argument, which is a .xpp file that contains some pixel++ code.
+The function takes one argument, which is a `.xpp` file that contains some Pixel++ codes.
 
 3. You will get the output immediately.
 
-You casn also clean intermediate and executable files before building again using the following command:
+You can also clean intermediate and executable files before building again using the following command:
 
 	make clean
 
-## Test Script
+### Test Script
 
-Alternatively, we have provided our own testcases. There are 10 testcases, 5 will compile and execute successfully and the others will not.
+We have also provided our own test cases. There are 10 test cases, 5 of which will compile and execute successfully and the others will not compile.
 
-To test on our test script instead of your own input, follow the following procedure:
-
-1. Run bash test script with the following command:
+To test our test script, just run:
 	
-		./testall.sh
+	./testall.sh
 
-For successful test cases, a message of "test succeeded" will be printed. Otherwise, "test failed" will be displayed.
+A message, "test succeeded", will be printed if the test files are successfully compiled and executed. Otherwise, "test failed" will be displayed.
