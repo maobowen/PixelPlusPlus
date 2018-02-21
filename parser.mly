@@ -19,6 +19,9 @@ open Ast
 
 %nonassoc NOELSE
 %nonassoc ELSE
+%nonassoc AT
+%left FIL
+%left COMMA
 %right ASSIGN
 %left OR
 %left AND
@@ -116,7 +119,7 @@ expr:
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
-  | LPAREN filter_list RPAREN     {       Filterliteral(List.rev $2)           }
+  | LPAREN filter_list RPAREN     {       Filterliteral(List.rev $2)    }
   | QUOTE ID QUOTE                {       Slit($2)                      }
 args_opt:
     /* nothing */ { [] }
