@@ -4,7 +4,7 @@ Pixel++ is a programming language for efficient manipulation of images coded in 
 
 ## Makefile
 
-Makefile is provided. By typing "make" in the terminal, the following commands will automatically execute to produce the top level executable:
+Makefile is provided. By typing "make" in the terminal, the following commands will be executed automatically to produce the top level executable:
 
 	rm -f *.o
 	ocamlbuild top.native
