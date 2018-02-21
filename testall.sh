@@ -2,7 +2,7 @@
 
 files="tests/test-*.xpp"
 
-TOPLEVEL="./top.native"
+TOPLEVEL="./toplevel.native"
 
 Check() {
     basename=`echo $1 | sed 's/.*\\///
