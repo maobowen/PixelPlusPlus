@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE COMMA PLUS MINUS TIMES DIVIDE ASSIGN
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE WRAP COMMA PLUS MINUS TIMES DIVIDE ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
 %token FIL AT
 %token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID STRING
@@ -119,7 +119,7 @@ expr:
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
-  | LPAREN filter_list RPAREN     {       Filterliteral(List.rev $2)    }
+  | WRAP filter_list WRAP         {       Filterliteral(List.rev $2)    }
   | QUOTE ID QUOTE                {       Slit($2)                      }
 args_opt:
     /* nothing */ { [] }
