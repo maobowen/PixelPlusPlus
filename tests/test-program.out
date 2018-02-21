@@ -5,7 +5,7 @@ int superpower;
 float f;
 String s;
 
-void temp()
+func void temp()
 {
 a = 123;
 b = 321;
@@ -13,7 +13,7 @@ f = 1.21;
 s = "anc";
 }
 
-int main()
+func int main()
 {
 int a;
 int b;
