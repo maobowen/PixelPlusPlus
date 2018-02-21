@@ -41,11 +41,7 @@ Alternatively, we have provided our own testcases. There are 10 testcases, 5 wil
 
 To test on our test script instead of your own input, follow the following procedure:
 
-1. Produce the top level executable with the following command:
-   
-		make 
-
-2. Run bash test script with the following command:
+1. Run bash test script with the following command:
 	
 		./testall.sh
 
