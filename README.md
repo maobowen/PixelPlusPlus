@@ -2,6 +2,14 @@
 
 Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a document intended for the compilation and execution instructions.
 
+## Group Members
+
+Jiayang Li	jl4305@columbia.edu
+Yilan He	yh2961@columbia.edu
+Bowen Mao	bm2734@columbia.edu
+Nana Pang	np2630@columbia.edu
+Yunxuan Sun	ys3065@columbia.edu
+
 ## Makefile
 
 Makefile is provided. By typing "make" in the terminal, the following commands will be executed automatically to produce the top level executable:
