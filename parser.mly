@@ -6,10 +6,11 @@ open Ast
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE COMMA PLUS MINUS TIMES DIVIDE ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
+%token FIL AT
 %token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID STRING
 %token <int> LITERAL
 %token <bool> BLIT
-%token <string> ID FLIT 
+%token <string> ID FLIT FILTER
 %token EOF
 
 %start program
@@ -54,13 +55,13 @@ formal_list:
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 typ:
-    INT   { Int   }
-  | BOOL  { Bool  }
-  | FLOAT { Float }
-  | VOID  { Void  }
-  | ARR   { Arr }
-  | MATRIX { Matrix }
-  | STRING  { String}
+    INT     { Int    }
+  | BOOL    { Bool   }
+  | FLOAT   { Float  }
+  | VOID    { Void   }
+  | ARR     { Arr    }
+  | MATRIX  { Matrix }
+  | STRING  { String }
 
 
 vdecl_list:
@@ -93,6 +94,7 @@ expr:
   | FLIT	           { Fliteral($1)           }
   | BLIT             { BoolLit($1)            }
   | ID               { Id($1)                 }
+  | FILTER           { Filter($1)      }
   | expr PLUS   expr { Binop($1, Add,   $3)   }
   | expr MINUS  expr { Binop($1, Sub,   $3)   }
   | expr TIMES  expr { Binop($1, Mult,  $3)   }
@@ -105,6 +107,7 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3)   }
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
+  | expr AT     expr { Binop($1, At,    $3)   }
   | MINUS expr %prec NEG { Unop(Neg, $2)      }
   | NOT expr         { Unop(Not, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
@@ -112,10 +115,15 @@ expr:
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
+  | LPAREN filter_list RPAREN     {       Filterliteral(List.rev $2)           }
   | QUOTE ID QUOTE                {       Slit($2)                      }
 args_opt:
     /* nothing */ { [] }
   | args_list  { List.rev $1 }
+
+filter_list:
+    FILTER                      { [Filter($1)]       }
+  | filter_list FIL FILTER { Filter($3) :: $1 }
 
 args_list:
     expr                    { [$1] }
