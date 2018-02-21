@@ -83,7 +83,7 @@ let rec string_of_expr = function
   (* add expr *)
   | Slit(s)-> String.make 1 '"'^s^String.make 1 '"'
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
-  | Filterliteral(e) -> "(" ^ String.concat "->" (List.map string_of_expr e) ^ ")"
+  | Filterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_expr e) ^ "|"
   (*| Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"*)
 
 let rec string_of_stmt = function
