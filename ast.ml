@@ -105,9 +105,14 @@ let string_of_typ = function
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
+let string_of_formals formals =
+let string_of_bind bind =
+string_of_typ (fst bind) ^ " " ^ (snd bind) in
+List.map string_of_bind formals
+
 let string_of_fdecl fdecl =
   string_of_typ fdecl.typ ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
+  fdecl.fname ^ "(" ^ String.concat ", " (string_of_formals fdecl.formals) ^
   ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
