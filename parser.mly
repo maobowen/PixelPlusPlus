@@ -1,4 +1,4 @@
-/* Ocamlyacc parser for MicroC */
+/* Ocamlyacc parser for Pixel++ */
 
 %{
 open Ast
@@ -12,6 +12,7 @@ open Ast
 %token <bool> BLIT
 %token <string> ID FLIT FILTER
 %token EOF
+%token FUNC
 
 %start program
 %type <Ast.program> program
@@ -39,12 +40,12 @@ decls:
  | decls fdecl { (fst $1, ($2 :: snd $1)) }
 
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
-     { { typ = $1;
-	 fname = $2;
-	 formals = $4;
-	 locals = List.rev $7;
-	 body = List.rev $8 } }
+   FUNC typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
+     { { typ = $2;
+	 fname = $3;
+	 formals = $5;
+	 locals = List.rev $8;
+	 body = List.rev $9 } }
 
 formals_opt:
     /* nothing */ { [] }
