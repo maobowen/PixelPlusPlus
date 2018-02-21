@@ -30,7 +30,7 @@ open Ast
 %%
 
 program:
-  decls EOF { $1 }
+  decls EOF { (List.rev (fst $1), List.rev (snd $1)) }
 
 decls:
    /* nothing */ { ([], [])               }
@@ -111,9 +111,8 @@ expr:
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
-  | LBRACKET args_list RBRACKET  { Arrliteral($2) }
-  | LBRACKET arr_list RBRACKET { Mliteral($2) }
-  | QUOTE ID QUOTE {Slit($2)}
+  | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
+  | QUOTE ID QUOTE                {       Slit($2)                      }
 args_opt:
     /* nothing */ { [] }
   | args_list  { List.rev $1 }
@@ -122,6 +121,6 @@ args_list:
     expr                    { [$1] }
   | args_list COMMA expr { $3 :: $1 }
 
-arr_list:
-  | LBRACKET expr  RBRACKET   { [$2] }
-  | arr_list COMMA LBRACKET expr RBRACKET { $4 :: $1 }
+/*arr_list:
+  | LBRACKET args_list RBRACKET   { [[$2]] }
+  | arr_list COMMA LBRACKET args_list RBRACKET { [$4] :: $1 }*/
