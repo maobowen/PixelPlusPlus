@@ -1,7 +1,7 @@
-(*top.ml*)
+(*toplevel.ml*)
 open Ast
 let () =
-  let usage_msg = "usage: ./top.native [file.xpp]" in
+  let usage_msg = "Usage: ./toplevel.native <file.xpp>" in
   let channel = ref stdin in
   Arg.parse [] (fun file -> channel := open_in file) usage_msg;
   let lex_buf = Lexing.from_channel !channel in
