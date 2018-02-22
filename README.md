@@ -55,4 +55,13 @@ To test our test script, just run:
 	
 	./testall.sh
 
-A message, "test succeeded", will be printed if the test files are successfully compiled and executed. Otherwise, "test failed" will be displayed.
+For positive test cases, a message "positive test succeeded" will be printed, which indicates that the files are successfully compiled and the results match our expectation. For negative test cases, a message "negative test succeeded" will be displayed to indicate that the files are failed to compile and the error matches our expectation.
+
+-----
+
+So far, we have implemented all the syntax we have defined except:
+
+1. Array subscript
+2. Built-in functions
+
+We will add those in the future implementation.
