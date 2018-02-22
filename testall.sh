@@ -16,9 +16,9 @@ Check() {
 
     if diff -bB ${basename}.out ${reffile}.out > ${basename}.diff
     then
-        echo "test succeeded"
+        echo "positive test succeeded"
     else
-        echo "test failed"
+        echo "positive test failed"
     fi
     rm -f ${basename}.out ${basename}.diff
 }
@@ -35,9 +35,9 @@ CheckFail() {
 
     if diff -bB ${basename}.err ${reffile}.err > ${basename}.diff
     then
-        echo "test succeeded"
+        echo "negative test succeeded"
     else
-        echo "test failed"
+        echo "negative test failed"
     fi  
     rm -f ${basename}.err ${basename}.diff
 }
