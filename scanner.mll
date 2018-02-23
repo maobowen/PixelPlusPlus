@@ -31,9 +31,9 @@ rule token = parse
 | "<="     { LEQ }
 | ">"      { GT }
 | ">="     { GEQ }
-| "&&"     { AND }
-| "||"     { OR }
-| "!"      { NOT }
+| "and"    { AND }
+| "or"     { OR }
+| "not"    { NOT }
 | "->"	   { FIL }
 | "if"     { IF }
 | "else"   { ELSE }

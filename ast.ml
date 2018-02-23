@@ -58,13 +58,13 @@ let string_of_op = function
   | Leq -> "<="
   | Greater -> ">"
   | Geq -> ">="
-  | And -> "&&"
-  | Or -> "||"
+  | And -> "and"
+  | Or -> "or"
   | At -> "@"
 
 let string_of_uop = function
     Neg -> "-"
-  | Not -> "!"
+  | Not -> "not"
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
