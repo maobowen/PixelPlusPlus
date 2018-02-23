@@ -8,7 +8,8 @@ type uop = Neg | Not
 
 type typ = Int | Bool | Float | Arr | Matrix | Void |String 
 
-type bind = typ * string
+type bind = typ * string 
+
 
 type expr =
     Literal of int
@@ -21,6 +22,7 @@ type expr =
   | Call of string * expr list
   | Noexpr
   (* add expr *)
+  | Noassign
   | Slit of string
   | Arrliteral of expr list
   | Filter of string
@@ -34,16 +36,19 @@ type expr =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
+  | Var of typ * string * expr
+
+type global = typ * string * expr
 
 type func_decl = {
     typ : typ;
     fname : string;
     formals : bind list;
-    locals : bind list;
+    (* locals : bind list; *)
     body : stmt list;
   }
 
-type program = bind list * func_decl list
+type program = global list * func_decl list
 
 (* Pretty-printing functions *)
 
@@ -66,6 +71,15 @@ let string_of_uop = function
     Neg -> "-"
   | Not -> "not"
 
+let string_of_typ = function
+  | Int -> "int"
+  | Bool -> "bool"
+  | Float -> "float"
+  | Void -> "void"
+  | Arr -> "arr"
+  | Matrix -> "matrix"
+  | String -> "String"
+
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
   | Fliteral(l) -> l
@@ -81,6 +95,7 @@ let rec string_of_expr = function
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
   (* add expr *)
+  | Noassign -> ""
   | Slit(s)-> String.make 1 '"'^s^String.make 1 '"'
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
   | Filterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_expr e) ^ "|"
@@ -98,17 +113,10 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-
-let string_of_typ = function
-  | Int -> "int"
-  | Bool -> "bool"
-  | Float -> "float"
-  | Void -> "void"
-  | Arr -> "arr"
-  | Matrix -> "matrix"
-  | String -> "String"
+  | Var(t,id,e)-> if string_of_expr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_expr e ^ ";\n"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
+let string_of_global (t,id,e) = if string_of_expr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_expr e ^ ";\n"
 
 let string_of_formals formals =
 let string_of_bind bind =
@@ -119,10 +127,10 @@ let string_of_fdecl fdecl =
   "func " ^string_of_typ fdecl.typ ^ " " ^
   fdecl.fname ^ "(" ^ String.concat ", " (string_of_formals fdecl.formals) ^
   ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
+  (* String.concat "" (List.map string_of_vdecl fdecl.locals) ^ *)
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
 
 let string_of_program (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+  String.concat "" (List.map string_of_global vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)

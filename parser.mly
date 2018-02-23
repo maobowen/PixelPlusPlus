@@ -39,16 +39,15 @@ program:
 
 decls:
    /* nothing */ { ([], [])               }
- | decls vdecl { (($2 :: fst $1), snd $1) }
+ | decls global { (($2 :: fst $1), snd $1) }
  | decls fdecl { (fst $1, ($2 :: snd $1)) }
 
 fdecl:
-   FUNC typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
+   FUNC typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { { typ = $2;
 	 fname = $3;
 	 formals = $5;
-	 locals = List.rev $8;
-	 body = List.rev $9 } }
+	 body = List.rev $8 } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -67,13 +66,9 @@ typ:
   | MATRIX  { Matrix }
   | STRING  { String }
 
-
-vdecl_list:
-    /* nothing */    { [] }
-  | vdecl_list vdecl { $2 :: $1 }
-
-vdecl:
-   typ ID SEMI { ($1, $2) }
+global:
+  |typ ID SEMI { ($1,$2,Noassign)}
+  |typ ID ASSIGN expr SEMI {($1,$2,$4)}
 
 stmt_list:
     /* nothing */  { [] }
@@ -88,6 +83,8 @@ stmt:
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
+  | typ ID SEMI         { Var($1,$2,Noassign)}
+  | typ ID ASSIGN expr SEMI { Var ($1,$2,$4)}
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -121,6 +118,7 @@ expr:
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
   | WRAP filter_list WRAP         {       Filterliteral(List.rev $2)    }
   | QUOTE ID QUOTE                {       Slit($2)                      }
+
 args_opt:
     /* nothing */ { [] }
   | args_list  { List.rev $1 }
