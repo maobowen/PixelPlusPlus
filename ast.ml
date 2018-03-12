@@ -78,7 +78,7 @@ let string_of_typ = function
   | Void -> "void"
   | Arr -> "arr"
   | Matrix -> "matrix"
-  | String -> "String"
+  | String -> "string"
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
