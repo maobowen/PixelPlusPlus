@@ -4,10 +4,10 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE WRAP COMMA PLUS MINUS TIMES DIVIDE ASSIGN
+%token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE WRAP COMMA PLUS MINUS TIMES DIVIDE TRANS MTIMES EXPO ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
 %token FIL AT
-%token RETURN IF ELSE FOR WHILE INT ARR MATRIX BOOL FLOAT VOID STRING
+%token RETURN IF ELSE FOR WHILE INT ARR BOOL FLOAT VOID STRING
 %token <int> LITERAL
 %token <bool> BLIT
 %token <string> ID FLIT FILTER
@@ -20,16 +20,15 @@ open Ast
 %nonassoc NOELSE
 %nonassoc ELSE
 %nonassoc AT
-%left FIL
 %left COMMA
 %right ASSIGN
-%left OR
-%left AND
-%left EQ NEQ
-%left LT GT LEQ GEQ
+%left FIL
+%left OR AND
+%left EQ NEQ LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE
 %right NOT NEG
+%left TRANS MTIMES EXPO
 
 
 %%
@@ -63,7 +62,6 @@ typ:
   | FLOAT   { Float  }
   | VOID    { Void   }
   | ARR     { Arr    }
-  | MATRIX  { Matrix }
   | STRING  { String }
 
 global:
@@ -109,8 +107,11 @@ expr:
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
   | expr AT     expr { Binop($1, At,    $3)   }
+  | expr MTIMES expr { Binop($1, Mtimes, $3)  }
+  | expr EXPO   expr { Binop($1, Expo,  $3)   }
   | MINUS expr %prec NEG { Unop(Neg, $2)      }
   | NOT expr         { Unop(Not, $2)          }
+  | TRANS expr       { Unop(Trans, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | LPAREN expr RPAREN { $2                   }

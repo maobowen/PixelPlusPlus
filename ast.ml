@@ -2,11 +2,11 @@
 
 type op = Add | Sub | Mult | Div | Equal | Neq 
           | Less | Leq | Greater | Geq |
-          And | Or | At
+          And | Or | At | Mtimes | Expo
 
-type uop = Neg | Not
+type uop = Neg | Not | Trans
 
-type typ = Int | Bool | Float | Arr | Matrix | Void |String 
+type typ = Int | Bool | Float | Arr | Void |String 
 
 type bind = typ * string 
 
@@ -66,10 +66,13 @@ let string_of_op = function
   | And -> "and"
   | Or -> "or"
   | At -> "@"
+  | Mtimes -> ":*"
+  | Expo -> "^"
 
 let string_of_uop = function
     Neg -> "-"
   | Not -> "not"
+  | Trans -> "**"
 
 let string_of_typ = function
   | Int -> "int"
@@ -77,7 +80,6 @@ let string_of_typ = function
   | Float -> "float"
   | Void -> "void"
   | Arr -> "arr"
-  | Matrix -> "matrix"
   | String -> "string"
 
 let rec string_of_expr = function
