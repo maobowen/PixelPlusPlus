@@ -114,6 +114,7 @@ expr:
   | TRANS expr       { Unop(Trans, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
+  | expr LBRACKET LITERAL RBRACKET { Arrsub($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
