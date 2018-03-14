@@ -29,6 +29,7 @@ open Ast
 %left TIMES DIVIDE
 %right NOT NEG
 %left TRANS MTIMES EXPO
+%nonassoc LBRACKET RBRACKET
 
 
 %%
@@ -132,7 +133,3 @@ filter_list:
 args_list:
     expr                    { [$1] }
   | args_list COMMA expr { $3 :: $1 }
-
-/*arr_list:
-  | LBRACKET args_list RBRACKET   { [[$2]] }
-  | arr_list COMMA LBRACKET args_list RBRACKET { [$4] :: $1 }*/
