@@ -1,0 +1,29 @@
+int a;
+int b =100;
+
+func int gcd(int a, int b) {
+  while (a!=b) {
+    if (a > b)
+      a = a - b;
+    else
+      b = b - a;
+  }
+  return a;
+}
+
+func int forLoopTest() {
+  int accu;
+  int i;
+  a = 0;
+  for (i = a; i < b; i = i + 1) {
+    accu = accu + i;
+  }
+  return accu;
+}
+
+func int main(){
+	a =0;
+	int result1 = forLoopTest();
+	int result2 = gcd(5050,100);
+	return result1 + result2;
+}
