@@ -10,7 +10,7 @@ open Ast
 %token RETURN IF ELSE FOR WHILE INT ARR BOOL FLOAT VOID STRING
 %token <int> LITERAL
 %token <bool> BLIT
-%token <string> ID FLIT FILTER
+%token <string> ID FLIT FILTER ID2
 %token EOF
 %token FUNC
 
@@ -120,7 +120,7 @@ expr:
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
   | WRAP filter_list WRAP         {       Filterliteral(List.rev $2)    }
-  | QUOTE ID QUOTE                {       Slit($2)                      }
+  | ID2                           {       Slit($1)                      }
 
 args_opt:
     /* nothing */ { [] }

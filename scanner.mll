@@ -5,6 +5,7 @@
 let digit = ['0' - '9']
 let digits = digit+
 let ary = ['['] digits ([','] digits)* [']']
+(*let str = *)
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -44,7 +45,7 @@ rule token = parse
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
-| "string" { STRING}
+| "string" { STRING }
 | "arr"    { ARR }
 | "bool"   { BOOL }
 | "float"  { FLOAT }
@@ -57,6 +58,7 @@ rule token = parse
 | "blur" as lxm { FILTER(lxm) }
 | "hdr" as lxm { FILTER(lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*     as lxm { ID(lxm) }
+| ['"']([^'"' '\\' '\n'] | '\\'[^'\n'])*['"'] as lxm { ID2(lxm) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

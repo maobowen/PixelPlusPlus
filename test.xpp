@@ -22,6 +22,7 @@ func int forLoopTest() {
 }
 
 func int main(){
+        string s = "1.23";
 	a =0;
 	int result1 = forLoopTest();
 	int result2 = gcd(5050,100);
