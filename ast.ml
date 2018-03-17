@@ -99,7 +99,7 @@ let rec string_of_expr = function
   | Noexpr -> ""
   (* add expr *)
   | Noassign -> ""
-  | Slit(s)-> s
+  | Slit(s)-> "\"" ^ s ^ "\""
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
   | Filterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_expr e) ^ "|"
   | Arrsub(a, i) -> string_of_expr a ^ "[" ^ string_of_int i ^ "]"
