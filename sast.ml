@@ -28,7 +28,7 @@ type sstmt =
   | SIf of sexpr * sstmt * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
-  | Var of typ * string * sexpr
+  | SVar of typ * string * sexpr
 
 type sfunc_decl = {
     styp : typ;
@@ -56,14 +56,14 @@ let rec string_of_sexpr (t, e) =
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SNoexpr -> ""
-				  ) ^ ")"		
+				  	
   (* add expr *)		     
   | SNoassign -> ""
   | SSlit(s)-> "\"" ^ s ^ "\""
   | SArrliteral(e) -> "[" ^ String.concat "," (List.map string_of_sexpr e)^ "]"
   | SFilterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_sexpr e) ^ "|"
   | SArrsub(a, i) -> string_of_sexpr a ^ "[" ^ string_of_sexpr i ^ "]"
-
+          ) ^ ")" 
 let rec string_of_sstmt = function
     SBlock(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_sstmt stmts) ^ "}\n"
