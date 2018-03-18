@@ -29,7 +29,7 @@ type sstmt =
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
   | Var of typ * string * sexpr
-  
+
 type sfunc_decl = {
     styp : typ;
     sfname : string;
@@ -56,7 +56,13 @@ let rec string_of_sexpr (t, e) =
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SNoexpr -> ""
-				  ) ^ ")"				     
+				  ) ^ ")"		
+  (* add expr *)		     
+  | SNoassign -> ""
+  | SSlit(s)-> "\"" ^ s ^ "\""
+  | SArrliteral(e) -> "[" ^ String.concat "," (List.map string_of_sexpr e)^ "]"
+  | SFilterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_sexpr e) ^ "|"
+  | SArrsub(a, i) -> string_of_sexpr a ^ "[" ^ string_of_sexpr i ^ "]"
 
 let rec string_of_sstmt = function
     SBlock(stmts) ->
@@ -71,15 +77,16 @@ let rec string_of_sstmt = function
       "for (" ^ string_of_sexpr e1  ^ " ; " ^ string_of_sexpr e2 ^ " ; " ^
       string_of_sexpr e3  ^ ") " ^ string_of_sstmt s
   | SWhile(e, s) -> "while (" ^ string_of_sexpr e ^ ") " ^ string_of_sstmt s
+  | SVar(t,id,e)-> if string_of_sexpr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_sexpr e ^ ";\n"
 
 let string_of_sfdecl fdecl =
   string_of_typ fdecl.styp ^ " " ^
   fdecl.sfname ^ "(" ^ String.concat ", " (List.map snd fdecl.sformals) ^
   ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.slocals) ^
+  (* String.concat "" (List.map string_of_vdecl fdecl.slocals) ^ *)
   String.concat "" (List.map string_of_sstmt fdecl.sbody) ^
   "}\n"
 
 let string_of_sprogram (vars, funcs) =
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+  String.concat "" (List.map string_of_global vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_sfdecl funcs)
