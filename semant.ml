@@ -120,7 +120,8 @@ let check (globals, functions) =
       | BoolLit l  -> (Bool, SBoolLit l)
       | Noexpr     -> (Void, SNoexpr)
       | Noassign   -> (Void, SNoassign)
-      | Slit       -> (Void, SSlit)
+      | Noassign   -> (Void, SNoassign)
+      | Slit s     -> (Void, SSlit s)
       | Id s       -> (type_of_identifier s, SId s)
       | Assign(var, e) as ex -> 
           let lt = type_of_identifier var
