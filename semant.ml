@@ -40,13 +40,16 @@ let check (globals, functions) =
                     (* No duplicate bindings *)
                       ((_, n2) :: _) when n1 = n2 -> raise (Failure dup_err)
                     | _ -> binding :: checked
-    in let _ = List.fold_left check_it []  (List.sort compare to_check) 
+    in let _ = List.fold_left check_it [] (List.sort compare to_check) 
        in to_check
   in 
 
   (**** Checking Global Variables ****)
 
   let globals' = check_globals "global" globals in
+    let glob =
+      let extract (fst, _) = fst 
+    in List.map extract globals' in
 
   (**** Checking Functions ****)
 
@@ -100,7 +103,7 @@ let check (globals, functions) =
 
     (* Build local symbol table of variables for this function *)
     let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
-	                StringMap.empty (globals' @ formals' )
+	                StringMap.empty (glob @ formals' )
     in
 
     (* Return a variable from our local symbol table *)
