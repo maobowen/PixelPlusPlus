@@ -66,10 +66,13 @@ let translate (globals, functions) =
     (* Create an Instruction Builder, which points into a basic block
       and determines where the next instruction should be placed *)
     let builder = L.builder_at_end context (L.entry_block the_function) in
+    let init_list x = "%d" in
+    let create_fmt_str len = "[" ^ (String.concat "," (List.init len init_list)) ^ "]\n" in
     (* Create a pointer to a format string for printf *)
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and float_format_str = L.build_global_stringptr "%g\n" "fmt" builder
-    and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
+    and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder
+    and arr_format_str len = L.build_global_stringptr (create_fmt_str len) "fmt" builder in
 
     let local_vars =
       let add_formal m (t, n) p =
@@ -96,12 +99,16 @@ let translate (globals, functions) =
 
     (* Generate LLVM code for a call to MicroC's "print" *)
     let rec expr builder ((_, e) : sexpr) = match e with
-	SLiteral i -> L.const_int i32_t i (* Generate a constant integer *)
+  SLiteral i -> L.const_int i32_t i (* Generate a constant integer *)
       | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | SSlit s -> L.build_global_stringptr s ".str" builder
       | SFliteral l -> L.const_float_of_string float_t l
       | SNoexpr -> L.const_int i32_t 0
       | SId s -> L.build_load (lookup s) s builder
+      | SArrliteral s -> 
+      let to_array x = let y = snd x in match y with
+       SLiteral i2 -> L.const_int i32_t i2
+        in L.const_array i32_t (Array.of_list (List.map to_array s))
       | SBinop (e1, op, e2) ->
     let (t, _) = e1
     and e1' = expr builder e1
@@ -143,8 +150,8 @@ let translate (globals, functions) =
       | SAssign (s, e) -> let e' = expr builder e in
                           let _  = L.build_store e' (lookup s) builder in e' 
       | SCall ("print", [e]) -> (* Generate a call instruction *)
-	  L.build_call printf_func [| int_format_str ; (expr builder e) |]
-	    "printf" builder 
+    L.build_call printf_func [| int_format_str ; (expr builder e) |]
+      "printf" builder 
       (* Throw an error for any other expressions *)
       | SCall ("printf", [e]) ->
     L.build_call printf_func [| float_format_str ; (expr builder e) |]
@@ -152,11 +159,20 @@ let translate (globals, functions) =
       | SCall ("printline", [e]) -> 
     L.build_call printf_func [| string_format_str ; (expr builder e) |]
       "printf" builder
+      | SCall ("printarr", [e]) -> 
+    let expr_builder = expr builder e in
+    let init_array idx = L.const_extractvalue expr_builder [|idx|] in
+    let (_, e') = e in
+    let len_of_list = match e' with
+    SArrliteral s -> List.length s in
+    let args_array = Array.init len_of_list init_array in
+    L.build_call printf_func (Array.append [| arr_format_str len_of_list |] args_array)
+      "printf" builder
       | _ -> to_imp (string_of_sexpr (A.Int,e))  
     in
     (* Deal with a block of expression statements, terminated by a return *)
     let rec stmt builder = function
-	SBlock sl -> List.fold_left stmt builder sl
+  SBlock sl -> List.fold_left stmt builder sl
       | SExpr e -> let _ = expr builder e in builder 
       | SReturn e -> let _ = match fdecl.styp with
                               A.Int -> L.build_ret (expr builder e) builder 
