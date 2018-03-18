@@ -115,12 +115,16 @@ expr:
   | TRANS expr       { Unop(Trans, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
-  | expr LBRACKET LITERAL RBRACKET { Arrsub($1, $3)  }
+  | expr LBRACKET arr_sub_opt RBRACKET { Arrsub($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
   | WRAP filter_list WRAP         {       Filterliteral(List.rev $2)    }
   | ID2                           {       Slit($1)                      }
+
+arr_sub_opt:
+    LITERAL {Literal($1)}
+  | ID      {Id($1)}
 
 args_opt:
     /* nothing */ { [] }

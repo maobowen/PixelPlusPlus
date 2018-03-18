@@ -27,7 +27,7 @@ type expr =
   | Arrliteral of expr list
   | Filter of string
   | Filterliteral of expr list
-  | Arrsub of expr * int
+  | Arrsub of expr * expr
   (*| Mliteral of expr list*)
 
 type stmt =
@@ -102,7 +102,7 @@ let rec string_of_expr = function
   | Slit(s)-> "\"" ^ s ^ "\""
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
   | Filterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_expr e) ^ "|"
-  | Arrsub(a, i) -> string_of_expr a ^ "[" ^ string_of_int i ^ "]"
+  | Arrsub(a, i) -> string_of_expr a ^ "[" ^ string_of_expr i ^ "]"
   (*| Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"*)
 
 let rec string_of_stmt = function
