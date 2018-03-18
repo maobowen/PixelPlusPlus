@@ -28,7 +28,7 @@ type sstmt =
   | SIf of sexpr * sstmt * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
-  | SVar of typ * string * sexpr
+  | SVar of bind * sexpr
 
 type sfunc_decl = {
     styp : typ;
@@ -56,7 +56,6 @@ let rec string_of_sexpr (t, e) =
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SNoexpr -> ""
-				  	
   (* add expr *)		     
   | SNoassign -> ""
   | SSlit(s)-> "\"" ^ s ^ "\""
@@ -64,6 +63,7 @@ let rec string_of_sexpr (t, e) =
   | SFilterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_sexpr e) ^ "|"
   | SArrsub(a, i) -> string_of_sexpr a ^ "[" ^ string_of_sexpr i ^ "]"
           ) ^ ")" 
+
 let rec string_of_sstmt = function
     SBlock(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_sstmt stmts) ^ "}\n"
@@ -77,7 +77,7 @@ let rec string_of_sstmt = function
       "for (" ^ string_of_sexpr e1  ^ " ; " ^ string_of_sexpr e2 ^ " ; " ^
       string_of_sexpr e3  ^ ") " ^ string_of_sstmt s
   | SWhile(e, s) -> "while (" ^ string_of_sexpr e ^ ") " ^ string_of_sstmt s
-  | SVar(t,id,e)-> if string_of_sexpr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_sexpr e ^ ";\n"
+  | SVar(b,e)-> if string_of_sexpr e = "" then string_of_typ (fst b) ^ " " ^ (snd b) ^ ";\n" else string_of_typ (fst b) ^ " " ^ (snd b) ^" = "^ string_of_sexpr e ^ ";\n"
 
 let string_of_sfdecl fdecl =
   string_of_typ fdecl.styp ^ " " ^
