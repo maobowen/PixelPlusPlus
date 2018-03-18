@@ -66,8 +66,8 @@ typ:
   | STRING  { String }
 
 global:
-  |typ ID SEMI { ($1,$2,Noassign)}
-  |typ ID ASSIGN expr SEMI {($1,$2,$4)}
+  |typ ID SEMI { (($1,$2),Noassign)}
+  |typ ID ASSIGN expr SEMI {(($1,$2),$4)}
 
 stmt_list:
     /* nothing */  { [] }
@@ -82,8 +82,8 @@ stmt:
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
-  | typ ID SEMI         { Var($1,$2,Noassign)}
-  | typ ID ASSIGN expr SEMI { Var ($1,$2,$4)}
+  | typ ID SEMI         { Var(($1,$2),Noassign)}
+  | typ ID ASSIGN expr SEMI { Var (($1,$2),$4)}
 
 expr_opt:
     /* nothing */ { Noexpr }

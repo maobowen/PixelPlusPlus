@@ -37,9 +37,9 @@ type stmt =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
-  | Var of typ * string * expr
+  | Var of bind * expr
 
-type global = typ * string * expr
+type global = bind * expr
 
 type func_decl = {
     typ : typ;
@@ -117,10 +117,10 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-  | Var(t,id,e)-> if string_of_expr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_expr e ^ ";\n"
+  | Var(b,e)-> if string_of_expr e = "" then string_of_typ (fst b) ^ " " ^ (snd b) ^ ";\n" else string_of_typ (fst b) ^ " " ^ (snd b) ^" = "^ string_of_expr e ^ ";\n"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
-let string_of_global (t,id,e) = if string_of_expr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_expr e ^ ";\n"
+let string_of_global (b,e) = if string_of_expr e = "" then string_of_typ (fst b) ^ " " ^ (snd b) ^ ";\n" else string_of_typ (fst b) ^ " " ^ (snd b) ^" = "^ string_of_expr e ^ ";\n"
 
 let string_of_formals formals =
 let string_of_bind bind =
