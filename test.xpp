@@ -1,5 +1,6 @@
 int a;
-int b = 100;
+int c = 100;
+int b = c;
 
 func int gcd(int a, int b) {
   while (a!=b) {

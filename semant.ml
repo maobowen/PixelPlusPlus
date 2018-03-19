@@ -30,16 +30,82 @@ let check (globals, functions) =
   in 
 
   let check_globals (kind : string) (to_check : global list) = 
-    let check_it checked (binding, _) = 
+  let global_map = StringMap.empty in
+    let check_it checked (binding, ex) = 
       let void_err = "illegal void " ^ kind ^ " " ^ snd binding
       and dup_err = "duplicate " ^ kind ^ " " ^ snd binding
-      in match binding with
+
+      in let global_map = StringMap.add (snd binding) (fst binding) global_map
+
+      in 
+      
+      let type_of_identifier s =
+      try StringMap.find s global_map
+      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in
+
+    (* Return a semantically-checked expression, i.e., with a type *)
+    let rec expr = function
+        Literal l    -> (Int, SLiteral l)
+      | Fliteral l   -> (Float, SFliteral l)
+      | BoolLit l    -> (Bool, SBoolLit l)
+      | Noexpr       -> (Void, SNoexpr)
+      | Noassign     -> (Void, SNoassign)
+      | Slit s       -> (String, SSlit s)
+      | Id s         -> (type_of_identifier s, SId s)
+      | Arrliteral a -> 
+          let sa = List.map expr a in (Arr, SArrliteral sa)
+      | Arrsub(e1, e2) -> 
+          let (t1, e1') = expr e1
+          and (t2, e2') = expr e2 in
+          let ty = match t1 with
+            Arr -> if t2 = Int then Arr else raise (Failure ("illegal type " ^
+                       string_of_typ t1 ^ " " ^ string_of_expr e1 ^ 
+                       "on subscript, which expects an Arr."))
+          | _ -> raise (Failure ("illegal subscript type " ^
+                       string_of_typ t2 ^ " " ^ string_of_expr e2 ^ 
+                       ", which expects an Int."))
+        in (ty, SArrsub((t1, e1'), (t2, e2')))
+      | Unop(op, e) as ex -> 
+          let (t, e') = expr e in
+          let ty = match op with
+            Neg when t = Int || t = Float -> t
+          | Not when t = Bool -> Bool
+          | _ -> raise (Failure ("illegal unary operator " ^ 
+                                 string_of_uop op ^ string_of_typ t ^
+                                 " in " ^ string_of_expr ex))
+          in (ty, SUnop(op, (t, e')))
+      | Binop(e1, op, e2) as e -> 
+          let (t1, e1') = expr e1 
+          and (t2, e2') = expr e2 in
+          (* All binary operators require operands of the same type *)
+          let same = t1 = t2 in
+          (* Determine expression type based on operator and operand types *)
+          let ty = match op with
+            Add | Sub | Mult | Div when same && t1 = Int   -> Int
+          | Add | Sub | Mult | Div when same && t1 = Float -> Float
+          | Equal | Neq            when same               -> Bool
+          | Less | Leq | Greater | Geq
+                     when same && (t1 = Int || t1 = Float) -> Bool
+          | And | Or when same && t1 = Bool -> Bool
+          | _ -> raise (
+        Failure ("illegal binary operator " ^
+                       string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
+                       string_of_typ t2 ^ " in " ^ string_of_expr e))
+          in (ty, SBinop((t1, e1'), op, (t2, e2')))
+
+      in let (tx, ex') = expr ex
+
+      in match (binding, ex) with
         (* No void bindings *)
-        (Void, _) -> raise (Failure void_err)
-      | (_, n1) -> match checked with
+        ((Void, _),_) -> raise (Failure void_err)
+      | ((t1, n1),_) -> match checked with
                     (* No duplicate bindings *)
-                      ((_, n2) :: _) when n1 = n2 -> raise (Failure dup_err)
-                    | _ -> binding :: checked
+                      (((_, n2),_) :: _) when n1 = n2 -> raise (Failure dup_err)
+                    | _ -> if tx = t1 || tx = Void then (binding, ex) :: checked 
+                      else raise (Failure ("unmatch types " ^ string_of_typ t1 ^ " and " ^ string_of_typ tx))
+
+
     in let _ = List.fold_left check_it [] (List.sort compare to_check) 
        in to_check
   in 
@@ -120,10 +186,10 @@ let check (globals, functions) =
       | BoolLit l    -> (Bool, SBoolLit l)
       | Noexpr       -> (Void, SNoexpr)
       | Noassign     -> (Void, SNoassign)
-      | Slit s       -> (Void, SSlit s)
+      | Slit s       -> (String, SSlit s)
       | Id s         -> (type_of_identifier s, SId s)
       | Arrliteral a -> 
-          let sa = List.map expr a in (Void, SArrliteral sa)
+          let sa = List.map expr a in (Arr, SArrliteral sa)
       | Arrsub(e1, e2) -> 
           let (t1, e1') = expr e1
           and (t2, e2') = expr e2 in
