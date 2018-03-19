@@ -25,23 +25,24 @@ let check (globals, functions) =
                     (* No duplicate bindings *)
                       ((_, n2) :: _) when n1 = n2 -> raise (Failure dup_err)
                     | _ -> binding :: checked
-    in let _ = List.fold_left check_it [] (List.sort compare to_check) 
-       in to_check
+    in  List.fold_left check_it [] (List.sort compare to_check) 
+       (* in to_check *)
   in 
 
   let check_globals (kind : string) (to_check : global list) = 
-  let global_map = StringMap.empty in
-    let check_it checked (binding, ex) = 
+  
+    let check_it (checked, global_map) (binding, ex) = 
       let void_err = "illegal void " ^ kind ^ " " ^ snd binding
       and dup_err = "duplicate " ^ kind ^ " " ^ snd binding
 
-      in let global_map = StringMap.add (snd binding) (fst binding) global_map
+    in
 
-      in 
-      
-      let type_of_identifier s =
-      try StringMap.find s global_map
-      with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    let check_identifier_assign s = 
+        if StringMap.mem s global_map then
+          let (t1, t2) = StringMap.find s global_map in
+          if t2 = Void then raise (Failure ("uninialized identifier " ^ s))
+          else t2
+        else raise (Failure ("undeclared identifier " ^ s))
     in
 
     (* Return a semantically-checked expression, i.e., with a type *)
@@ -52,14 +53,14 @@ let check (globals, functions) =
       | Noexpr       -> (Void, SNoexpr)
       | Noassign     -> (Void, SNoassign)
       | Slit s       -> (String, SSlit s)
-      | Id s         -> (type_of_identifier s, SId s)
+      | Id s         -> (check_identifier_assign s, SId s)
       | Arrliteral a -> 
           let sa = List.map expr a in (Arr, SArrliteral sa)
       | Arrsub(e1, e2) -> 
           let (t1, e1') = expr e1
           and (t2, e2') = expr e2 in
           let ty = match t1 with
-            Arr -> if t2 = Int then Arr else raise (Failure ("illegal type " ^
+            Arr -> if t2 = Int then t2 else raise (Failure ("illegal type " ^
                        string_of_typ t1 ^ " " ^ string_of_expr e1 ^ 
                        "on subscript, which expects an Arr."))
           | _ -> raise (Failure ("illegal subscript type " ^
@@ -98,15 +99,13 @@ let check (globals, functions) =
 
       in match (binding, ex) with
         (* No void bindings *)
-        ((Void, _),_) -> raise (Failure void_err)
-      | ((t1, n1),_) -> match checked with
-                    (* No duplicate bindings *)
-                      (((_, n2),_) :: _) when n1 = n2 -> raise (Failure dup_err)
-                    | _ -> if tx = t1 || tx = Void then (binding, ex) :: checked 
-                      else raise (Failure ("unmatch types " ^ string_of_typ t1 ^ " and " ^ string_of_typ tx))
+        ((Void, _), _) -> raise (Failure void_err)
+      | ((t1, n1), _) -> if StringMap.mem n1 global_map then raise (Failure dup_err) else
+                        let global_map = StringMap.add (snd binding) ((fst binding), tx) global_map in
+                        if tx = t1 || tx = Void then (((binding, (tx, ex')) :: checked), global_map)
+                      else raise (Failure ("unmatch types " ^ string_of_typ t1 ^  n1 ^ " and " ^ string_of_typ tx))
 
-
-    in let _ = List.fold_left check_it [] (List.sort compare to_check) 
+    in let _ = List.fold_left check_it ([], StringMap.empty) to_check
        in to_check
   in 
 
@@ -194,7 +193,7 @@ let check (globals, functions) =
           let (t1, e1') = expr e1
           and (t2, e2') = expr e2 in
           let ty = match t1 with
-            Arr -> if t2 = Int then Arr else raise (Failure ("illegal type " ^
+            Arr -> if t2 = Int then t2 else raise (Failure ("illegal type " ^
                        string_of_typ t1 ^ " " ^ string_of_expr e1 ^ 
                        "on subscript, which expects an Arr."))
           | _ -> raise (Failure ("illegal subscript type " ^

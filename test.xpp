@@ -1,6 +1,6 @@
-int a;
-int c = 100;
-int b = c;
+arr a;
+arr c = [1,3,4];
+int b = c[0];
 
 func int gcd(int a, int b) {
   while (a!=b) {
@@ -14,6 +14,6 @@ func int gcd(int a, int b) {
 
 
 func int main(){
-  gcd(5050,100);
+  gcd(5050, 100);
 	return 0;
 }
