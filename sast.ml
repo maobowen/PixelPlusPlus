@@ -60,6 +60,7 @@ let rec string_of_sexpr (t, e) =
   | SNoassign -> ""
   | SSlit(s)-> "\"" ^ s ^ "\""
   | SArrliteral(e) -> "[" ^ String.concat "," (List.map string_of_sexpr e)^ "]"
+  | SFilter(s)-> s
   | SFilterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_sexpr e) ^ "|"
   | SArrsub(a, i) -> string_of_sexpr a ^ "[" ^ string_of_sexpr i ^ "]"
           ) ^ ")" 
