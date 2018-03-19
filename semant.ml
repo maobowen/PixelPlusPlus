@@ -115,14 +115,28 @@ let check (globals, functions) =
 
     (* Return a semantically-checked expression, i.e., with a type *)
     let rec expr = function
-        Literal  l -> (Int, SLiteral l)
-      | Fliteral l -> (Float, SFliteral l)
-      | BoolLit l  -> (Bool, SBoolLit l)
-      | Noexpr     -> (Void, SNoexpr)
-      | Noassign   -> (Void, SNoassign)
-      | Noassign   -> (Void, SNoassign)
-      | Slit s     -> (Void, SSlit s)
-      | Id s       -> (type_of_identifier s, SId s)
+        Literal l    -> (Int, SLiteral l)
+      | Fliteral l   -> (Float, SFliteral l)
+      | BoolLit l    -> (Bool, SBoolLit l)
+      | Noexpr       -> (Void, SNoexpr)
+      | Noassign     -> (Void, SNoassign)
+      | Slit s       -> (Void, SSlit s)
+      | Id s         -> (type_of_identifier s, SId s)
+      | Arrliteral a -> 
+          let sa = List.map expr a in (Void, SArrliteral sa)
+      | Arrsub(e1, e2) -> 
+          let (t1, e1') = expr e1
+          and (t2, e2') = expr e2 in
+          let ty = match t1 with
+            Arr -> if t2 = Int then Arr else raise (
+        Failure ("illegal type " ^
+                       string_of_typ t1 ^ " " ^ string_of_expr e1 ^ 
+                       "on subscript, which expects an Arr."))
+          | _ -> raise (
+        Failure ("illegal subscript type " ^
+                       string_of_typ t2 ^ " " ^ string_of_expr e2 ^ 
+                       ", which expects an Int."))
+        in (ty, SArrsub((t1, e1'), (t2, e2')))
       | Assign(var, e) as ex -> 
           let lt = type_of_identifier var
           and (rt, e') = expr e in
@@ -170,6 +184,8 @@ let check (globals, functions) =
           in 
           let args' = List.map2 check_call fd.formals args
           in (fd.typ, SCall(fname, args'))
+      (* | Filter s = 
+      | Filterliteral el = *)
     in
 
     let check_bool_expr e = 
