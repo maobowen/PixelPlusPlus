@@ -128,12 +128,10 @@ let check (globals, functions) =
           let (t1, e1') = expr e1
           and (t2, e2') = expr e2 in
           let ty = match t1 with
-            Arr -> if t2 = Int then Arr else raise (
-        Failure ("illegal type " ^
+            Arr -> if t2 = Int then Arr else raise (Failure ("illegal type " ^
                        string_of_typ t1 ^ " " ^ string_of_expr e1 ^ 
                        "on subscript, which expects an Arr."))
-          | _ -> raise (
-        Failure ("illegal subscript type " ^
+          | _ -> raise (Failure ("illegal subscript type " ^
                        string_of_typ t2 ^ " " ^ string_of_expr e2 ^ 
                        ", which expects an Int."))
         in (ty, SArrsub((t1, e1'), (t2, e2')))
