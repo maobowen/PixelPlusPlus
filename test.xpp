@@ -1,5 +1,7 @@
 arr a;
 arr c = [1,3,4];
+string s = "s";
+string s2 = s;
 int b = c[0];
 
 func int gcd(int a, int b) {
