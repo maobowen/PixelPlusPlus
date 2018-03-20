@@ -174,6 +174,13 @@ let check (globals, functions) =
 	                StringMap.empty (glob @ formals' )
     in
 
+    (* add local symbol table of variables for this function *)
+    let check_var b = 
+    	let update_symbols = StringMap.add (snd b) (fst b) symbols 
+        in b
+	in 
+    (* update symbol table*)   
+		
     (* Return a variable from our local symbol table *)
     let type_of_identifier s =
       try StringMap.find s symbols
@@ -283,7 +290,7 @@ let check (globals, functions) =
             | s :: ss         -> check_stmt s :: check_stmt_list ss
             | []              -> []
           in SBlock(check_stmt_list sl)
-      (* | Var (b,e) -> SVar (add_locals b, expr e) *)
+      | Var (b,e) -> SVar (check_var b, expr e)
     in (* body of check_function *)
     { styp = func.typ;
       sfname = func.fname;

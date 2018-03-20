@@ -16,6 +16,8 @@ func int gcd(int a, int b) {
 
 
 func int main(){
-  gcd(5050, 100);
-	return 0;
+
+   int result = 0;
+    gcd(5050, 100);
+	return result;
 }
