@@ -27,7 +27,7 @@ type expr =
   | Arrliteral of expr list
   | Filter of string
   | Filterliteral of expr list
-  | Arrsub of expr * int
+  | Arrsub of expr * expr
   (*| Mliteral of expr list*)
 
 type stmt =
@@ -37,9 +37,9 @@ type stmt =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
-  | Var of typ * string * expr
+  | Var of bind * expr
 
-type global = typ * string * expr
+type global = bind * expr
 
 type func_decl = {
     typ : typ;
@@ -83,6 +83,9 @@ let string_of_typ = function
   | Arr -> "arr"
   | String -> "string"
 
+let string_of_bind bind =
+string_of_typ (fst bind) ^ " " ^ (snd bind)
+
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
   | Fliteral(l) -> l
@@ -102,7 +105,7 @@ let rec string_of_expr = function
   | Slit(s)-> "\"" ^ s ^ "\""
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
   | Filterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_expr e) ^ "|"
-  | Arrsub(a, i) -> string_of_expr a ^ "[" ^ string_of_int i ^ "]"
+  | Arrsub(a, i) -> string_of_expr a ^ "[" ^ string_of_expr i ^ "]"
   (*| Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"*)
 
 let rec string_of_stmt = function
@@ -117,15 +120,12 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
-  | Var(t,id,e)-> if string_of_expr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_expr e ^ ";\n"
+  | Var(b, e)-> if string_of_expr e = "" then string_of_bind b ^ ";\n" else string_of_bind b ^" = "^ string_of_expr e ^ ";\n"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
-let string_of_global (t,id,e) = if string_of_expr e = "" then string_of_typ t ^ " " ^ id ^ ";\n" else string_of_typ t^ " " ^ id ^" = "^ string_of_expr e ^ ";\n"
+let string_of_global (b, e) = if string_of_expr e = "" then string_of_bind b ^ ";\n" else string_of_bind b ^" = "^ string_of_expr e ^ ";\n"
 
-let string_of_formals formals =
-let string_of_bind bind =
-string_of_typ (fst bind) ^ " " ^ (snd bind) in
-List.map string_of_bind formals
+let string_of_formals formals = List.map string_of_bind formals
 
 let string_of_fdecl fdecl =
   "func " ^string_of_typ fdecl.typ ^ " " ^

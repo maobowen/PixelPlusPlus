@@ -66,8 +66,8 @@ typ:
   | STRING  { String }
 
 global:
-  |typ ID SEMI { ($1,$2,Noassign)}
-  |typ ID ASSIGN expr SEMI {($1,$2,$4)}
+  |typ ID SEMI { (($1,$2),Noassign)}
+  |typ ID ASSIGN expr SEMI {(($1,$2),$4)}
 
 stmt_list:
     /* nothing */  { [] }
@@ -82,8 +82,8 @@ stmt:
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
                                             { For($3, $5, $7, $9)   }
   | WHILE LPAREN expr RPAREN stmt           { While($3, $5)         }
-  | typ ID SEMI         { Var($1,$2,Noassign)}
-  | typ ID ASSIGN expr SEMI { Var ($1,$2,$4)}
+  | typ ID SEMI         { Var(($1,$2),Noassign)}
+  | typ ID ASSIGN expr SEMI { Var (($1,$2),$4)}
 
 expr_opt:
     /* nothing */ { Noexpr }
@@ -115,12 +115,16 @@ expr:
   | TRANS expr       { Unop(Trans, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
-  | expr LBRACKET LITERAL RBRACKET { Arrsub($1, $3)  }
+  | expr LBRACKET arr_sub_opt RBRACKET { Arrsub($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
   | WRAP filter_list WRAP         {       Filterliteral(List.rev $2)    }
   | ID2                           {       Slit($1)                      }
+
+arr_sub_opt:
+    LITERAL {Literal($1)}
+  | ID      {Id($1)}
 
 args_opt:
     /* nothing */ { [] }

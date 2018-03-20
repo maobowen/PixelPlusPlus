@@ -1,5 +1,8 @@
-int a;
-int b =100;
+arr a;
+arr c = [1,3,4];
+string s = "s";
+string s2 = s;
+int b = c[0];
 
 func int gcd(int a, int b) {
   while (a!=b) {
@@ -11,20 +14,8 @@ func int gcd(int a, int b) {
   return a;
 }
 
-func int forLoopTest() {
-  int accu;
-  int i;
-  a = 0;
-  for (i = a; i < b; i = i + 1) {
-    accu = accu + i;
-  }
-  return accu;
-}
 
 func int main(){
-        string s = "1.23";
-	a =0;
-	int result1 = forLoopTest();
-	int result2 = gcd(5050,100);
-	return result1 + result2;
+  gcd(5050, 100);
+	return 0;
 }
