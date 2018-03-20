@@ -168,19 +168,20 @@ let check (globals, functions) =
     let check_assign lvaluet rvaluet err =
        if lvaluet = rvaluet then lvaluet else raise (Failure err)
     in   
-
+	
     (* Build local symbol table of variables for this function *)
     let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
-	                StringMap.empty (glob @ formals' )
+	                StringMap.empty (glob @ formals' @locals')
     in
 
-    (* add local symbol table of variables for this function *)
-    let check_var b = 
-    	let update_symbols = StringMap.add (snd b) (fst b) symbols 
-        in b
-	in 
     (* update symbol table*)   
-		
+	
+	(* add local symbol table of variables for this function *)
+    
+    let check_var b m= 
+       try (StringMap.find (snd b ) m, snd b)
+       with Not_found -> raise (Failure ("undeclared identifier " ^ (snd b)))
+	in 
     (* Return a variable from our local symbol table *)
     let type_of_identifier s =
       try StringMap.find s symbols
@@ -290,7 +291,11 @@ let check (globals, functions) =
             | s :: ss         -> check_stmt s :: check_stmt_list ss
             | []              -> []
           in SBlock(check_stmt_list sl)
-      | Var (b,e) -> SVar (check_var b, expr e)
+      | Var (b,e) -> 
+      	let locals' = locals' @ [b] in
+      	let update_symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
+	                StringMap.empty (glob @ formals' @locals') in
+	                SVar (check_var b update_symbols, expr e)
     in (* body of check_function *)
     { styp = func.typ;
       sfname = func.fname;
