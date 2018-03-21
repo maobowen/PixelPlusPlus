@@ -34,6 +34,7 @@ let translate (globals, functions) =
   (* Create an LLVM module -- this is a "container" into which we'll 
      generate actual code *)
   and the_module = L.create_module context "MicroC" in
+
   let ip_t       = L.pointer_type i8_t in
   let ipp_t      = L.pointer_type ip_t
   and ip32_t     = L.pointer_type i32_t in
@@ -75,16 +76,33 @@ let translate (globals, functions) =
   let length_t = L.function_type i32_t [| structp_t |] in
   let length_func = L.declare_function "length" length_t the_module in
 
+  let width_t = L.function_type i32_t [| structp_t |] in
+  let width_func = L.declare_function "width" width_t the_module in
+
+  let height_t = L.function_type i32_t [| structp_t |] in
+  let height_func = L.declare_function "height" width_t the_module in
+
+  let init_t = L.function_type i32_t [| structp_t; i32_t; i32_t; i32_t |] in
+  let init_func = L.declare_function "init" init_t the_module in
+
   let addPixel_t = L.function_type i32_t [| structp_t |] in
   let length_func = L.declare_function "addPixel" addPixel_t the_module in
 
   let to_imp str = raise (Failure ("Not yet implemented: " ^ str)) in
 
+  let function_decls =
+    let function_decl m fdecl =
+      let name = fdecl.sfname
+      and formal_types = 
+  Array.of_list (List.map (fun (t, _) -> ltype_of_typ t) fdecl.sformals)
+      in let ftype = L.function_type (ltype_of_typ fdecl.styp) formal_types in
+      StringMap.add name (L.define_function name ftype the_module, fdecl) m in
+    List.fold_left function_decl StringMap.empty functions in
+
   (* Generate the instructions for a trivial "main" function *)
   let build_function fdecl =
     (* Make the LLVM module "aware" of the main function *)
-    let main_ty = L.function_type (ltype_of_typ fdecl.styp) [||] in
-    let the_function = L.define_function "main" main_ty the_module in
+    let (the_function, _) = StringMap.find fdecl.sfname function_decls in
     (* Create an Instruction Builder, which points into a basic block
       and determines where the next instruction should be placed *)
     let builder = L.builder_at_end context (L.entry_block the_function) in
@@ -129,20 +147,27 @@ let translate (globals, functions) =
       | SId s -> L.build_load (lookup s) s builder
       | SArrliteral s -> 
       let to_array x = let y = snd x in match y with
-       SLiteral i2 -> L.const_int i8_t i2 (* store [3 x i8] c"\01\02\03", i8** %img *)
+       SLiteral i2 -> L.const_int i8_t i2
        in let img_array = L.const_array i8_t (Array.of_list (List.map to_array s))
        in let ipt = L.define_global "tmp" img_array the_module
        in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
        in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
        in let global_arr = L.define_global "tmp" const_arr the_module 
-       in let res = global_arr(*L.build_struct_gep global_arr 0 "tmp" builder*)
-       in res
+       in global_arr(*L.build_struct_gep global_arr 0 "tmp" builder*)
       | SArrsub (e, l) -> let expr_builder = expr builder e in let l2 = expr builder l in
-        let expr_builder = expr_builder in (*L.build_gep expr_builder [|L.const_int i32_t |] "tmp" builder in*)
         let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
-        let abxd = L.build_load arr_builder "tmp" builder in 
+        let abxd = L.build_load arr_builder "tmp" builder in
         let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
         L.build_load abxd "tmp" builder
+      (*| SArrAssign (e1, e2) -> (
+          match e1 with (_, SArrsub(e, l)) ->
+          let expr_builder = expr builder e in let l2 = expr builder l in
+          let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
+          let abxd = L.build_load arr_builder "tmp" builder in 
+          let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
+          let expr_builder2 = expr builder e2 in
+          let expr_builder2 = L.build_intcast expr_builder2 i8_t "tmp" builder in
+          let _ = L.build_store expr_builder2 abxd builder in expr_builder2 )*)
       | SBinop (e1, op, e2) ->
     let (t, _) = e1
     and e1' = expr builder e1
@@ -181,8 +206,14 @@ let translate (globals, functions) =
       A.Neg when t = A.Float -> L.build_fneg
     | A.Neg              -> L.build_neg
     | A.Not              -> L.build_not) e' "tmp" builder
-      | SAssign (s, e) -> let e' = expr builder e in
-                          let _  = L.build_store e' (lookup s) builder in e' 
+      | SAssign (s, e) ->   (let e' = expr builder e in
+                (*match L.type_of e' with
+                  structp_t -> let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
+                               let abxd = L.build_load arr_builder "tmp" builder in
+                               let abxd = L.array_type i8_t 
+                               let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
+                               L.build_load abxd "tmp" builder
+                | _         ->*) let _  = L.build_store e' (lookup s) builder in e' )
       | SCall ("print", [e]) -> (* Generate a call instruction *)
     L.build_call printf_func [| int_format_str ; (expr builder e) |]
       "printf" builder 
@@ -192,7 +223,27 @@ let translate (globals, functions) =
       "printf" builder
       | SCall ("length", [e]) -> let expr_builder = expr builder e in 
         let expr_builder = L.build_struct_gep expr_builder 0 "tmp" builder in
-        L.build_load expr_builder "tmp" builder
+        let len = L.build_load expr_builder "tmp" builder in
+        let () = print_endline(L.string_of_llvalue len) in len
+      | SCall ("height", [e]) -> let expr_builder = expr builder e in 
+        let expr_builder = L.build_struct_gep expr_builder 1 "tmp" builder in
+        let len = L.build_load expr_builder "tmp" builder in len
+      | SCall ("width", [e]) -> let expr_builder = expr builder e in 
+        let expr_builder = L.build_struct_gep expr_builder 2 "tmp" builder in
+        let len = L.build_load expr_builder "tmp" builder in len
+      | SCall ("init", [e1; e2; e3; e4]) -> let e2' = expr builder e2 in let e3' = expr builder e3 in let e4' = expr builder e4
+        (*in let () = L.set_global_constant true e2'*)
+        in let int64_val = L.int64_of_const e2'
+        in let int64_v = match int64_val with Some k -> k
+        in let len = (Int64.to_int int64_v)
+        in let f_helper _ = L.const_int i8_t 0 
+        in let img_array = L.const_array i8_t (Array.init len f_helper) 
+        in let ipt = L.define_global "tmp" img_array the_module
+        in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
+        in let const_arr = (L.const_struct context [|e2'; e3'; e4'; img_array_ptr|]  )
+        in let global_arr = L.define_global "tmp" const_arr the_module 
+        in let (_, e1') = e1 in let e1'' = lookup (match e1' with SId(s) -> s )
+        in let _ = L.build_store global_arr e1'' builder in global_arr
       | SCall ("printline", [e]) -> 
     L.build_call printf_func [| string_format_str ; (expr builder e) |]
       "printf" builder
@@ -210,7 +261,14 @@ let translate (globals, functions) =
     L.build_call closeimg_func [| (expr builder e) |] "close" builder
       | SCall("save", [e1; e2]) ->
     L.build_call saveimg_func [| (expr builder e1); (expr builder e2) |] "save" builder
-      | _ -> to_imp (string_of_sexpr (A.Int,e))  
+      | SCall (f, act) ->
+         let (fdef, fdecl) = StringMap.find f function_decls in
+    let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+    let result = (match fdecl.styp with
+                         A.Void -> ""
+                       | _ -> f ^ "_result") in
+          L.build_call fdef (Array.of_list actuals) result builder
+      (* | _ -> to_imp (string_of_sexpr (A.Int,e))  *)
     in
     (* Deal with a block of expression statements, terminated by a return *)
     let add_terminal builder f =
@@ -222,6 +280,13 @@ let translate (globals, functions) =
     let rec stmt builder = function
   SBlock sl -> List.fold_left stmt builder sl
       | SExpr e -> let _ = expr builder e in builder 
+      | SVar (e1, e2) -> let (tp, s) = e1 in let _ = expr builder (tp, SId(s)) in
+                    let _ = match e2 with
+                        (tp, SNoassign) -> L.const_int i32_t 0
+                      | _ -> expr builder (tp, SAssign(s, e2))
+
+
+                     in builder
       | SReturn e -> let _ = match fdecl.styp with
                               A.Int -> L.build_ret (expr builder e) builder 
                             | _ -> to_imp (A.string_of_typ fdecl.styp)
@@ -259,7 +324,15 @@ let translate (globals, functions) =
       | s -> to_imp (string_of_sstmt s)
     (* Generate the instructions for the function's body, 
        which mutates the_module *)
-    in ignore(stmt builder (SBlock fdecl.sbody))
+    in
+
+    let builder = stmt builder (SBlock fdecl.sbody) in
+
+    add_terminal builder (match fdecl.styp with
+        A.Void -> L.build_ret_void
+        | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
+    
+    in
   (* Build each function (there should only be one for Hello World), 
      and return the final module *)
-  in List.iter build_function functions; the_module
+    List.iter build_function functions; the_module
