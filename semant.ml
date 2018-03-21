@@ -306,4 +306,4 @@ let check (globals, functions) =
       | _ -> let err = "internal error: block didn't become a block?"
       in raise (Failure err)
     }
-  in (globals', List.map check_function functions)
+  in (glob, List.map check_function functions)
