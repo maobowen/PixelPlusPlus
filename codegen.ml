@@ -54,7 +54,10 @@ let translate (globals, functions) =
 
   let global_vars = 
     let global_var m (t, n) = 
-      let init = L.const_int (ltype_of_typ t) 0
+      let init = match t with 
+            A.Arr -> L.const_pointer_null structp_t
+          | A.String -> L.const_pointer_null ip_t
+          | _     -> L.const_int (ltype_of_typ t) 0
       in StringMap.add n (L.define_global n init the_module) m in
     List.fold_left global_var StringMap.empty globals in
 
@@ -107,7 +110,7 @@ let translate (globals, functions) =
       and determines where the next instruction should be placed *)
     let builder = L.builder_at_end context (L.entry_block the_function) in
     let init_list _ = "%d" in
-    let create_fmt_str len = "[" ^ (String.concat "," (List.init len init_list)) ^ "]\n" in
+    let create_fmt_str len = "[" ^ "]\n" in
     (* Create a pointer to a format string for printf *)
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and float_format_str = L.build_global_stringptr "%g\n" "fmt" builder
@@ -153,7 +156,7 @@ let translate (globals, functions) =
        in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
        in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
        in let global_arr = L.define_global "tmp" const_arr the_module 
-       in global_arr(*L.build_struct_gep global_arr 0 "tmp" builder*)
+       in global_arr
       | SArrsub (e, l) -> let expr_builder = expr builder e in let l2 = expr builder l in
         let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
         let abxd = L.build_load arr_builder "tmp" builder in
@@ -223,27 +226,24 @@ let translate (globals, functions) =
       "printf" builder
       | SCall ("length", [e]) -> let expr_builder = expr builder e in 
         let expr_builder = L.build_struct_gep expr_builder 0 "tmp" builder in
-        let len = L.build_load expr_builder "tmp" builder in
-        let () = print_endline(L.string_of_llvalue len) in len
+        let len = L.build_load expr_builder "tmp" builder in len
       | SCall ("height", [e]) -> let expr_builder = expr builder e in 
         let expr_builder = L.build_struct_gep expr_builder 1 "tmp" builder in
         let len = L.build_load expr_builder "tmp" builder in len
       | SCall ("width", [e]) -> let expr_builder = expr builder e in 
         let expr_builder = L.build_struct_gep expr_builder 2 "tmp" builder in
         let len = L.build_load expr_builder "tmp" builder in len
-      | SCall ("init", [e1; e2; e3; e4]) -> let e2' = expr builder e2 in let e3' = expr builder e3 in let e4' = expr builder e4
-        (*in let () = L.set_global_constant true e2'*)
-        in let int64_val = L.int64_of_const e2'
-        in let int64_v = match int64_val with Some k -> k
-        in let len = (Int64.to_int int64_v)
-        in let f_helper _ = L.const_int i8_t 0 
-        in let img_array = L.const_array i8_t (Array.init len f_helper) 
-        in let ipt = L.define_global "tmp" img_array the_module
-        in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
-        in let const_arr = (L.const_struct context [|e2'; e3'; e4'; img_array_ptr|]  )
-        in let global_arr = L.define_global "tmp" const_arr the_module 
-        in let (_, e1') = e1 in let e1'' = lookup (match e1' with SId(s) -> s )
-        in let _ = L.build_store global_arr e1'' builder in global_arr
+      | SCall ("init", [e1; e2; e3; e4]) -> let e1' = expr builder e1 in let e2' = expr builder e2 in let e3' = expr builder e3 in let e4' = expr builder e4
+        in let mptr = L.build_array_malloc i8_t e2' "tmp" builder in
+        let typ = L.type_of mptr (*in let () = print_endline (L.string_of_lltype typ) *)in
+        let e2'' = L.build_struct_gep e1' 0 "tmp" builder in
+        let e3'' = L.build_struct_gep e1' 1 "tmp" builder in
+        let e4'' = L.build_struct_gep e1' 2 "tmp" builder in
+        let e5'' = L.build_struct_gep e1' 3 "tmp" builder in
+        let _ = L.build_store e2' e2'' builder in
+        let _ = L.build_store e3' e3'' builder in
+        let _ = L.build_store e4' e4'' builder in
+        let _ = L.build_store mptr e5'' builder in e1'
       | SCall ("printline", [e]) -> 
     L.build_call printf_func [| string_format_str ; (expr builder e) |]
       "printf" builder
@@ -284,9 +284,7 @@ let translate (globals, functions) =
                     let _ = match e2 with
                         (tp, SNoassign) -> L.const_int i32_t 0
                       | _ -> expr builder (tp, SAssign(s, e2))
-
-
-                     in builder
+          in builder
       | SReturn e -> let _ = match fdecl.styp with
                               A.Int -> L.build_ret (expr builder e) builder 
                             | _ -> to_imp (A.string_of_typ fdecl.styp)
