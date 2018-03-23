@@ -39,7 +39,7 @@ let check (globals, functions) =
 
     let check_identifier_assign s = 
         if StringMap.mem s global_map then
-          let (t1, t2) = StringMap.find s global_map in
+          let (_, t2) = StringMap.find s global_map in
           if t2 = Void then raise (Failure ("uninialized identifier " ^ s))
           else t2
         else raise (Failure ("undeclared identifier " ^ s))
@@ -54,10 +54,6 @@ let check (globals, functions) =
       | Noassign     -> (Void, SNoassign)
       | Slit s       -> (String, SSlit s)
       | Id s         -> (check_identifier_assign s, SId s)
-      | Assign(var, e) as ex -> 
-              raise (Failure ("illegal assign operator"))
-      | Call(fname, args) as call -> 
-          raise (Failure ("cannot call functions on global initialization"))
       | Arrliteral a -> 
           let sa = List.map expr a in (Arr, SArrliteral sa)
       | Arrsub(e1, e2) -> 
@@ -98,6 +94,8 @@ let check (globals, functions) =
                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
                        string_of_typ t2 ^ " in " ^ string_of_expr e))
           in (ty, SBinop((t1, e1'), op, (t2, e2')))
+
+      | _ -> raise (Failure ("illegal operation for global initialization"))
 
       in let (tx, ex') = expr ex
 
@@ -175,11 +173,11 @@ let check (globals, functions) =
 	
 	(* add local symbol table of variables for this function *)
 	let rec find_locals stmt_list locals= match stmt_list with
-		| Var (b,e):: tl -> b :: (find_locals tl locals)
+		| Var (b, _):: tl -> b :: (find_locals tl locals)
 		| Block sl :: tl -> 
 			let rec find_locals_in_block sl locals= match sl with
             | Block sl :: tl  -> find_locals_in_block (sl @ tl) locals(* Flatten blocks *)
-            | Var(b,e) :: tl  -> (b :: (find_locals tl locals)) @ (find_locals_in_block tl locals)
+            | Var(b, _) :: tl  -> (b :: (find_locals tl locals)) @ (find_locals_in_block tl locals)
             | _ 			  -> []
           	in (find_locals_in_block sl locals) @ (find_locals tl locals)
 		| _ -> []   
