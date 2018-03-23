@@ -54,6 +54,10 @@ let check (globals, functions) =
       | Noassign     -> (Void, SNoassign)
       | Slit s       -> (String, SSlit s)
       | Id s         -> (check_identifier_assign s, SId s)
+      | Assign(var, e) as ex -> 
+              raise (Failure ("illegal assign operator"))
+      | Call(fname, args) as call -> 
+          raise (Failure ("cannot call functions on global initialization"))
       | Arrliteral a -> 
           let sa = List.map expr a in (Arr, SArrliteral sa)
       | Arrsub(e1, e2) -> 
