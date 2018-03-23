@@ -129,39 +129,28 @@ let check (globals, functions) =
       formals = [(ty, "x")];
       locals = []; body = [] } map
     in List.fold_left add_bind StringMap.empty [ ("print", Int);
-			                         ("printb", Bool);
-			                         ("printf", Float);
-			                         ("printbig", Int);
-			                         ("load", Void);
-			                         ("save", Bool);
-			                         ("close", Bool) ]
-    in
-
-  let filter_decls = 
-    let add_bind map name = StringMap.add name {
-      typ = Void; fname = name; 
-      formals = [(Arr, "x")];
-      locals = []; body = [] } map
-    in List.fold_left add_bind StringMap.empty [ ("blur"); ("hdr")]
+                               ("printb", Bool);
+                               ("printf", Float);
+                               ("printbig", Int);
+                               ("load", Void);
+                               ("save", Bool);
+                               ("close", Bool) ]
   in
 
   (* Add function name to symbol table *)
   let add_func map fd = 
     let built_in_err = "function " ^ fd.fname ^ " may not be defined"
     and dup_err = "duplicate function " ^ fd.fname
-    and filter_err = "function " ^ fd.fname ^ " may not be defined"
     and make_err er = raise (Failure er)
     and n = fd.fname (* Name of the function *)
     in match fd with (* No duplicate functions or redefinitions of built-ins *)
          _ when StringMap.mem n built_in_decls -> make_err built_in_err
-       | _ when StringMap.mem n filter_decls -> make_err filter_err
        | _ when StringMap.mem n map -> make_err dup_err  
        | _ ->  StringMap.add n fd map 
   in
 
   (* Collect all other function names into one symbol table *)
   let function_decls = List.fold_left add_func built_in_decls functions
-
   in
   
   (* Return a function from our symbol table *)
@@ -181,23 +170,23 @@ let check (globals, functions) =
     let check_assign lvaluet rvaluet err =
        if lvaluet = rvaluet then lvaluet else raise (Failure err)
     in     
-	
-	(* add local symbol table of variables for this function *)
-	let rec find_locals stmt_list locals= match stmt_list with
-		| Var (b, _):: tl -> b :: (find_locals tl locals)
-		| Block sl :: tl -> 
-			let rec find_locals_in_block sl locals= match sl with
+  
+  (* add local symbol table of variables for this function *)
+  let rec find_locals stmt_list locals= match stmt_list with
+    | Var (b, _):: tl -> b :: (find_locals tl locals)
+    | Block sl :: tl -> 
+      let rec find_locals_in_block sl locals= match sl with
             | Block sl :: tl  -> find_locals_in_block (sl @ tl) locals(* Flatten blocks *)
             | Var(b, _) :: tl  -> (b :: (find_locals tl locals)) @ (find_locals_in_block tl locals)
-            | _ 			  -> []
-          	in (find_locals_in_block sl locals) @ (find_locals tl locals)
-		| _ -> []   
-	in 
+            | _         -> []
+            in (find_locals_in_block sl locals) @ (find_locals tl locals)
+    | _ -> []   
+  in 
     
-	let locals = find_locals func.body [] in
-	let locals' = check_binds "local" locals in
+  let locals = find_locals func.body [] in
+  let locals' = check_binds "local" locals in
     let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
-	                StringMap.empty (glob @ formals' @locals')
+                  StringMap.empty (glob @ formals' @locals')
     in
     (* Return a variable from our local symbol table *)
     let type_of_identifier s =
@@ -256,8 +245,9 @@ let check (globals, functions) =
           | Less | Leq | Greater | Geq
                      when same && (t1 = Int || t1 = Float) -> Bool
           | And | Or when same && t1 = Bool -> Bool
+          | At when t1 = String && t2 = Arr -> Void
           | _ -> raise (
-	      Failure ("illegal binary operator " ^
+        Failure ("illegal binary operator " ^
                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
                        string_of_typ t2 ^ " in " ^ string_of_expr e))
           in (ty, SBinop((t1, e1'), op, (t2, e2')))
@@ -275,8 +265,18 @@ let check (globals, functions) =
           in 
           let args' = List.map2 check_call fd.formals args
           in (fd.typ, SCall(fname, args'))
-      (* | Filter f = 
-      | Filterliteral el = *)
+      | Filter f -> 
+        let ty = match f with
+            "blur" -> String
+          | "hdr" -> String
+          | _ -> raise (Failure ("illegal filter keyword" ^ f))
+        in (ty, SFilter f)
+      | Filterliteral fl -> 
+        let rec check_filter fl = match fl with
+            [] -> raise (Failure ("illegal empty filter"))
+          | [f] -> let (t, f') = expr f in if (f' = SFilter "blur" || f' = SFilter "hdr") then [(t, f')] else raise (Failure ("illegal filter keywords"))
+          | f :: n -> let (t, f') = expr f in if (f' = SFilter "blur" || f' = SFilter "hdr") then (t, f') :: check_filter n else raise (Failure ("illegal filter keywords"))
+          in (String, SFilterliteral(check_filter fl))
     in
 
     let check_bool_expr e = 
@@ -290,16 +290,16 @@ let check (globals, functions) =
         Expr e -> SExpr (expr e)
       | If(p, b1, b2) -> SIf(check_bool_expr p, check_stmt b1, check_stmt b2)
       | For(e1, e2, e3, st) ->
-	  		SFor(expr e1, check_bool_expr e2, expr e3, check_stmt st)
+        SFor(expr e1, check_bool_expr e2, expr e3, check_stmt st)
       | While(p, s) -> SWhile(check_bool_expr p, check_stmt s)
       | Return e -> let (t, e') = expr e in
         if t = func.typ then SReturn (t, e') 
         else raise (
-	  		Failure ("return gives " ^ string_of_typ t ^ " expected " ^
-		   string_of_typ func.typ ^ " in " ^ string_of_expr e))
-	    
-	    (* A block is correct if each statement is correct and nothing
-	       follows any Return statement.  Nested blocks are flattened. *)
+        Failure ("return gives " ^ string_of_typ t ^ " expected " ^
+       string_of_typ func.typ ^ " in " ^ string_of_expr e))
+      
+      (* A block is correct if each statement is correct and nothing
+         follows any Return statement.  Nested blocks are flattened. *)
       | Block sl -> 
           let rec check_stmt_list = function
               [Return _ as s] -> [check_stmt s]
@@ -315,7 +315,7 @@ let check (globals, functions) =
       sformals = formals';
       slocals  = locals';
       sbody = match check_stmt (Block func.body) with
-		SBlock(sl) -> sl
+    SBlock(sl) -> sl
       | _ -> let err = "internal error: block didn't become a block?"
       in raise (Failure err)
     }
