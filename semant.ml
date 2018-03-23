@@ -135,22 +135,33 @@ let check (globals, functions) =
 			                         ("load", Void);
 			                         ("save", Bool);
 			                         ("close", Bool) ]
+    in
+
+  let filter_decls = 
+    let add_bind map name = StringMap.add name {
+      typ = Void; fname = name; 
+      formals = [(Arr, "x")];
+      locals = []; body = [] } map
+    in List.fold_left add_bind StringMap.empty [ ("blur"); ("hdr")]
   in
 
   (* Add function name to symbol table *)
   let add_func map fd = 
     let built_in_err = "function " ^ fd.fname ^ " may not be defined"
     and dup_err = "duplicate function " ^ fd.fname
+    and filter_err = "function " ^ fd.fname ^ " may not be defined"
     and make_err er = raise (Failure er)
     and n = fd.fname (* Name of the function *)
     in match fd with (* No duplicate functions or redefinitions of built-ins *)
          _ when StringMap.mem n built_in_decls -> make_err built_in_err
+       | _ when StringMap.mem n filter_decls -> make_err filter_err
        | _ when StringMap.mem n map -> make_err dup_err  
        | _ ->  StringMap.add n fd map 
   in
 
   (* Collect all other function names into one symbol table *)
   let function_decls = List.fold_left add_func built_in_decls functions
+
   in
   
   (* Return a function from our symbol table *)
@@ -264,7 +275,7 @@ let check (globals, functions) =
           in 
           let args' = List.map2 check_call fd.formals args
           in (fd.typ, SCall(fname, args'))
-      (* | Filter s = 
+      (* | Filter f = 
       | Filterliteral el = *)
     in
 

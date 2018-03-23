@@ -27,7 +27,7 @@ func int forLoopTest() {
 }
 
 func int main(){
-
+   int hdr;
    int result = 0;
    result = forLoopTest();
    return result;
