@@ -49,13 +49,14 @@ let translate (globals, functions) =
     (* | t -> raise (Failure ("Type " ^ A.string_of_typ t ^ " not implemented yet")) *)
   in
 
-  let global_vars = 
-    let global_var m (t, n) = 
-      let init = match t with 
+  let init t = match t with 
             A.Arr -> L.const_pointer_null structp_t
           | A.String -> L.const_pointer_null ip_t
           | _     -> L.const_int (ltype_of_typ t) 0
-      in StringMap.add n (L.define_global n init the_module) m in
+  in
+
+  let global_vars = 
+    let global_var m (t, n) = StringMap.add n (L.define_global n (init t) the_module) m in
     List.fold_left global_var StringMap.empty globals in
 
   (* Declare a "printf" function to implement MicroC's "print". *)
@@ -135,12 +136,19 @@ let translate (globals, functions) =
     in
 
     (* Generate LLVM code for a call to MicroC's "print" *)
-    let rec expr builder ((_, e) : sexpr) = match e with
+    let rec expr builder ((tp, e) : sexpr) = match e with
   SLiteral i -> L.const_int i32_t i (* Generate a constant integer *)
       | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | SSlit s -> L.build_global_stringptr s ".str" builder
       | SFliteral l -> L.const_float_of_string float_t l
       | SNoexpr -> L.const_int i32_t 0
+      | SNoassign -> init tp
+      | SFilter s -> L.const_string context s 
+      | SFilterliteral e_list -> let f1 (_, filter_val) =  
+            (match filter_val with 
+              SFilter (s) -> L.const_string context s 
+            | _ -> raise (Failure ("The list should contain only filters!")))
+        in L.const_struct context (Array.of_list (List.map f1 e_list))
       | SId s -> L.build_load (lookup s) s builder
       | SArrliteral s -> 
       let to_array x = let y = snd x in match y with
@@ -299,7 +307,7 @@ let translate (globals, functions) =
       | SExpr e -> let _ = expr builder e in builder 
       | SVar (e1, e2) -> let (tp, s) = e1 in let _ = expr builder (tp, SId(s)) in
                     let _ = match e2 with
-                        (tp, SNoassign) -> L.const_int i32_t 0
+                        (tp, SNoassign) -> init tp
                       | _ -> expr builder (tp, SAssign(s, e2))
           in builder
       | SReturn e -> let _ = match fdecl.styp with
