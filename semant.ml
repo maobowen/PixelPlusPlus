@@ -126,22 +126,29 @@ let check (globals, functions) =
   let add_typ_list s = match s with _ -> [(s,"x")]
   in
   let built_in_decls = 
-    let add_bind map (name,return_type, arg_list) = 
-	      StringMap.add name {
-	      typ = return_type; fname = name; 
-	      formals = arg_list;
-	      locals = []; body = [] } map
-    in List.fold_left add_bind StringMap.empty [ ("print", Void, add_typ_list Int);
-			                         ("printb",Void, add_typ_list Bool);
-			                         ("printf",Void, add_typ_list Float);
-			                         ("printbig", Void , add_typ_list Int);
-			                         ("load", Arr , add_typ_list String);
-			                         ("save", Void , add_typ_list Arr @ add_typ_list String);
-			                         ("shape", Int , add_typ_list Arr) ]
-  in
-
+    let add_bind map (name, ty) = StringMap.add name {
+      typ = Void; fname = name; 
+      formals = [(ty, "x")];
+      locals = []; body = [] } map
+    in List.fold_left add_bind StringMap.empty [ ("print", Int);
+                            ("printb", Bool);
+                            ("printf", Float);
+                            ("printline", String);
+                               ("printarr", Arr);
+                               ("close", Arr)]
+  in let built_in_decls = 
+    StringMap.add "load" {typ = Arr; fname = "load"; formals = [(String, "x")]; locals=[]; body=[]} built_in_decls
+  in let built_in_decls =  StringMap.add "length" {typ = Int; fname = "length"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+  in let built_in_decls =  StringMap.add "width" {typ = Int; fname = "width"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+  in let built_in_decls =  StringMap.add "height" {typ = Int; fname = "height"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+  in let built_in_decls =  StringMap.add "save" {typ = Void; fname = "save"; formals = [(Arr, "x"); (String, "y")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls =  StringMap.add "init" {typ = Void; fname = "init"; formals = [(Arr, "x"); (Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls =  StringMap.add "imgcpy" {typ = Arr; fname = "imgcpy"; formals = [(Arr, "i1"); (Arr, "i2")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls =  StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls =  StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in
   (* Add function name to symbol table *)
-  let add_func map fd = 
+  let add_func map fd =
     let built_in_err = "function " ^ fd.fname ^ " may not be defined"
     and dup_err = "duplicate function " ^ fd.fname
     and make_err er = raise (Failure er)

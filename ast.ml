@@ -10,7 +10,6 @@ type typ = Int | Bool | Float | Arr | Void |String
 
 type bind = typ * string 
 
-
 type expr =
     Literal of int
   | Fliteral of string
