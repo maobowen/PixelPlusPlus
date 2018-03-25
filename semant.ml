@@ -226,6 +226,16 @@ let check (globals, functions) =
           let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^ 
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
+      | ArrAssign(e1, e2) ->
+          let (t1, e1') = expr e1 
+          and (t2, e2') = expr e2 in
+          (* All binary operators require operands of the same type *)
+          let same = t1 = t2 in
+          (* Determine expression type based on operator and operand types *)
+          let ty = match t2 with
+            Int when same -> Int
+          | _ -> raise (Failure ("illigeal array subscript assignment."))
+        in (ty, SArrAssign((t1, e1'), (t2, e2')))
       | Unop(op, e) as ex -> 
           let (t, e') = expr e in
           let ty = match op with

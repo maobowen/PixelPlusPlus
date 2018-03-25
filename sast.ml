@@ -11,6 +11,7 @@ and sx =
   | SBinop of sexpr * op * sexpr
   | SUnop of uop * sexpr
   | SAssign of string * sexpr
+  | SArrAssign of sexpr * sexpr
   | SCall of string * sexpr list
   | SNoexpr
   (* add expr *)

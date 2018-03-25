@@ -115,6 +115,7 @@ expr:
   | NOT expr         { Unop(Not, $2)          }
   | TRANS expr       { Unop(Trans, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
+  | expr LBRACKET arr_sub_opt RBRACKET ASSIGN expr { ArrAssign(Arrsub($1, $3), $6) }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
   | expr LBRACKET arr_sub_opt RBRACKET { Arrsub($1, $3)  }
   | LPAREN expr RPAREN { $2                   }
