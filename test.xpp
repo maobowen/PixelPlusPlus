@@ -21,6 +21,8 @@ func int forLoopTest() {
   accu = 0;
   for (i = a; i < b; i = i + 1) {
     accu = accu + i;
+    int k;
+    k = 0;
   }
   a=gcd(5050,100);
   return a;

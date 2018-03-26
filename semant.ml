@@ -187,10 +187,13 @@ in
             | Block sl :: tl  -> find_locals_in_block (sl @ tl) locals(* Flatten blocks *)
             | Var(b, _) :: tl  -> (b :: (find_locals tl locals)) @ (find_locals_in_block tl locals)
             | _ ::tl       -> find_locals_in_block tl locals
-            | [] ->[]
+            | [] -> locals
             in (find_locals_in_block sl locals) @ (find_locals tl locals)
-    | _ :: tl -> find_locals tl locals
-    | [] -> []
+    | If(_,_,e) :: tl -> (find_locals [e] locals) @ (find_locals tl locals)
+    | For(_,_,_,e) ::tl -> (find_locals [e] locals) @ (find_locals tl locals)
+    | While(_,e) :: tl -> (find_locals [e] locals) @ (find_locals tl locals)
+    | _ :: tl-> find_locals tl locals
+    | [] -> locals
   in 
     
   let locals = find_locals func.body [] in
