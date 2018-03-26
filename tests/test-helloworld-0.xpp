@@ -1,0 +1,5 @@
+func int main()
+{
+	printline("Hello, Pixel++!");
+	return 0;
+}
