@@ -22,7 +22,9 @@ func int forLoopTest() {
   for (i = a; i < b; i = i + 1) {
     accu = accu + i;
     int k;
-    k = 0;
+    for (k = b; k < b; k = k + 1){
+          accu = accu + k;
+    }
   }
   a=gcd(5050,100);
   return a;
