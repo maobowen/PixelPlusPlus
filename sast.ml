@@ -67,7 +67,7 @@ let rec string_of_sexpr (t, e) =
   | SFilterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_sexpr e) ^ "|"
   | SArrsub(a, i) -> 
   let rec string_of_list list= match list with
-      [] -> []
+      [] -> ""
     | f::tl -> string_of_sexpr f ^ string_of_list tl
   in string_of_sexpr a ^ "[" ^ string_of_list i ^ "]"
           ) ^ ")" 

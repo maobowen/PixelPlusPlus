@@ -18,6 +18,7 @@ open Ast
 %type <Ast.program> program
 
 %nonassoc NOELSE
+%nonassoc NOARRASSIGN
 %nonassoc ELSE
 %nonassoc AT
 %left COMMA
@@ -115,9 +116,9 @@ expr:
   | NOT expr         { Unop(Not, $2)          }
   | TRANS expr       { Unop(Trans, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
-  | expr arr_sub_opt ASSIGN expr { ArrAssign(Arrsub($1, $2), $4) }
+  | expr arr_sub_opt_list ASSIGN expr { ArrAssign(Arrsub($1, List.rev $2), $4) }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
-  | expr arr_sub_opt_list { Arrsub($1, $2)  }
+  | expr arr_sub_opt_list %prec NOARRASSIGN { Arrsub($1, List.rev $2)  }
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
@@ -125,12 +126,8 @@ expr:
   | ID2                           {       Slit($1)                      }
 
 arr_sub_opt_list:
-    LBRACKET arr_sub_opt RBRACKET {[$2]}
-  | arr_sub_opt_list LBRACKET arr_sub_opt RBRACKET {$3::$1}
-
-arr_sub_opt:
-    LITERAL {Literal($1)}
-  | ID      {Id($1)}
+    LBRACKET LITERAL RBRACKET { [Literal($2)] }
+  | arr_sub_opt_list LBRACKET LITERAL RBRACKET { Literal($3)::$1 }
 
 args_opt:
     /* nothing */ { [] }
