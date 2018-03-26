@@ -272,19 +272,13 @@ let translate (globals, functions) =
       | SCall ("width", [e]) -> let expr_builder = expr builder e in 
         let expr_builder = L.build_struct_gep expr_builder 2 "tmp" builder in
         let len = L.build_load expr_builder "tmp" builder in len
-      | SCall ("init", [(A.Arr, SId(s)); e2; e3; e4]) -> let e2' = expr builder e2 in let e3' = expr builder e3 in let e4' = expr builder e4
-        in let mptr = L.build_array_malloc i8_t e2' "tmp" builder in
-        (*let typ = L.type_of mptr in let () = print_endline (L.string_of_lltype typ) in*)
-        let e1' = L.build_malloc struct_t "tmp" builder in
-        let _ = L.build_store e1' (lookup s) builder in
-        let e2'' = L.build_struct_gep e1' 0 "tmp" builder in
-        let e3'' = L.build_struct_gep e1' 1 "tmp" builder in
-        let e4'' = L.build_struct_gep e1' 2 "tmp" builder in
-        let e5'' = L.build_struct_gep e1' 3 "tmp" builder in
-        let _ = L.build_store e2' e2'' builder in
-        let _ = L.build_store e3' e3'' builder in
-        let _ = L.build_store e4' e4'' builder in
-        let _ = L.build_store mptr e5'' builder in e1'
+      | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 in let e3' = expr builder e3 in let e4' = expr builder e4
+        in let mptr = L.build_array_malloc i8_t e2' "tmp" builder 
+        in let empty_ptr = L.const_pointer_null ip_t
+        in let init_struct = L.const_struct context [|e2'; e3'; e4'; empty_ptr|]
+        in let e1' = L.define_global "init_arr" init_struct the_module
+        in let e5'' = L.build_struct_gep e1' 3 "tmp" builder
+        in let _ = L.build_store mptr e5'' builder in e1'
       | SCall ("imgcpy", [e1;e2]) -> let e1' = expr builder e1 in let e2' = expr builder e2 in
         let e1_l = L.build_struct_gep e1' 0 "tmp" builder in
         let e1_h = L.build_struct_gep e1' 1 "tmp" builder in
