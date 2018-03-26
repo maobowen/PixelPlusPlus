@@ -56,17 +56,16 @@ let check (globals, functions) =
       | Id s         -> (check_identifier_assign s, SId s)
       | Arrliteral a -> 
           let sa = List.map expr a in (Arr, SArrliteral sa)
-      | Arrsub(e1, e2) -> 
-          let (t1, e1') = expr e1
-          and (t2, e2') = expr e2 in
-          let ty = match t1 with
-            Arr -> if t2 = Int then t2 else raise (Failure ("illegal type " ^
-                       string_of_typ t1 ^ " " ^ string_of_expr e1 ^ 
-                       "on subscript, which expects an Arr."))
-          | _ -> raise (Failure ("illegal subscript type " ^
-                       string_of_typ t2 ^ " " ^ string_of_expr e2 ^ 
-                       ", which expects an Int."))
-        in (ty, SArrsub((t1, e1'), (t2, e2')))
+      | Arrsub(e, fl) -> 
+          let (t1, e') = expr e in
+
+          if t1 != Arr then raise (Failure ("illegal subscript operation")) else
+
+          let rec check_sublist fl = match fl with
+            [] -> raise (Failure ("illegal empty filter"))
+          | [f] -> let (t, f') = expr f in if t = Int then [(t, f')] else raise (Failure ("illegal subscript argument"))
+          | f :: n -> let (t, f') = expr f in if t = Int then (t, f') :: check_sublist n else raise (Failure ("illegal subscript argument"))
+          in (Int, SArrsub((t1, e'), check_sublist fl))
       | Unop(op, e) as ex -> 
           let (t, e') = expr e in
           let ty = match op with
@@ -216,17 +215,25 @@ in
       | Id s         -> (type_of_identifier s, SId s)
       | Arrliteral a -> 
           let sa = List.map expr a in (Arr, SArrliteral sa)
-      | Arrsub(e1, e2) -> 
-          let (t1, e1') = expr e1
-          and (t2, e2') = expr e2 in
+      | Arrsub(e, fl) -> 
+          let (t1, e') = expr e in
+
+          if t1 != Arr then raise (Failure ("illegal subscript operation")) else
+
+          let rec check_sublist fl = match fl with
+            [] -> raise (Failure ("illegal empty filter"))
+          | [f] -> let (t, f') = expr f in if t = Int then [(t, f')] else raise (Failure ("illegal subscript argument"))
+          | f :: n -> let (t, f') = expr f in if t = Int then (t, f') :: check_sublist n else raise (Failure ("illegal subscript argument"))
+          in (Int, SArrsub((t1, e'), check_sublist fl))
+          (* and (t2, e2') = expr e2 in
           let ty = match t1 with
             Arr -> if t2 = Int then t2 else raise (Failure ("illegal type " ^
                        string_of_typ t1 ^ " " ^ string_of_expr e1 ^ 
                        "on subscript, which expects an Arr."))
           | _ -> raise (Failure ("illegal subscript type " ^
                        string_of_typ t2 ^ " " ^ string_of_expr e2 ^ 
-                       ", which expects an Int."))
-        in (ty, SArrsub((t1, e1'), (t2, e2')))
+                       ", which expects an Int.")) *)
+        (* in (ty, SArrsub((t1, e1'), (t2, e2'))) *)
       | Assign(var, e) as ex -> 
           let lt = type_of_identifier var
           and (rt, e') = expr e in

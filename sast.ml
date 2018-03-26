@@ -20,7 +20,7 @@ and sx =
   | SArrliteral of sexpr list
   | SFilter of string
   | SFilterliteral of sexpr list
-  | SArrsub of sexpr * sexpr
+  | SArrsub of sexpr * sexpr list
 
 type sstmt =
     SBlock of sstmt list
@@ -65,7 +65,11 @@ let rec string_of_sexpr (t, e) =
   | SArrliteral(e) -> "[" ^ String.concat "," (List.map string_of_sexpr e)^ "]"
   | SFilter(s)-> s
   | SFilterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_sexpr e) ^ "|"
-  | SArrsub(a, i) -> string_of_sexpr a ^ "[" ^ string_of_sexpr i ^ "]"
+  | SArrsub(a, i) -> 
+  let rec string_of_list list= match list with
+      [] -> []
+    | f::tl -> string_of_sexpr f ^ string_of_list tl
+  in string_of_sexpr a ^ "[" ^ string_of_list i ^ "]"
           ) ^ ")" 
 
 let rec string_of_sstmt = function
