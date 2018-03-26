@@ -196,7 +196,7 @@ let translate (globals, functions) =
     | A.And | A.Or | A.Mtimes | A.At ->
         raise (Failure "internal error: semant should have rejected and/or on float")
     )
-    else if t = A.Int then (match op with
+    else if (t = A.Int || t = A.Bool) then (match op with
       A.Add     -> L.build_add e1' e2' "tmp" builder
     | A.Sub     -> L.build_sub e1' e2' "tmp" builder
     | A.Mult    -> L.build_mul e1' e2' "tmp" builder
