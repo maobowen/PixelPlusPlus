@@ -140,7 +140,7 @@ let check (globals, functions) =
   in let built_in_decls =  StringMap.add "width" {typ = Int; fname = "width"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls =  StringMap.add "height" {typ = Int; fname = "height"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls =  StringMap.add "save" {typ = Void; fname = "save"; formals = [(Arr, "x"); (String, "y")]; locals=[]; body=[]} built_in_decls
-in let built_in_decls =  StringMap.add "init" {typ = Void; fname = "init"; formals = [(Arr, "x"); (Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls =  StringMap.add "init" {typ = Arr; fname = "init"; formals = [(Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls =  StringMap.add "imgcpy" {typ = Arr; fname = "imgcpy"; formals = [(Arr, "i1"); (Arr, "i2")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls =  StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls =  StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
