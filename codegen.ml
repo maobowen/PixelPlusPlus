@@ -248,14 +248,11 @@ let translate (globals, functions) =
     | A.Not              -> L.build_not e' "tmp" builder
     | A.Trans when t = A.Arr -> let _ = L.build_call trans_func [|e'|] "trans" builder in e'
     | A.Trans -> raise (Failure "internal error: can't perform matrix operation on scalar")) 
-      | SAssign (s, e) ->   (let e' = expr builder e in
-                (*match L.type_of e' with
-                  structp_t -> let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
-                               let abxd = L.build_load arr_builder "tmp" builder in
-                               let abxd = L.array_type i8_t 
-                               let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
-                               L.build_load abxd "tmp" builder
-                | _         ->*) let _  = L.build_store e' (lookup s) builder in e' )
+      | SAssign (s, e) -> let e' = expr builder e in
+                          let e'  = (match e with 
+                              (_, SArrsub(_, _)) -> L.build_intcast e' i32_t "tmp" builder
+                            | _ -> e')
+                        in let _ = L.build_store e' (lookup s) builder in e'
       | SCall ("print", [e]) -> (* Generate a call instruction *)
     L.build_call printf_func [| int_format_str ; (expr builder e) |]
       "printf" builder 
