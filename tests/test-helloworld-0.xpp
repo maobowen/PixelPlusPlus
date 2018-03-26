@@ -1,5 +1,5 @@
 func int main()
 {
-	printline("Hello, Pixel++!");
-	return 0;
+    printline("Hello, Pixel++!");
+    return 0;
 }
