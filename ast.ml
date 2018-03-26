@@ -110,9 +110,8 @@ let rec string_of_expr = function
   | Arrsub(a, i) -> 
     let rec string_of_list list = match list with
     [] -> ""
-    | [f] -> string_of_expr f
-    | f::tl -> string_of_expr f ^ string_of_list tl
-  in string_of_expr a ^ "[" ^ (string_of_list i) ^ "]"
+    | f::tl -> "[" ^ string_of_expr f ^ "]"^ string_of_list tl
+  in string_of_expr a ^  (string_of_list i) 
   (*| Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"*)
 
 let rec string_of_stmt = function
