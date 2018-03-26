@@ -8,8 +8,8 @@
 
 struct Img {
 	int length;
-        int height;
-        int width;
+    int height;
+    int width;
 	uint8_t* arr;
 };
 
@@ -19,7 +19,7 @@ struct Img* load(char* path) {
     uint8_t* rgb_image = stbi_load(path, &width, &height, &bpp, 3);
     printf("loading_image completed!\n");
     struct Img *img;
-    img = (struct Img *)malloc(sizeof(struct Img));
+    img = (struct Img *) malloc(sizeof(struct Img));
     img->length = width * height * CHANNEL_NUM;
     img->arr = rgb_image;
     img->width = width;
@@ -27,9 +27,21 @@ struct Img* load(char* path) {
     return img;
 }
 
+void close(struct Img* img) {
+  stbi_image_free(img->arr);
+  free(img);
+  printf("close completed!\n");
+}
+
+void save(struct Img *img, char* path) {
+    stbi_write_png(path, img->width, img->height, 3, img->arr, img->width * 3);
+    printf("saving image completed!\n");
+}
+
 #ifdef BUILD_TEST
 int main() {
     struct Img *img = load("./img2.png");
+    save(img, "./img2_new.png");
     stbi_image_free(img->arr);
     free(img);
 }
