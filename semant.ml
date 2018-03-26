@@ -241,7 +241,7 @@ in
           (* Determine expression type based on operator and operand types *)
           let ty = match t2 with
             Int when same -> Int
-          | _ -> raise (Failure ("illigeal array subscript assignment."))
+          | _ -> raise (Failure ("illegal array subscript assignment."))
         in (ty, SArrAssign((t1, e1'), (t2, e2')))
       | Unop(op, e) as ex -> 
           let (t, e') = expr e in
