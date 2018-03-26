@@ -28,6 +28,7 @@ func int forLoopTest() {
 
 func int main(){
    arr img = [[[1],[2],[3]],[[1],[2],[3]],[[1],[2],[3]]];
+   img[0][1][2] =1;
    int result = 0;
    /*|blur->hdr| @ img;*/
    result = forLoopTest();

@@ -186,9 +186,11 @@ in
       let rec find_locals_in_block sl locals= match sl with
             | Block sl :: tl  -> find_locals_in_block (sl @ tl) locals(* Flatten blocks *)
             | Var(b, _) :: tl  -> (b :: (find_locals tl locals)) @ (find_locals_in_block tl locals)
-            | _         -> []
+            | _ ::tl       -> find_locals_in_block tl locals
+            | [] ->[]
             in (find_locals_in_block sl locals) @ (find_locals tl locals)
-    | _ -> []   
+    | _ :: tl -> find_locals tl locals
+    | [] -> []
   in 
     
   let locals = find_locals func.body [] in
