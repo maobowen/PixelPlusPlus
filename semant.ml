@@ -65,7 +65,7 @@ let check (globals, functions) =
             [] -> raise (Failure ("illegal empty filter"))
           | [f] -> let (t, f') = expr f in if t = Int then [(t, f')] else raise (Failure ("illegal subscript argument"))
           | f :: n -> let (t, f') = expr f in if t = Int then (t, f') :: check_sublist n else raise (Failure ("illegal subscript argument"))
-          in (Int, SArrsub((t1, e'), check_sublist fl))
+          in (t1, SArrsub((t1, e'), check_sublist fl))
       | Unop(op, e) as ex -> 
           let (t, e') = expr e in
           let ty = match op with
