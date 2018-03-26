@@ -1,0 +1,20 @@
+func int Fibonacci(int n)
+{
+    if (n == 0)
+        return 0;
+    else if (n == 1)
+        return 1;
+    else
+        return Fibonacci(n-1) + Fibonacci(n-2);
+}
+
+func int main()
+{
+    int i;
+    int max = 10;
+    for (i = 0; i < max; i = i + 1)
+    {
+        print(Fibonacci(i));
+    }
+    return 0;
+}

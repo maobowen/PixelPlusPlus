@@ -58,8 +58,7 @@ let rec string_of_sexpr (t, e) =
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SNoexpr -> ""
-  (* add expr *)
-  | SArrAssign(e1,e2)-> string_of_sexpr e1 ^ " = " ^ string_of_sexpr e2		     
+  (* add expr *)     
   | SNoassign -> ""
   | SSlit(s)-> "\"" ^ s ^ "\""
   | SArrliteral(e) -> "[" ^ String.concat "," (List.map string_of_sexpr e)^ "]"
