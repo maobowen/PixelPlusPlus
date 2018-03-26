@@ -122,8 +122,7 @@ let check (globals, functions) =
 
 
   (* Collect function declarations for built-in functions: no bodies *)
-  let add_typ_list s = match s with _ -> [(s,"x")]
-  in
+  
   let built_in_decls = 
     let add_bind map (name, ty) = StringMap.add name {
       typ = Void; fname = name; 

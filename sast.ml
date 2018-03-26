@@ -58,16 +58,16 @@ let rec string_of_sexpr (t, e) =
   | SCall(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_sexpr el) ^ ")"
   | SNoexpr -> ""
-  (* add expr *)
-  | SArrAssign(e1,e2)-> string_of_sexpr e1 ^ " = " ^ string_of_sexpr e2		     
+  (* add expr *)     
   | SNoassign -> ""
   | SSlit(s)-> "\"" ^ s ^ "\""
   | SArrliteral(e) -> "[" ^ String.concat "," (List.map string_of_sexpr e)^ "]"
   | SFilter(s)-> s
   | SFilterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_sexpr e) ^ "|"
   | SArrsub(a, i) -> 
-  let rec string_of_list list= match list with
-      [] -> []
+    let rec string_of_list list = match list with
+     [] -> ""
+    | [f] -> string_of_sexpr f
     | f::tl -> string_of_sexpr f ^ string_of_list tl
   in string_of_sexpr a ^ "[" ^ string_of_list i ^ "]"
           ) ^ ")" 

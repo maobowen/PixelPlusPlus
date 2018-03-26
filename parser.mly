@@ -115,9 +115,9 @@ expr:
   | NOT expr         { Unop(Not, $2)          }
   | TRANS expr       { Unop(Trans, $2)          }
   | ID ASSIGN expr   { Assign($1, $3)         }
-  | expr arr_sub_opt ASSIGN expr { ArrAssign(Arrsub($1, $2), $4) }
+  | expr arr_sub_opt_list ASSIGN expr { ArrAssign(Arrsub($1, List.rev $2), $4) }
   | ID LPAREN args_opt RPAREN { Call($1, $3)  }
-  | expr arr_sub_opt_list { Arrsub($1, $2)  }
+  | expr arr_sub_opt_list { Arrsub($1, List.rev $2)  }
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
