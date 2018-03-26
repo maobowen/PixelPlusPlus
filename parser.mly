@@ -125,7 +125,7 @@ expr:
   | ID2                           {       Slit($1)                      }
 
 arr_sub_opt_list:
-    LBRACKET arr_sub_opt RBRACKET {[$1]}
+    LBRACKET arr_sub_opt RBRACKET {[$2]}
   | arr_sub_opt_list LBRACKET arr_sub_opt RBRACKET {$3::$1}
 
 arr_sub_opt:

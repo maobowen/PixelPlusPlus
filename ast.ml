@@ -83,6 +83,7 @@ let string_of_typ = function
   | Arr -> "arr"
   | String -> "string"
 
+
 let string_of_bind bind =
 string_of_typ (fst bind) ^ " " ^ (snd bind)
 
@@ -106,7 +107,11 @@ let rec string_of_expr = function
   | Slit(s)-> "\"" ^ s ^ "\""
   | Arrliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"
   | Filterliteral(e) -> "|" ^ String.concat "->" (List.map string_of_expr e) ^ "|"
-  | Arrsub(a, i) -> string_of_expr a ^ String.concat "[" ^ (List.map string_of_expr i) ^ "]"
+  | Arrsub(a, i) -> 
+    let rec string_of_list list= match list with
+    [f] -> string_of_expr f
+    | f::tl -> string_of_expr f ^ string_of_list tl
+  in string_of_expr a ^ "[" ^ (string_of_list i) ^ "]"
   (*| Mliteral(e) -> "[" ^ String.concat "," (List.map string_of_expr e)^ "]"*)
 
 let rec string_of_stmt = function
