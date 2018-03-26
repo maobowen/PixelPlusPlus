@@ -125,9 +125,13 @@ expr:
   | WRAP filter_list WRAP         {       Filterliteral(List.rev $2)    }
   | ID2                           {       Slit($1)                      }
 
+arr_sub_opt:
+    LITERAL {Literal($1)}
+  | ID {Id($1)}
+
 arr_sub_opt_list:
-    LBRACKET LITERAL RBRACKET { [Literal($2)] }
-  | arr_sub_opt_list LBRACKET LITERAL RBRACKET { Literal($3)::$1 }
+    LBRACKET arr_sub_opt RBRACKET { [($2)] }
+  | arr_sub_opt_list LBRACKET arr_sub_opt RBRACKET { ($3)::$1 }
 
 args_opt:
     /* nothing */ { [] }
