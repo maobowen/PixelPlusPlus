@@ -167,7 +167,7 @@ in
     with Not_found -> raise (Failure ("unrecognized function " ^ s))
   in
 
-  let _ = find_func "main" in (* Ensure "main" is defined *)
+  (* let _ = find_func "main" in Ensure "main" is defined *)
 
   let check_function func =
     (* Make sure no formals are void or duplicates *)
