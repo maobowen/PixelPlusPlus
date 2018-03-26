@@ -160,23 +160,47 @@ let translate (globals, functions) =
        in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
        in let global_arr = L.define_global "tmp" const_arr the_module 
        in global_arr
-      | SArrsub (e, l) -> let expr_builder = expr builder e in let l2 = expr builder l in
+      | SArrsub (e, sexpr_list) -> let expr_builder = expr builder e in
+        let w = let expr_builder2 = L.build_struct_gep expr_builder 2 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
+        let h = let expr_builder2 = L.build_struct_gep expr_builder 1 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
+        let wh = L.build_mul w h "tmp" builder in
+        let l2 = 
+          match sexpr_list with
+              [e1] -> expr builder e1
+            | [e1;e2] -> let e1' = expr builder e1 and e2' = expr builder e2 in (L.build_add (L.build_mul e1' w "tmp" builder) e2' "tmp" builder)
+            | [e1;e2;e3] -> let e1' = expr builder e1 and e2' = expr builder e2 and e3' = expr builder e3 in 
+              L.build_add (L.build_mul e1' wh "tmp" builder) (L.build_add (L.build_mul e2' w "tmp" builder) e3' "tmp" builder) "tmp" builder
+            | _ -> raise (Failure ("Not yet supported for this multi-dimensional array type"))
+
+        in
         let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
         let abxd = L.build_load arr_builder "tmp" builder in
         let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
         L.build_load abxd "tmp" builder
-      (*| SArrAssign (e1, e2) -> (
+      | SArrAssign (e1, e_rhs) -> (
+          let expr_rhs = expr builder e_rhs in
+          let expr_rhs = L.build_intcast expr_rhs i8_t "tmp" builder in
           let (_, sx) = e1 in match sx with 
-               SArrsub(e, l) ->
-                  let expr_builder = expr builder e in let l2 = expr builder l in
+               SArrsub(e, sexpr_list) -> 
+                  let expr_builder = expr builder e in
+                  let w = let expr_builder2 = L.build_struct_gep expr_builder 2 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
+                  let h = let expr_builder2 = L.build_struct_gep expr_builder 1 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
+                  let wh = L.build_mul w h "tmp" builder in 
+                  let l2 = 
+                    match sexpr_list with
+                        [e1] -> expr builder e1
+                      | [e1;e2] -> let e1' = expr builder e1 and e2' = expr builder e2 in (L.build_add (L.build_mul e1' w "tmp" builder) e2' "tmp" builder)
+                      | [e1;e2;e3] -> let e1' = expr builder e1 and e2' = expr builder e2 and e3' = expr builder e3 in
+                        L.build_add (L.build_mul e1' wh "tmp" builder) (L.build_add (L.build_mul e2' w "tmp" builder) e3' "tmp" builder) "tmp" builder
+                      | _ -> raise (Failure ("Not yet supported for this multi-dimensional array type"))
+                  in
                   let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
-                  let abxd = L.build_load arr_builder "tmp" builder in 
+                  let abxd = L.build_load arr_builder "tmp" builder in
                   let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
-                  let expr_builder2 = expr builder e2 in
-                  let expr_builder2 = L.build_intcast expr_builder2 i8_t "tmp" builder in
-                  let _ = L.build_store expr_builder2 abxd builder in expr_builder2
+                  let _ = L.build_store expr_rhs abxd builder
+                  in expr_rhs
              | _ -> raise (Failure ("LHS should be an array subscript!"))
-           )*)
+           )
       | SBinop (e1, op, e2) ->
     let (t, _) = e1
     and e1' = expr builder e1
