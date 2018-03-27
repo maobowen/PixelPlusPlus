@@ -4,7 +4,8 @@ all : toplevel.native
 .PHONY : toplevel.native
 toplevel.native :
 	rm -f *.o
-	ocamlbuild toplevel.native
+	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
+		toplevel.native
 
 .PHONY : clean
 clean :

@@ -5,6 +5,7 @@
 let digit = ['0' - '9']
 let digits = digit+
 let ary = ['['] digits ([','] digits)* [']']
+(*let str = *)
 
 rule token = parse
   [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
@@ -25,15 +26,18 @@ rule token = parse
 | '/'      { DIVIDE }
 | '='      { ASSIGN }
 | '@'	   { AT }
+| '<'      { LT }
+| '>'      { GT }
+| '^'      { EXPO }
+| ":*"     { MTIMES }
+| "**"     { TRANS }
 | "=="     { EQ }
 | "!="     { NEQ }
-| '<'      { LT }
 | "<="     { LEQ }
-| ">"      { GT }
 | ">="     { GEQ }
-| "&&"     { AND }
-| "||"     { OR }
-| "!"      { NOT }
+| "and"    { AND }
+| "or"     { OR }
+| "not"    { NOT }
 | "->"	   { FIL }
 | "if"     { IF }
 | "else"   { ELSE }
@@ -41,7 +45,7 @@ rule token = parse
 | "while"  { WHILE }
 | "return" { RETURN }
 | "int"    { INT }
-| "String" { STRING}
+| "string" { STRING }
 | "arr"    { ARR }
 | "bool"   { BOOL }
 | "float"  { FLOAT }
@@ -52,8 +56,9 @@ rule token = parse
 | digits as lxm { LITERAL(int_of_string lxm) }
 | digits '.'  digit* ( ['e' 'E'] ['+' '-']? digits )? as lxm { FLIT(lxm) }
 | "blur" as lxm { FILTER(lxm) }
-| "cobol" as lxm { FILTER(lxm) }
+| "hdr" as lxm { FILTER(lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']*     as lxm { ID(lxm) }
+| ['"']([^'"' '\\' '\n'] | '\\'[^'\n'])*['"'] as lxm { ID2(String.sub lxm 1 (String.length lxm - 2)) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

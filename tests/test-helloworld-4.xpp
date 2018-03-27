@@ -1,0 +1,25 @@
+func int main()
+{
+    arr a = [1, 4, 2, 8, 5, 7];
+    int len = 6;
+    int i;
+    int j;
+    int tmp;
+    for (i = 0; i < len - 1; i = i + 1)
+    {
+        for (j = i + 1; j < len; j = j + 1)
+        {
+            if (a[i] > a[j])
+            {
+                tmp = a[i];
+                a[i] = a[j];
+                a[j] = tmp;
+            }
+        }
+    }
+    for (i = 0; i < len; i = i + 1)
+    {
+        print(a[i]);
+    }
+    return 0;
+}

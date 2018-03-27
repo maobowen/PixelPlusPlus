@@ -1,0 +1,24 @@
+func int gcd(int a, int b)
+{
+    while (a != b)
+    {
+        if (a > b)
+            a = a - b;
+        else
+            b = b - a;
+    }
+    return a;
+}
+
+func int main()
+{
+    int i;
+    int c = 3;
+    int max = 20;
+    for (i = 1; i < max; i = i + 1)
+    {
+        if (gcd(i, c) == 1)
+            print(i);
+    }
+    return 0;
+}
