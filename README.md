@@ -18,17 +18,16 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 
 Our compiler is tested on Ubuntu 17.10 with OCaml 4.04 and LLVM 6.0. To set up the environment, please run the following commands:
 
-	
-
 ```bash
 #!/bin/bash 
 
 # Add LLVM repositories
 LLVM_VERSION=6.0
 OCAML_LLVM_VERSION=6.0.0
+UBUNTU_CODENAME=`lsb_release --codename | cut -f2`
 wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-echo "deb http://apt.llvm.org/artful/ llvm-toolchain-`lsb_release --codename | cut -f2`-${LLVM_VERSION} main" | sudo tee /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
-echo "deb-src http://apt.llvm.org/artful/ llvm-toolchain-`lsb_release --codename | cut -f2`-${LLVM_VERSION} main" | sudo tee -a /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+echo "deb-src http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee -a /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
 sudo apt update
 
 # Install OCaml and LLVM
@@ -41,8 +40,11 @@ tee -a ~/.bashrc << EOF
 export PATH="/usr/lib/llvm-${LLVM_VERSION}/bin:\$PATH"
 eval \`opam config env\`
 EOF
-source ~/.bashrc
 ```
+
+You may also run the following command to take changes into effect:
+
+	source ~/.bashrc
 
 ### Makefile
 
