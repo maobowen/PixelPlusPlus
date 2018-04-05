@@ -54,6 +54,11 @@ let translate (globals, functions) =
           | A.String -> L.const_pointer_null ip_t
           | _     -> L.const_int (ltype_of_typ t) 0
   in
+  let i32_zero = init A.Int in
+
+  let get_optional opt = match opt with
+    Some x -> x
+  | _ -> raise (Failure ("Failed to get optional")) in 
 
   let global_vars = 
     let global_var m (t, n) = StringMap.add n (L.define_global n (init t) the_module) m in
@@ -87,7 +92,7 @@ let translate (globals, functions) =
   let mtimes_func = L.declare_function "mtimes" mtimes_t the_module in 
 
   let scifi_t = L.function_type i32_t [| structp_t |] in
-  let scifi_func = L.declare_function "scifi" scifi_t the_module in 
+  let scifi_func = L.declare_function "scifi_filter" scifi_t the_module in
 
   let to_imp str = raise (Failure ("Not yet implemented: " ^ str)) in
 
@@ -144,11 +149,11 @@ let translate (globals, functions) =
       | SNoexpr -> L.const_int i32_t 0
       | SNoassign -> init tp
       | SFilter s -> L.const_string context s 
-      | SFilterliteral e_list -> let f1 (_, filter_val) =  
+      | SFilterliteral e_list -> let len = List.length e_list in let f1 (_, filter_val) =  
             (match filter_val with 
               SFilter (s) -> L.const_string context s 
             | _ -> raise (Failure ("The list should contain only filters!")))
-        in L.const_struct context (Array.of_list (List.map f1 e_list))
+        in L.const_vector (Array.of_list ((L.const_int i32_t len)::(List.map f1 e_list)))
       | SId s -> L.build_load (lookup s) s builder
       | SArrliteral s -> 
       let to_array x = let y = snd x in match y with
@@ -238,6 +243,9 @@ let translate (globals, functions) =
     )
   else (match op with
       A.Mtimes -> L.build_call mtimes_func [|e1';e2'|] "mtimes" builder
+    | A.At ->  let get_vec idx = L.const_extractelement e1' (L.const_int i32_t idx) in let len_lvalue = get_vec 0 in let len = get_optional (L.int64_of_const len_lvalue)
+        in let len = Int64.to_int len in let get_string idx = get_optional (L.string_of_const (get_vec idx)) 
+        in expr builder (A.Void, SCall((get_string 1) ^ "_filter", [e2]))
     | _ -> raise (Failure "not implemented yet")
     )
       | SUnop(op, e) ->
@@ -272,10 +280,17 @@ let translate (globals, functions) =
       | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 in let e3' = expr builder e3 in let e4' = expr builder e4
         in let mptr = L.build_array_malloc i8_t e2' "tmp" builder 
         in let empty_ptr = L.const_pointer_null ip_t
-        in let init_struct = L.const_struct context [|e2'; e3'; e4'; empty_ptr|]
+
+        in let init_struct = L.const_struct context [|i32_zero; i32_zero; i32_zero; empty_ptr|]
         in let e1' = L.define_global "init_arr" init_struct the_module
-        in let e5'' = L.build_struct_gep e1' 3 "tmp" builder
-        in let _ = L.build_store mptr e5'' builder in e1'
+        in let e5'' = L.build_struct_gep e1' 0 "tmp" builder
+        in let _ = L.build_store e2' e5'' builder
+        in let e6'' = L.build_struct_gep e1' 1 "tmp" builder
+        in let _ = L.build_store e3' e6'' builder
+        in let e7'' = L.build_struct_gep e1' 2 "tmp" builder
+        in let _ = L.build_store e4' e7'' builder
+        in let e8'' = L.build_struct_gep e1' 3 "tmp" builder
+        in let _ = L.build_store mptr e8'' builder in e1'
       | SCall ("imgcpy", [e1;e2]) -> let e1' = expr builder e1 in let e2' = expr builder e2 in
         let e1_l = L.build_struct_gep e1' 0 "tmp" builder in
         let e1_h = L.build_struct_gep e1' 1 "tmp" builder in
@@ -293,8 +308,8 @@ let translate (globals, functions) =
       | SCall ("printline", [e]) -> 
     L.build_call printf_func [| string_format_str ; (expr builder e) |]
       "printf" builder
-      | SCall ("scifi", [e]) ->
-    L.build_call scifi_func [| (expr builder e) |] "scifi" builder
+      | SCall ("scifi_filter", [e]) ->
+    L.build_call scifi_func [| (expr builder e) |] "scifi_filter" builder
       | SCall("load", [e]) ->
     L.build_call loadimg_func [| (expr builder e) |] "load" builder
       | SCall("close", [e]) ->
