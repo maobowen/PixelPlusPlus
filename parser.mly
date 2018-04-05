@@ -126,8 +126,7 @@ expr:
   | ID2                           {       Slit($1)                      }
 
 arr_sub_opt:
-    LITERAL {Literal($1)}
-  | ID {Id($1)}
+    expr          { $1 }
 
 arr_sub_opt_list:
     LBRACKET arr_sub_opt RBRACKET { [($2)] }

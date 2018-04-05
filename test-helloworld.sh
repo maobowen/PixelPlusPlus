@@ -13,7 +13,7 @@ Check() {
     echo "Testing ${basename}..."
 
     $TOPLEVEL -l $1 > ${reffile}.ll
-    clang -Wall ${reffile}.ll -o ${reffile}
+    /usr/local/Cellar/llvm/6.0.0/bin/clang -Wall ${reffile}.ll -o ${reffile}
     ./${reffile} > ${basename}.out 
 
     if diff -bB ${basename}.out ${reffile}.out > ${basename}.diff
