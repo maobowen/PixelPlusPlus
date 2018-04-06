@@ -198,36 +198,50 @@ in
     
   let locals = find_locals func.body [] in
   let locals' = check_binds "local" locals in
-    let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
-                  StringMap.empty (glob @ formals' @locals')
-    in
+    let symbol = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
+                  StringMap.empty (glob @ formals') in
+    let symbols = [symbol] in
+
     (* Return a variable from our local symbol table *)
-    let type_of_identifier s =
-      try StringMap.find s symbols
+    (* let type_of_identifier s =
+      try StringMap.find s List.hd symbols
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
+    in *)
+    let type_of_identifier s symbols =
+      (* try StringMap.find s (List.hd symbols) with Not_found -> raise (Failure ("undeclared identifier " ^ s)) *)
+      let rec f list = match list with 
+       [] -> raise (Failure ("undeclared identifier " ^ s))
+      | fst :: tail -> try StringMap.find s fst with Not_found -> f tail 
+    in f symbols 
     in
 
 
     (* Return a semantically-checked expression, i.e., with a type *)
-    let rec expr = function
+    let rec expr e symbols = match e with
         Literal l    -> (Int, SLiteral l)
       | Fliteral l   -> (Float, SFliteral l)
       | BoolLit l    -> (Bool, SBoolLit l)
       | Noexpr       -> (Void, SNoexpr)
       | Noassign     -> (Void, SNoassign)
       | Slit s       -> (String, SSlit s)
-      | Id s         -> (type_of_identifier s, SId s)
+      | Id s         -> (type_of_identifier s symbols, SId s)
       | Arrliteral a -> 
-          let sa = List.map expr a in (Arr, SArrliteral sa)
+        let rec to_list b symbols = match b with 
+          | [] -> []
+          | fst :: tail -> (expr fst symbols) :: to_list tail symbols
+        in let sa = to_list a symbols
+        in (Arr, SArrliteral sa)
+          (* let f b = expr b symbols in
+          let sa = List.map f a in (Arr, SArrliteral sa) *)
       | Arrsub(e, fl) -> 
-          let (t1, e') = expr e in
+          let (t1, e') = expr e symbols in
 
           if t1 != Arr then raise (Failure ("illegal subscript operation")) else
 
           let rec check_sublist fl = match fl with
             [] -> raise (Failure ("illegal empty filter"))
-          | [f] -> let (t, f') = expr f in if t = Int then [(t, f')] else raise (Failure ("illegal subscript argument"))
-          | f :: n -> let (t, f') = expr f in if t = Int then (t, f') :: check_sublist n else raise (Failure ("illegal subscript argument"))
+          | [f] -> let (t, f') = expr f symbols in if t = Int then [(t, f')] else raise (Failure ("illegal subscript argument"))
+          | f :: n -> let (t, f') = expr f symbols in if t = Int then (t, f') :: check_sublist n else raise (Failure ("illegal subscript argument"))
           in (Int, SArrsub((t1, e'), check_sublist fl))
           (* and (t2, e2') = expr e2 in
           let ty = match t1 with
@@ -239,14 +253,14 @@ in
                        ", which expects an Int.")) *)
         (* in (ty, SArrsub((t1, e1'), (t2, e2'))) *)
       | Assign(var, e) as ex -> 
-          let lt = type_of_identifier var
-          and (rt, e') = expr e in
+          let lt = type_of_identifier var symbols
+          and (rt, e') = expr e symbols in
           let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^ 
             string_of_typ rt ^ " in " ^ string_of_expr ex
           in (check_assign lt rt err, SAssign(var, (rt, e')))
       | ArrAssign(e1, e2) ->
-          let (t1, e1') = expr e1 
-          and (t2, e2') = expr e2 in
+          let (t1, e1') = expr e1 symbols
+          and (t2, e2') = expr e2 symbols in
           (* All binary operators require operands of the same type *)
           let same = t1 = t2 in
           (* Determine expression type based on operator and operand types *)
@@ -255,7 +269,7 @@ in
           | _ -> raise (Failure ("illegal array subscript assignment."))
         in (ty, SArrAssign((t1, e1'), (t2, e2')))
       | Unop(op, e) as ex -> 
-          let (t, e') = expr e in
+          let (t, e') = expr e symbols in
           let ty = match op with
             Neg when t = Int || t = Float -> t
           | Not when t = Bool -> Bool
@@ -264,8 +278,8 @@ in
                                  " in " ^ string_of_expr ex))
           in (ty, SUnop(op, (t, e')))
       | Binop(e1, op, e2) as e -> 
-          let (t1, e1') = expr e1 
-          and (t2, e2') = expr e2 in
+          let (t1, e1') = expr e1 symbols
+          and (t2, e2') = expr e2 symbols in
           (* All binary operators require operands of the same type *)
           let same = t1 = t2 in
           (* Determine expression type based on operator and operand types *)
@@ -289,7 +303,7 @@ in
             raise (Failure ("expecting " ^ string_of_int param_length ^ 
                             " arguments in " ^ string_of_expr call))
           else let check_call (ft, _) e = 
-            let (et, e') = expr e in 
+            let (et, e') = expr e symbols in 
             let err = "illegal argument found " ^ string_of_typ et ^
               " expected " ^ string_of_typ ft ^ " in " ^ string_of_expr e
             in (check_assign ft et err, e')
@@ -305,25 +319,25 @@ in
       | Filterliteral fl -> 
         let rec check_filter fl = match fl with
             [] -> raise (Failure ("illegal empty filter"))
-          | [f] -> let (t, f') = expr f in if (f' = SFilter "blur" || f' = SFilter "hdr") then [(t, f')] else raise (Failure ("illegal filter keywords"))
-          | f :: n -> let (t, f') = expr f in if (f' = SFilter "blur" || f' = SFilter "hdr") then (t, f') :: check_filter n else raise (Failure ("illegal filter keywords"))
+          | [f] -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr") then [(t, f')] else raise (Failure ("illegal filter keywords"))
+          | f :: n -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr") then (t, f') :: check_filter n else raise (Failure ("illegal filter keywords"))
           in (String, SFilterliteral(check_filter fl))
     in
 
     let check_bool_expr e = 
-      let (t', e') = expr e
+      let (t', e') = expr e symbols
       and err = "expected Boolean expression in " ^ string_of_expr e
       in if t' != Bool then raise (Failure err) else (t', e') 
     in
 
     (* Return a semantically-checked statement i.e. containing sexprs *)
-    let rec check_stmt = function
-        Expr e -> SExpr (expr e)
-      | If(p, b1, b2) -> SIf(check_bool_expr p, check_stmt b1, check_stmt b2)
+    let rec check_stmt e symbols = match e with
+        Expr e -> SExpr (expr e symbols)
+      | If(p, b1, b2) -> SIf(check_bool_expr p, check_stmt b1 symbols, check_stmt b2 symbols)
       | For(e1, e2, e3, st) ->
-        SFor(expr e1, check_bool_expr e2, expr e3, check_stmt st)
-      | While(p, s) -> SWhile(check_bool_expr p, check_stmt s)
-      | Return e -> let (t, e') = expr e in
+        SFor(expr e1 symbols, check_bool_expr e2, expr e3 symbols, check_stmt st symbols)
+      | While(p, s) -> SWhile(check_bool_expr p, check_stmt s symbols)
+      | Return e -> let (t, e') = expr e symbols in
         if t = func.typ then SReturn (t, e') 
         else raise (
         Failure ("return gives " ^ string_of_typ t ^ " expected " ^
@@ -332,20 +346,22 @@ in
       (* A block is correct if each statement is correct and nothing
          follows any Return statement.  Nested blocks are flattened. *)
       | Block sl -> 
-          let rec check_stmt_list = function
-              [Return _ as s] -> [check_stmt s]
+          let rec check_stmt_list e symbols = match e with
+              [Return _ as s] -> [check_stmt s symbols]
             | Return _ :: _   -> raise (Failure "nothing may follow a return")
-            | Block sl :: ss  -> check_stmt_list (sl @ ss) (* Flatten blocks *)
-            | s :: ss         -> check_stmt s :: check_stmt_list ss
+            | Block sl :: ss  -> let symbols_up = StringMap.empty :: symbols in check_stmt_list (sl @ ss) symbols_up (* Flatten blocks *)
+            | s :: ss         -> check_stmt s symbols :: check_stmt_list ss symbols
             | []              -> []
-          in SBlock(check_stmt_list sl)
-      | Var (b,e) -> SVar ((type_of_identifier (snd b), snd b), expr e)
+          in let symbols_up = StringMap.empty :: symbols in SBlock(check_stmt_list sl symbols_up)
+      | Var (b, e) -> let entry = StringMap.add (snd b) (fst b) (List.hd symbols) in let symbols_up = [entry] in
+                    SVar ((type_of_identifier (snd b) symbols_up, snd b), expr e symbols_up)
+
     in (* body of check_function *)
     { styp = func.typ;
       sfname = func.fname;
       sformals = formals';
       slocals  = locals';
-      sbody = match check_stmt (Block func.body) with
+      sbody = match check_stmt (Block func.body) symbols with
     SBlock(sl) -> sl
       | _ -> let err = "internal error: block didn't become a block?"
       in raise (Failure err)
