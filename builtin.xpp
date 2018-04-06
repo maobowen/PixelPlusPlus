@@ -1,0 +1,229 @@
+/* Implement some scalar operations */
+
+
+
+func int exp(int num, int pow) {
+  int j;
+  int res;
+  res = 1;
+  for (j = 0; j < pow; j = j + 1) {
+    res = res * num;
+  }
+  return res;
+}
+
+func float exp2(float num, int pow) {
+  int j;
+  float res;
+  res = 1.0;
+  for (j = 0; j < pow; j = j + 1) {
+    res = res * num;
+  }
+  return res;
+}
+
+/* Implement matrix operations */
+
+func arr transpose(arr img) {
+  arr img2;
+  int len;
+  int i;
+  int j;
+  int h;
+  int w;
+  int o1;
+  int o2;
+  int o11;
+  int o21;
+  int o12;
+  int o22;
+  len = 1;
+  h = 2;
+  w = 3;
+  img2 = init(len, w, h);
+  for (i = 0; i < h; i = i + 1) {
+    for (j = 0; j < w; j = j + 1) {
+      o1 = (i * w + j) * 3;
+      o2 = (j * h + i) * 3;
+      img2[o2] = img[o1];
+      o21 = o2 + 1;
+      o11 = o1 + 1;
+      o22 = o2 + 2;
+      o12 = o1 + 2;
+      img2[o21] = img[o11];
+      img2[o22] = img[o12];
+    }
+  }
+  imgcpy(img, img2);
+  return img;
+}
+
+func arr mtimes(arr img1, arr img2) {
+  int i;
+  int l1;
+  int l2;
+  int h;
+  int w;
+  arr img3;
+  l1 = length(img1);
+  l2 = length(img2);
+  h = height(img1);
+  w = width(img1);
+  if (h != height(img2) or w != width(img2)) {
+    printline("error! arr shape not equal!");
+    return img1;
+  }
+  img3 = init(l1, h, w);
+  for (i = 0; i < l1; i = i + 1) {
+    img3[i] = img1[i] * img2[i];
+  }
+  return img3;
+}
+
+func void rotate(arr img, int angle) {
+  /* Only support rotate left(angle = -90), rotate right(angle = 90) and rotate 180 (angle = 180) */
+  int len;
+  int i;
+  int j;
+  int h;
+  int w;
+  int o1;
+  int o2;
+  int o11;
+  int o12;
+  int o21;
+  int o22;
+  arr img2;
+  len = length(img);
+  h = height(img);
+  w = width(img);
+  if (angle == 180) {
+    img2 = init(len, h, w);
+    for (i = 0; (i * 3 + 2) < len; i = i + 1) {
+      o1 = i * 3;
+      o2 = len - (i + 1) * 3;
+      o11 = o1 + 1;
+      o21 = o2 + 1;
+      o12 = o1 + 2;
+      o22 = o2 + 2;
+      img2[o1] = img[o2];
+      img2[o11] = img[o21];
+      img2[o12] = img[o22];
+    }
+  } else if (angle == 90) {
+    img2 = init(len, w, h);
+    for (i = 0; i < h; i = i + 1) {
+      for (j = 0; j < w; j = j + 1) {
+        o1 = (i * w + j) * 3;
+        o2 = (j * h + (h - i)) * 3;
+        o11 = o1 + 1;
+        o21 = o2 + 1;
+        o12 = o1 + 2;
+        o22 = o2 + 2;
+        img2[o2] = img[o1];
+        img2[o21] = img[o11];
+        img2[o22] = img[o12];
+      }
+    }
+  } else if (angle == -90) {
+    img2 = init(len, w, h);
+    for (i = 0; i < h; i = i + 1) {
+      for (j = 0; j < w; j = j + 1) {
+        o1 = (i * w + j) * 3;
+        o2 = ((w - j) * h + i) * 3;
+        o11 = o1 + 1;
+        o21 = o2 + 1;
+        o12 = o1 + 2;
+        o22 = o2 + 2;
+        img2[o2] = img[o1];
+        img2[o21] = img[o11];
+        img2[o22] = img[o12];
+      }
+    }
+  }
+  imgcpy(img, img2);
+}
+
+/* Built-in filteres */
+
+func void scifi_filter(arr img) {
+  int len;
+  int i;
+  arr img2;
+  int o;
+  len = length(img);
+  img2 = init(len, height(img), width(img));
+  for (i = 0; i < len; i = i + 1) {
+    o = len - 1 - i;
+    img2[i] = img[o];
+  }
+  imgcpy(img, img2);
+}
+
+func void blur_filter(arr img) {
+  /* Gaussian Blur with sigma = 1 and kernel size = 5 * 5 */
+  int len;
+  int i;
+  int j;
+  arr img2;
+  int o;
+  int r;
+  int g;
+  int b;
+  int height;
+  int width;
+  arr kernel;
+  arr x_axis;
+  arr y_axis;
+  int coef1;
+  int coef2;
+  int kernel_r;
+  int kernel_g;
+  int kernel_b;
+  int r_tmp;
+  int g_tmp;
+  int b_tmp;
+  int m;
+  int n;
+  arr coef = [1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1];
+  x_axis = [-2, -1, 0, 1, 2];
+  y_axis = [-2, -1, 0, 1, 2];
+  len = length(img);
+  height = height(img);
+  width = width(img);
+  img2 = init(len, height, width(img));
+  for (i = 0; i < height; i = i + 1) {
+    print(i);
+    print(height);
+    for (j = 0; j < width; j = j + 1) {
+      r = (width * i + j) * 3;
+      g = r + 1;
+      b = r + 2;
+
+      if (i - 2 >= 0 and i + 2 < height and j - 2 >= 0 and j + 2 < width) {
+        kernel_r = 0;
+        kernel_g = 0;
+        kernel_b = 0;
+        for (m = 0; m < 5; m = m + 1) {
+          for (n = 0; n < 5; n = n + 1) {
+            r_tmp = (width * (i + m - 2) + n - 2 + j) * 3;
+            g_tmp = r_tmp + 1;
+            b_tmp = r_tmp + 2;
+
+            kernel_r = kernel_r + coef[m * 5 + n] * img[r_tmp];
+            kernel_g = kernel_g + coef[m * 5 + n] * img[g_tmp];
+            kernel_b = kernel_b + coef[m * 5 + n] * img[b_tmp];
+          }
+        }
+        img2[r] = kernel_r / 273;
+        img2[g] = kernel_g / 273;
+        img2[b] = kernel_b / 273;
+      } else {
+        img2[r] = img[r];
+        img2[g] = img[g];
+        img2[b] = img[b];
+      }
+    }
+  }
+  imgcpy(img, img2);
+}
