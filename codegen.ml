@@ -156,9 +156,8 @@ let translate (globals, functions) =
         in L.const_vector (Array.of_list ((L.const_int i32_t len)::(List.map f1 e_list)))
       | SId s -> L.build_load (lookup s) s builder
       | SArrliteral s -> 
-      let to_array x = let y = snd x in match y with
-                          SLiteral i2 -> L.const_int i8_t i2
-                        | _           -> raise (Failure ("Not yet supported for this array type"))
+      let to_array x = L.build_intcast (expr builder x) i8_t "arr_init_elem" builder
+                        (*| _           -> raise (Failure ("Not yet supported for this array type"))*)
        in let img_array = L.const_array i8_t (Array.of_list (List.map to_array s))
        in let ipt = L.define_global "tmp" img_array the_module
        in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
@@ -181,7 +180,8 @@ let translate (globals, functions) =
         let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
         let abxd = L.build_load arr_builder "tmp" builder in
         let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
-        L.build_load abxd "tmp" builder
+        let abxd = L.build_load abxd "tmp" builder in
+        let abxd_i32 = L.build_zext_or_bitcast abxd i32_t "tmp" builder in abxd_i32
       | SArrAssign (e1, e_rhs) -> (
           let expr_rhs = expr builder e_rhs in
           let expr_rhs = L.build_intcast expr_rhs i8_t "tmp" builder in
@@ -245,7 +245,7 @@ let translate (globals, functions) =
       A.Mtimes -> L.build_call mtimes_func [|e1';e2'|] "mtimes" builder
     | A.At ->  let get_vec idx = L.const_extractelement e1' (L.const_int i32_t idx) in let len_lvalue = get_vec 0 in let len = get_optional (L.int64_of_const len_lvalue)
         in let len = Int64.to_int len in let get_string idx = get_optional (L.string_of_const (get_vec idx)) 
-        in expr builder (A.Void, SCall((get_string 1) ^ "_filter", [e2]))
+        in let fhelper idx = expr builder (A.Void, SCall((get_string idx) ^ "_filter", [e2])) in let rec apply_filter q = (if q = 1 then fhelper q else (let _ = apply_filter (q - 1) in fhelper q)) in apply_filter len
     | _ -> raise (Failure "not implemented yet")
     )
       | SUnop(op, e) ->
