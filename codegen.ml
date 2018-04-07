@@ -116,9 +116,9 @@ let translate (globals, functions) =
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and float_format_str = L.build_global_stringptr "%g\n" "fmt" builder
     and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
-    let add_local m (t, n) = 
-      let local_var = L.build_alloca (ltype_of_typ t) n builder
-      in StringMap.add n local_var m
+    let add_local (m, tmp_builder) (t, n) = 
+      let local_var = L.build_alloca (ltype_of_typ t) n tmp_builder
+      in (StringMap.add n local_var m, tmp_builder)
           in
     let local_vars =
       let add_formal m (t, n) p =
@@ -131,10 +131,10 @@ let translate (globals, functions) =
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.sformals
           (Array.to_list (L.params the_function)) in
-      List.fold_left add_local formals fdecl.slocals
+      List.fold_left add_local (formals, builder) fdecl.slocals
     in
 
-    let scoped_vars = [local_vars; global_vars] in
+    let scoped_vars = [fst local_vars; global_vars] in
 
     let rec lookup n var_list = match var_list with 
                            hd::tl -> (try StringMap.find n hd with Not_found -> lookup n tl)
@@ -330,7 +330,6 @@ let translate (globals, functions) =
     in
     (* Deal with a block of expression statements, terminated by a return *)
     let add_terminal builder f =
-
       match L.block_terminator (L.insertion_block builder) with
   Some _ -> ()
       | None -> ignore (f builder) in
@@ -338,11 +337,13 @@ let translate (globals, functions) =
     let rec stmt (builder,symbol_table) = function
   SBlock sl -> List.fold_left stmt (builder, symbol_table) sl
       | SExpr e -> let _ = expr builder e symbol_table in (builder, symbol_table) 
-      | SVar (e1, e2) -> let (tp, s) = e1 in let symbol_table2 = add_local (List.hd symbol_table) (tp, s) in let symbol_table3 = (symbol_table2::(List.tl symbol_table)) in let _ = expr builder (tp, SId(s)) symbol_table3 in
-                    let _ = match e2 with
-                        (tp, SNoassign) -> init tp
-                      | _ -> expr builder (tp, SAssign(s, e2)) symbol_table3
-          in (builder, symbol_table3)
+      | SVar (e1, e2) -> let (tp, s) = e1 in let (symbol_table2, _) = add_local (List.hd symbol_table, builder) (tp, s) in
+                                              let symbol_table3 = (symbol_table2 :: (List.tl symbol_table)) in
+                                                (*let _ = expr builder (tp, SId(s)) symbol_table3 in *)
+                                          let _ = match e2 with
+                                              (Void, SNoassign) -> init tp
+                                            | _ -> expr builder (tp, SAssign(s, e2)) symbol_table3
+           in (builder, symbol_table3)
       | SReturn e -> let _ = match fdecl.styp with
                               A.Int -> L.build_ret (expr builder e symbol_table) builder 
                             | A.Arr -> L.build_ret (expr builder e symbol_table) builder
@@ -354,7 +355,7 @@ let translate (globals, functions) =
    let merge_bb = L.append_block context "merge" the_function in
          let branch_instr = L.build_br merge_bb in
    let then_bb = L.append_block context "then" the_function in
-         let then_builder = fst (stmt ((L.builder_at_end context then_bb), symbol_table) then_stmt)in 
+         let then_builder = fst (stmt ((L.builder_at_end context then_bb), symbol_table) then_stmt) in 
    let () = add_terminal then_builder branch_instr in
 
    let else_bb = L.append_block context "else" the_function in

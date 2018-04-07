@@ -324,7 +324,7 @@ in
           in (String, SFilterliteral(check_filter fl))
     in
 
-    let check_bool_expr e = 
+    let check_bool_expr e symbols = 
       let (t', e') = expr e symbols
       and err = "expected Boolean expression in " ^ string_of_expr e
       in if t' != Bool then raise (Failure err) else (t', e') 
@@ -333,10 +333,10 @@ in
     (* Return a semantically-checked statement i.e. containing sexprs *)
     let rec check_stmt e symbols = match e with
         Expr e -> (SExpr (expr e symbols), symbols)
-      | If(p, b1, b2) -> (SIf(check_bool_expr p, fst(check_stmt b1 symbols), fst(check_stmt b2 symbols)), symbols)
+      | If(p, b1, b2) -> (SIf(check_bool_expr p symbols, fst(check_stmt b1 symbols), fst(check_stmt b2 symbols)), symbols)
       | For(e1, e2, e3, st) ->
-        (SFor(expr e1 symbols, check_bool_expr e2, expr e3 symbols, fst(check_stmt st symbols)), symbols)
-      | While(p, s) -> (SWhile(check_bool_expr p, fst(check_stmt s symbols)), symbols)
+        (SFor(expr e1 symbols, check_bool_expr e2 symbols, expr e3 symbols, fst(check_stmt st symbols)), symbols)
+      | While(p, s) -> (SWhile(check_bool_expr p symbols, fst(check_stmt s symbols)), symbols)
       | Return e -> let (t, e') = expr e symbols in
         if t = func.typ then (SReturn (t, e'), symbols)
         else raise (
