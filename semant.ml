@@ -207,7 +207,7 @@ in
       try StringMap.find s List.hd symbols
       with Not_found -> raise (Failure ("undeclared identifier " ^ s))
     in *)
-    let type_of_identifier s symbols =
+    let type_of_identifier s symbols =  
       (* try StringMap.find s (List.hd symbols) with Not_found -> raise (Failure ("undeclared identifier " ^ s)) *)
       let rec f list = match list with 
        [] -> raise (Failure ("undeclared identifier " ^ s))
@@ -332,36 +332,41 @@ in
 
     (* Return a semantically-checked statement i.e. containing sexprs *)
     let rec check_stmt e symbols = match e with
-        Expr e -> SExpr (expr e symbols)
-      | If(p, b1, b2) -> SIf(check_bool_expr p, check_stmt b1 symbols, check_stmt b2 symbols)
+        Expr e -> (SExpr (expr e symbols), symbols)
+      | If(p, b1, b2) -> (SIf(check_bool_expr p, fst(check_stmt b1 symbols), fst(check_stmt b2 symbols)), symbols)
       | For(e1, e2, e3, st) ->
-        SFor(expr e1 symbols, check_bool_expr e2, expr e3 symbols, check_stmt st symbols)
-      | While(p, s) -> SWhile(check_bool_expr p, check_stmt s symbols)
+        (SFor(expr e1 symbols, check_bool_expr e2, expr e3 symbols, fst(check_stmt st symbols)), symbols)
+      | While(p, s) -> (SWhile(check_bool_expr p, fst(check_stmt s symbols)), symbols)
       | Return e -> let (t, e') = expr e symbols in
-        if t = func.typ then SReturn (t, e') 
+        if t = func.typ then (SReturn (t, e'), symbols)
         else raise (
         Failure ("return gives " ^ string_of_typ t ^ " expected " ^
        string_of_typ func.typ ^ " in " ^ string_of_expr e))
       
       (* A block is correct if each statement is correct and nothing
          follows any Return statement.  Nested blocks are flattened. *)
-      | Block sl -> 
-          let rec check_stmt_list e symbols = match e with
+      | Block sl ->
+           let rec check_stmt_list e symbols = match e with
               [Return _ as s] -> [check_stmt s symbols]
             | Return _ :: _   -> raise (Failure "nothing may follow a return")
-            | Block sl :: ss  -> let symbols_up = StringMap.empty :: symbols in check_stmt_list (sl @ ss) symbols_up (* Flatten blocks *)
-            | s :: ss         -> check_stmt s symbols :: check_stmt_list ss symbols
+            | Block sl :: ss  -> check_stmt_list (sl @ ss) symbols (* Flatten blocks *)
+            | s :: ss         -> let (a,b) = check_stmt s symbols in (a,b) :: (check_stmt_list ss b)
             | []              -> []
-          in let symbols_up = StringMap.empty :: symbols in SBlock(check_stmt_list sl symbols_up)
-      | Var (b, e) -> let entry = StringMap.add (snd b) (fst b) (List.hd symbols) in let symbols_up = [entry] in
-                    SVar ((type_of_identifier (snd b) symbols_up, snd b), expr e symbols_up)
+          in let symbols_up = StringMap.empty :: symbols in (SBlock(List.map fst (check_stmt_list sl symbols_up)), symbols)
+      | Var (b, e) -> let entry = StringMap.add (snd b) (fst b) (List.hd symbols) in let symbols_up = 
+            match symbols with
+              [_] -> [entry]
+            | _ :: tl -> entry :: tl
+            | _ -> raise (Failure ("wrong symbol table")) in
+                    let k = (SVar ((type_of_identifier (snd b) symbols_up, snd b), expr e symbols_up), symbols_up)
+                      in k
 
     in (* body of check_function *)
     { styp = func.typ;
       sfname = func.fname;
       sformals = formals';
       slocals  = locals';
-      sbody = match check_stmt (Block func.body) symbols with
+      sbody = match fst (check_stmt (Block func.body) symbols) with
     SBlock(sl) -> sl
       | _ -> let err = "internal error: block didn't become a block?"
       in raise (Failure err)

@@ -116,7 +116,10 @@ let translate (globals, functions) =
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder
     and float_format_str = L.build_global_stringptr "%g\n" "fmt" builder
     and string_format_str = L.build_global_stringptr "%s\n" "fmt" builder in
-
+    let add_local m (t, n) = 
+      let local_var = L.build_alloca (ltype_of_typ t) n builder
+      in StringMap.add n local_var m
+          in
     let local_vars =
       let add_formal m (t, n) p =
         let () = L.set_value_name n p in
@@ -125,23 +128,22 @@ let translate (globals, functions) =
   StringMap.add n local m
       in
 
-      let add_local m (t, n) = 
-  let local_var = L.build_alloca (ltype_of_typ t) n builder
-  in StringMap.add n local_var m
-      in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.sformals
           (Array.to_list (L.params the_function)) in
       List.fold_left add_local formals fdecl.slocals
     in
 
+    let scoped_vars = [local_vars; global_vars] in
 
-    let lookup n = try StringMap.find n local_vars
-                   with Not_found -> StringMap.find n global_vars
+    let rec lookup n var_list = match var_list with 
+                           hd::tl -> (try StringMap.find n hd with Not_found -> lookup n tl)
+                         | [hd] -> StringMap.find n hd
+                         | _ -> raise (Failure("wrong variable tables"))
     in
 
     (* Generate LLVM code for a call to MicroC's "print" *)
-    let rec expr builder ((tp, e) : sexpr) = match e with
+    let rec expr builder ((tp, e) : sexpr) symbol_table = match e with
   SLiteral i -> L.const_int i32_t i (* Generate a constant integer *)
       | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | SSlit s -> L.build_global_stringptr s ".str" builder
@@ -154,9 +156,9 @@ let translate (globals, functions) =
               SFilter (s) -> L.const_string context s 
             | _ -> raise (Failure ("The list should contain only filters!")))
         in L.const_vector (Array.of_list ((L.const_int i32_t len)::(List.map f1 e_list)))
-      | SId s -> L.build_load (lookup s) s builder
+      | SId s -> L.build_load (lookup s symbol_table) s builder
       | SArrliteral s -> 
-      let to_array x = L.build_intcast (expr builder x) i8_t "arr_init_elem" builder
+      let to_array x = L.build_intcast (expr builder x symbol_table) i8_t "arr_init_elem" builder
                         (*| _           -> raise (Failure ("Not yet supported for this array type"))*)
        in let img_array = L.const_array i8_t (Array.of_list (List.map to_array s))
        in let ipt = L.define_global "tmp" img_array the_module
@@ -164,15 +166,15 @@ let translate (globals, functions) =
        in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
        in let global_arr = L.define_global "tmp" const_arr the_module 
        in global_arr
-      | SArrsub (e, sexpr_list) -> let expr_builder = expr builder e in
+      | SArrsub (e, sexpr_list) -> let expr_builder = expr builder e symbol_table in
         let w = let expr_builder2 = L.build_struct_gep expr_builder 2 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
         let h = let expr_builder2 = L.build_struct_gep expr_builder 1 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
         let wh = L.build_mul w h "tmp" builder in
         let l2 = 
           match sexpr_list with
-              [e1] -> expr builder e1
-            | [e1;e2] -> let e1' = expr builder e1 and e2' = expr builder e2 in (L.build_add (L.build_mul e1' w "tmp" builder) e2' "tmp" builder)
-            | [e1;e2;e3] -> let e1' = expr builder e1 and e2' = expr builder e2 and e3' = expr builder e3 in 
+              [e1] -> expr builder e1 symbol_table
+            | [e1;e2] -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table in (L.build_add (L.build_mul e1' w "tmp" builder) e2' "tmp" builder)
+            | [e1;e2;e3] -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table and e3' = expr builder e3 symbol_table in 
               L.build_add (L.build_mul e1' wh "tmp" builder) (L.build_add (L.build_mul e2' w "tmp" builder) e3' "tmp" builder) "tmp" builder
             | _ -> raise (Failure ("Not yet supported for this multi-dimensional array type"))
 
@@ -183,19 +185,19 @@ let translate (globals, functions) =
         let abxd = L.build_load abxd "tmp" builder in
         let abxd_i32 = L.build_zext_or_bitcast abxd i32_t "tmp" builder in abxd_i32
       | SArrAssign (e1, e_rhs) -> (
-          let expr_rhs = expr builder e_rhs in
+          let expr_rhs = expr builder e_rhs symbol_table in
           let expr_rhs = L.build_intcast expr_rhs i8_t "tmp" builder in
           let (_, sx) = e1 in match sx with 
                SArrsub(e, sexpr_list) -> 
-                  let expr_builder = expr builder e in
+                  let expr_builder = expr builder e symbol_table in
                   let w = let expr_builder2 = L.build_struct_gep expr_builder 2 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
                   let h = let expr_builder2 = L.build_struct_gep expr_builder 1 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
                   let wh = L.build_mul w h "tmp" builder in 
                   let l2 = 
                     match sexpr_list with
-                        [e1] -> expr builder e1
-                      | [e1;e2] -> let e1' = expr builder e1 and e2' = expr builder e2 in (L.build_add (L.build_mul e1' w "tmp" builder) e2' "tmp" builder)
-                      | [e1;e2;e3] -> let e1' = expr builder e1 and e2' = expr builder e2 and e3' = expr builder e3 in
+                        [e1] -> expr builder e1 symbol_table
+                      | [e1;e2] -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table in (L.build_add (L.build_mul e1' w "tmp" builder) e2' "tmp" builder)
+                      | [e1;e2;e3] -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table and e3' = expr builder e3 symbol_table in
                         L.build_add (L.build_mul e1' wh "tmp" builder) (L.build_add (L.build_mul e2' w "tmp" builder) e3' "tmp" builder) "tmp" builder
                       | _ -> raise (Failure ("Not yet supported for this multi-dimensional array type"))
                   in
@@ -208,8 +210,8 @@ let translate (globals, functions) =
            )
       | SBinop (e1, op, e2) ->
     let (t, _) = e1
-    and e1' = expr builder e1
-    and e2' = expr builder e2 in
+    and e1' = expr builder e1 symbol_table
+    and e2' = expr builder e2 symbol_table in
     if t = A.Float then (match op with
       A.Add     -> L.build_fadd e1' e2' "tmp" builder
     | A.Sub     -> L.build_fsub e1' e2' "tmp" builder
@@ -245,39 +247,39 @@ let translate (globals, functions) =
       A.Mtimes -> L.build_call mtimes_func [|e1';e2'|] "mtimes" builder
     | A.At ->  let get_vec idx = L.const_extractelement e1' (L.const_int i32_t idx) in let len_lvalue = get_vec 0 in let len = get_optional (L.int64_of_const len_lvalue)
         in let len = Int64.to_int len in let get_string idx = get_optional (L.string_of_const (get_vec idx)) 
-        in let fhelper idx = expr builder (A.Void, SCall((get_string idx) ^ "_filter", [e2])) in let rec apply_filter q = (if q = 1 then fhelper q else (let _ = apply_filter (q - 1) in fhelper q)) in apply_filter len
+        in let fhelper idx = expr builder (A.Void, SCall((get_string idx) ^ "_filter", [e2])) symbol_table in let rec apply_filter q = (if q = 1 then fhelper q else (let _ = apply_filter (q - 1) in fhelper q)) in apply_filter len
     | _ -> raise (Failure "not implemented yet")
     )
       | SUnop(op, e) ->
-    let (t, _) = e and e' = expr builder e in
+    let (t, _) = e and e' = expr builder e symbol_table in
     (match op with
       A.Neg when t = A.Float -> L.build_fneg e' "tmp" builder
     | A.Neg              -> L.build_neg e' "tmp" builder
     | A.Not              -> L.build_not e' "tmp" builder
     | A.Trans when t = A.Arr -> let _ = L.build_call trans_func [|e'|] "trans" builder in e'
     | A.Trans -> raise (Failure "internal error: can't perform matrix operation on scalar")) 
-      | SAssign (s, e) -> let e' = expr builder e in
+      | SAssign (s, e) -> let e' = expr builder e symbol_table in
                           let e'  = (match e with 
                               (_, SArrsub(_, _)) -> L.build_intcast e' i32_t "tmp" builder
                             | _ -> e')
-                        in let _ = L.build_store e' (lookup s) builder in e'
+                        in let _ = L.build_store e' (lookup s symbol_table) builder in e'
       | SCall ("print", [e]) -> (* Generate a call instruction *)
-    L.build_call printf_func [| int_format_str ; (expr builder e) |]
+    L.build_call printf_func [| int_format_str ; (expr builder e symbol_table) |]
       "printf" builder 
       (* Throw an error for any other expressions *)
       | SCall ("printf", [e]) ->
-    L.build_call printf_func [| float_format_str ; (expr builder e) |]
+    L.build_call printf_func [| float_format_str ; (expr builder e symbol_table) |]
       "printf" builder
-      | SCall ("length", [e]) -> let expr_builder = expr builder e in 
+      | SCall ("length", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 0 "tmp" builder in
         let len = L.build_load expr_builder "tmp" builder in len
-      | SCall ("height", [e]) -> let expr_builder = expr builder e in 
+      | SCall ("height", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 1 "tmp" builder in
         let len = L.build_load expr_builder "tmp" builder in len
-      | SCall ("width", [e]) -> let expr_builder = expr builder e in 
+      | SCall ("width", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 2 "tmp" builder in
         let len = L.build_load expr_builder "tmp" builder in len
-      | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 in let e3' = expr builder e3 in let e4' = expr builder e4
+      | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 symbol_table in let e3' = expr builder e3 symbol_table in let e4' = expr builder e4 symbol_table
         in let mptr = L.build_array_malloc i8_t e2' "tmp" builder 
         in let empty_ptr = L.const_pointer_null ip_t
 
@@ -291,7 +293,7 @@ let translate (globals, functions) =
         in let _ = L.build_store e4' e7'' builder
         in let e8'' = L.build_struct_gep e1' 3 "tmp" builder
         in let _ = L.build_store mptr e8'' builder in e1'
-      | SCall ("imgcpy", [e1;e2]) -> let e1' = expr builder e1 in let e2' = expr builder e2 in
+      | SCall ("imgcpy", [e1;e2]) -> let e1' = expr builder e1 symbol_table in let e2' = expr builder e2 symbol_table in
         let e1_l = L.build_struct_gep e1' 0 "tmp" builder in
         let e1_h = L.build_struct_gep e1' 1 "tmp" builder in
         let e1_w = L.build_struct_gep e1' 2 "tmp" builder in
@@ -306,19 +308,20 @@ let translate (globals, functions) =
         let _ = L.build_store e2_img e1_img builder in
         e1'
       | SCall ("printline", [e]) -> 
-    L.build_call printf_func [| string_format_str ; (expr builder e) |]
+    L.build_call printf_func [| string_format_str ; (expr builder e symbol_table) |]
       "printf" builder
       | SCall ("scifi_filter", [e]) ->
-    L.build_call scifi_func [| (expr builder e) |] "scifi_filter" builder
+    L.build_call scifi_func [| (expr builder e symbol_table) |] "scifi_filter" builder
       | SCall("load", [e]) ->
-    L.build_call loadimg_func [| (expr builder e) |] "load" builder
+    L.build_call loadimg_func [| (expr builder e symbol_table) |] "load" builder
       | SCall("close", [e]) ->
-    L.build_call closeimg_func [| (expr builder e) |] "close" builder
+    L.build_call closeimg_func [| (expr builder e symbol_table) |] "close" builder
       | SCall("save", [e1; e2]) ->
-    L.build_call saveimg_func [| (expr builder e1); (expr builder e2) |] "save" builder
+    L.build_call saveimg_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "save" builder
       | SCall (f, act) ->
          let (fdef, fdecl) = StringMap.find f function_decls in
-    let actuals = List.rev (List.map (expr builder) (List.rev act)) in
+    let temp_helper b st x = expr b x st in 
+    let actuals = List.rev (List.map (temp_helper builder symbol_table) (List.rev act)) in
     let result = (match fdecl.styp with
                          A.Void -> ""
                        | _ -> f ^ "_result") in
@@ -332,56 +335,56 @@ let translate (globals, functions) =
   Some _ -> ()
       | None -> ignore (f builder) in
 
-    let rec stmt builder = function
-  SBlock sl -> List.fold_left stmt builder sl
-      | SExpr e -> let _ = expr builder e in builder 
-      | SVar (e1, e2) -> let (tp, s) = e1 in let _ = expr builder (tp, SId(s)) in
+    let rec stmt (builder,symbol_table) = function
+  SBlock sl -> List.fold_left stmt (builder, symbol_table) sl
+      | SExpr e -> let _ = expr builder e symbol_table in (builder, symbol_table) 
+      | SVar (e1, e2) -> let (tp, s) = e1 in let symbol_table2 = add_local (List.hd symbol_table) (tp, s) in let symbol_table3 = (symbol_table2::(List.tl symbol_table)) in let _ = expr builder (tp, SId(s)) symbol_table3 in
                     let _ = match e2 with
                         (tp, SNoassign) -> init tp
-                      | _ -> expr builder (tp, SAssign(s, e2))
-          in builder
+                      | _ -> expr builder (tp, SAssign(s, e2)) symbol_table3
+          in (builder, symbol_table3)
       | SReturn e -> let _ = match fdecl.styp with
-                              A.Int -> L.build_ret (expr builder e) builder 
-                            | A.Arr -> L.build_ret (expr builder e) builder
-                            | A.Float -> L.build_ret (expr builder e) builder
+                              A.Int -> L.build_ret (expr builder e symbol_table) builder 
+                            | A.Arr -> L.build_ret (expr builder e symbol_table) builder
+                            | A.Float -> L.build_ret (expr builder e symbol_table) builder
                             | _ -> to_imp (A.string_of_typ fdecl.styp)
-                     in builder
+                     in (builder, symbol_table)
       | SIf (predicate, then_stmt, else_stmt) ->
-         let bool_val = expr builder predicate in
+         let bool_val = expr builder predicate symbol_table in
    let merge_bb = L.append_block context "merge" the_function in
          let branch_instr = L.build_br merge_bb in
    let then_bb = L.append_block context "then" the_function in
-         let then_builder = stmt (L.builder_at_end context then_bb) then_stmt in 
+         let then_builder = fst (stmt ((L.builder_at_end context then_bb), symbol_table) then_stmt)in 
    let () = add_terminal then_builder branch_instr in
 
    let else_bb = L.append_block context "else" the_function in
-         let else_builder = stmt (L.builder_at_end context else_bb) else_stmt in
+         let else_builder = fst (stmt ((L.builder_at_end context else_bb), symbol_table) else_stmt) in
    let () = add_terminal else_builder branch_instr in
 
    let _ = L.build_cond_br bool_val then_bb else_bb builder in
 
-   L.builder_at_end context merge_bb
+   (L.builder_at_end context merge_bb, symbol_table)
 
       | SWhile (predicate, body) ->
    let pred_bb = L.append_block context "while" the_function in
    let _ = L.build_br pred_bb builder in
    let body_bb = L.append_block context "while_body" the_function in
-         let while_builder = stmt (L.builder_at_end context body_bb) body in
+         let while_builder = fst (stmt ((L.builder_at_end context body_bb), symbol_table) body) in
    let () = add_terminal while_builder (L.build_br pred_bb) in
    let pred_builder = L.builder_at_end context pred_bb in
-   let bool_val = expr pred_builder predicate in
+   let bool_val = expr pred_builder predicate symbol_table in
    let merge_bb = L.append_block context "merge" the_function in
    let _ = L.build_cond_br bool_val body_bb merge_bb pred_builder in
-   L.builder_at_end context merge_bb
+   (L.builder_at_end context merge_bb, symbol_table)
 
-      | SFor (e1, e2, e3, body) -> stmt builder
-      ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] )
+      | SFor (e1, e2, e3, body) -> stmt (builder, symbol_table)
+      ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] ) 
       (* | s -> to_imp (string_of_sstmt s) *)
     (* Generate the instructions for the function's body, 
        which mutates the_module *)
     in
 
-    let builder = stmt builder (SBlock fdecl.sbody) in
+    let builder = fst (stmt (builder, scoped_vars) (SBlock fdecl.sbody)) in
 
     add_terminal builder (match fdecl.styp with
         A.Void -> L.build_ret_void
