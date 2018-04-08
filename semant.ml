@@ -133,11 +133,11 @@ let check (globals, functions) compiling_builtin =
                             ("printb", Bool);
                             ("printf", Float);
                             ("printline", String);
-                               ("printarr", Arr);
-                               ("close", Arr)]
+                               ("printarr", Arr)]
   in let built_in_decls = 
     StringMap.add "load" {typ = Arr; fname = "load"; formals = [(String, "x")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls = StringMap.add "length" {typ = Int; fname = "length"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "close" {typ = Void; fname = "close"; formals = [(Arr, "x"); (Int, "y")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls = StringMap.add "width" {typ = Int; fname = "width"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls = StringMap.add "height" {typ = Int; fname = "height"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls = StringMap.add "save" {typ = Void; fname = "save"; formals = [(Arr, "x"); (String, "y")]; locals=[]; body=[]} built_in_decls

@@ -27,9 +27,10 @@ struct Img* load(char* path) {
     return img;
 }
 
-void close(struct Img* img) {
+void close(struct Img* img, int i) {
   stbi_image_free(img->arr);
-  free(img);
+  if (i == 0)
+    free(img);
   printf("close completed!\n");
 }
 

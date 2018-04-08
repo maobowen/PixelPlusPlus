@@ -75,7 +75,7 @@ let translate (globals, functions) compiling_builtin =
   let loadimg_t = L.function_type structp_t [| ip_t |] in
   let loadimg_func = L.declare_function "load" loadimg_t the_module in
 
-  let closeimg_t = L.function_type i32_t [| structp_t |] in
+  let closeimg_t = L.function_type i32_t [| structp_t; i32_t |] in
   let closeimg_func = L.declare_function "close" closeimg_t the_module in
 
   let saveimg_t = L.function_type i32_t [| structp_t; ip_t |] in
@@ -316,8 +316,8 @@ let translate (globals, functions) compiling_builtin =
     L.build_call scifi_func [| (expr builder e symbol_table) |] "scifi_filter" builder
       | SCall("load", [e]) ->
     L.build_call loadimg_func [| (expr builder e symbol_table) |] "load" builder
-      | SCall("close", [e]) ->
-    L.build_call closeimg_func [| (expr builder e symbol_table) |] "close" builder
+      | SCall("close", [e; e2]) ->
+    L.build_call closeimg_func [| (expr builder e symbol_table); (expr builder e2 symbol_table) |] "close" builder
       | SCall("save", [e1; e2]) ->
     L.build_call saveimg_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "save" builder
       | SCall (f, act) ->
