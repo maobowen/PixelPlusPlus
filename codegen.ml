@@ -163,7 +163,7 @@ let translate (globals, functions) compiling_builtin =
       let to_array x = L.build_intcast (expr builder x symbol_table) i8_t "arr_init_elem" builder
                         (*| _           -> raise (Failure ("Not yet supported for this array type"))*)
        in let img_array = L.const_array i8_t (Array.of_list (List.map to_array s))
-       in let ipt = L.define_global "tmp" ^ g_var_suffix img_array the_module
+       in let ipt = L.define_global ("tmp" ^ g_var_suffix) img_array the_module
        in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
        in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
        in let global_arr = L.define_global "tmp" ^ g_var_suffix const_arr the_module 
