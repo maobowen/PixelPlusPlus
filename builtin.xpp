@@ -54,6 +54,7 @@ func arr transpose(arr img) {
       img2[o22] = img[o12];
     }
   }
+  close(img, 1);
   imgcpy(img, img2);
   return img;
 }
@@ -141,6 +142,7 @@ func void rotate(arr img, int angle) {
       }
     }
   }
+  close(img, 1);
   imgcpy(img, img2);
 }
 
@@ -158,6 +160,7 @@ func void scifi_filter(arr img) {
     img2[i] = img[o];
   }
   rotate(img2, 180);
+  close(img, 1);
   imgcpy(img, img2);
 }
 
@@ -226,5 +229,6 @@ func void blur_filter(arr img) {
       }
     }
   }
+  close(img, 1);
   imgcpy(img, img2);
 }
