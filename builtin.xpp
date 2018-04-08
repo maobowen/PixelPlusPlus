@@ -157,6 +157,7 @@ func void scifi_filter(arr img) {
     o = len - 1 - i;
     img2[i] = img[o];
   }
+  rotate(img2, 180);
   imgcpy(img, img2);
 }
 

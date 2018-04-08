@@ -21,7 +21,7 @@ module StringMap = Map.Make(String)
 
 (* Code Generation from the SAST. Returns an LLVM module if successful,
    throws an exception if something is wrong. *)
-let translate (globals, functions) =
+let translate (globals, functions) compiling_builtin =
   let context    = L.global_context () in
   (* Add types to the context so we can use them in our LLVM code *)
   let i32_t      = L.i32_type    context
@@ -80,19 +80,19 @@ let translate (globals, functions) =
   let saveimg_func = L.declare_function "save" saveimg_t the_module in
 
   let trans_t = L.function_type structp_t [| structp_t |] in
-  let trans_func = L.declare_function "trans" trans_t the_module in 
-
   let expf_t = L.function_type float_t [| float_t ; i32_t |] in
-  let expf_func = L.declare_function "expf" expf_t the_module in 
-
   let exp_t = L.function_type i32_t [| i32_t; i32_t |] in
-  let exp_func = L.declare_function "exp" exp_t the_module in 
-
-  let mtimes_t = L.function_type structp_t [| structp_t; structp_t |] in
-  let mtimes_func = L.declare_function "mtimes" mtimes_t the_module in 
-
+  let mtimes_t = L.function_type structp_t [| structp_t; structp_t |] in 
   let scifi_t = L.function_type i32_t [| structp_t |] in
-  let scifi_func = L.declare_function "scifi_filter" scifi_t the_module in
+
+  let (trans_func, expf_func, exp_func, mtimes_func, scifi_func) = 
+  if compiling_builtin 
+    then (printf_func, printf_func, printf_func, printf_func, printf_func)
+    else (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
+          L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
+          L.declare_function "scifi_filter" scifi_t the_module) 
+  
+  in
 
   let to_imp str = raise (Failure ("Not yet implemented: " ^ str)) in
 

@@ -5,12 +5,13 @@ open Sast
 
 module StringMap = Map.Make(String)
 
+
 (* Semantic checking of the AST. Returns an SAST if successful,
    throws an exception if something is wrong.
 
    Check each global variable, then check each function *)
 
-let check (globals, functions) =
+let check (globals, functions) compiling_builtin =
 
   (* Check if a certain kind of binding has void type or is a duplicate
      of another, previously checked binding *)
@@ -136,15 +137,15 @@ let check (globals, functions) =
                                ("close", Arr)]
   in let built_in_decls = 
     StringMap.add "load" {typ = Arr; fname = "load"; formals = [(String, "x")]; locals=[]; body=[]} built_in_decls
-  in let built_in_decls =  StringMap.add "length" {typ = Int; fname = "length"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
-  in let built_in_decls =  StringMap.add "width" {typ = Int; fname = "width"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
-  in let built_in_decls =  StringMap.add "height" {typ = Int; fname = "height"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
-  in let built_in_decls =  StringMap.add "save" {typ = Void; fname = "save"; formals = [(Arr, "x"); (String, "y")]; locals=[]; body=[]} built_in_decls
-in let built_in_decls =  StringMap.add "init" {typ = Arr; fname = "init"; formals = [(Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
-in let built_in_decls =  StringMap.add "imgcpy" {typ = Arr; fname = "imgcpy"; formals = [(Arr, "i1"); (Arr, "i2")]; locals=[]; body=[]} built_in_decls
-in let built_in_decls =  StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
-in let built_in_decls =  StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
-in
+  in let built_in_decls = StringMap.add "length" {typ = Int; fname = "length"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+  in let built_in_decls = StringMap.add "width" {typ = Int; fname = "width"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+  in let built_in_decls = StringMap.add "height" {typ = Int; fname = "height"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+  in let built_in_decls = StringMap.add "save" {typ = Void; fname = "save"; formals = [(Arr, "x"); (String, "y")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "init" {typ = Arr; fname = "init"; formals = [(Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "imgcpy" {typ = Arr; fname = "imgcpy"; formals = [(Arr, "i1"); (Arr, "i2")]; locals=[]; body=[]} built_in_decls
+in let build_in_decls_final = (if not compiling_builtin then let built_in_decls = StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_final in
   (* Add function name to symbol table *)
   let add_func map fd =
     let built_in_err = "function " ^ fd.fname ^ " may not be defined"
@@ -314,13 +315,14 @@ in
         let ty = match f with
             "blur" -> String
           | "hdr" -> String
+          | "scifi" -> String
           | _ -> raise (Failure ("illegal filter keyword" ^ f))
         in (ty, SFilter f)
       | Filterliteral fl -> 
         let rec check_filter fl = match fl with
             [] -> raise (Failure ("illegal empty filter"))
-          | [f] -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr") then [(t, f')] else raise (Failure ("illegal filter keywords"))
-          | f :: n -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr") then (t, f') :: check_filter n else raise (Failure ("illegal filter keywords"))
+          | [f] -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr" || f' = SFilter "scifi") then [(t, f')] else raise (Failure ("illegal filter keywords"))
+          | f :: n -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr" || f' = SFilter "scifi") then (t, f') :: check_filter n else raise (Failure ("illegal filter keywords"))
           in (String, SFilterliteral(check_filter fl))
     in
 
