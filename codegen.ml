@@ -55,13 +55,15 @@ let translate (globals, functions) compiling_builtin =
           | _     -> L.const_int (ltype_of_typ t) 0
   in
   let i32_zero = init A.Int in
+  
+  let g_var_suffix = if compiling_builtin then "_bn" else "" in
 
   let get_optional opt = match opt with
     Some x -> x
   | _ -> raise (Failure ("Failed to get optional")) in 
 
   let global_vars = 
-    let global_var m (t, n) = StringMap.add n (L.define_global n ^ g_var_suffix (init t) the_module) m in
+    let global_var m (t, n) = StringMap.add n (L.define_global (n ^ g_var_suffix) (init t) the_module) m in
     List.fold_left global_var StringMap.empty globals in
 
   (* Declare a "printf" function to implement MicroC's "print". *)
@@ -95,8 +97,6 @@ let translate (globals, functions) compiling_builtin =
   in
 
   let to_imp str = raise (Failure ("Not yet implemented: " ^ str)) in
-  
-  let g_var_suffix = if compiling_builtin then "_bn" else "" in
 
   let function_decls =
     let function_decl m fdecl =
