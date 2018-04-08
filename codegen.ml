@@ -61,7 +61,7 @@ let translate (globals, functions) compiling_builtin =
   | _ -> raise (Failure ("Failed to get optional")) in 
 
   let global_vars = 
-    let global_var m (t, n) = StringMap.add n (L.define_global n (init t) the_module) m in
+    let global_var m (t, n) = StringMap.add n (L.define_global n ^ g_var_suffix (init t) the_module) m in
     List.fold_left global_var StringMap.empty globals in
 
   (* Declare a "printf" function to implement MicroC's "print". *)
@@ -95,6 +95,8 @@ let translate (globals, functions) compiling_builtin =
   in
 
   let to_imp str = raise (Failure ("Not yet implemented: " ^ str)) in
+  
+  let g_var_suffix = if compiling_builtin then "_bn" else "" in
 
   let function_decls =
     let function_decl m fdecl =
@@ -161,10 +163,10 @@ let translate (globals, functions) compiling_builtin =
       let to_array x = L.build_intcast (expr builder x symbol_table) i8_t "arr_init_elem" builder
                         (*| _           -> raise (Failure ("Not yet supported for this array type"))*)
        in let img_array = L.const_array i8_t (Array.of_list (List.map to_array s))
-       in let ipt = L.define_global "tmp" img_array the_module
+       in let ipt = L.define_global "tmp" ^ g_var_suffix img_array the_module
        in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
        in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
-       in let global_arr = L.define_global "tmp" const_arr the_module 
+       in let global_arr = L.define_global "tmp" ^ g_var_suffix const_arr the_module 
        in global_arr
       | SArrsub (e, sexpr_list) -> let expr_builder = expr builder e symbol_table in
         let w = let expr_builder2 = L.build_struct_gep expr_builder 2 "tmp" builder in L.build_load expr_builder2 "tmp" builder in
@@ -284,7 +286,7 @@ let translate (globals, functions) compiling_builtin =
         in let empty_ptr = L.const_pointer_null ip_t
 
         in let init_struct = L.const_struct context [|i32_zero; i32_zero; i32_zero; empty_ptr|]
-        in let e1' = L.define_global "init_arr" init_struct the_module
+        in let e1' = L.define_global "init_arr" ^ g_var_suffix init_struct the_module
         in let e5'' = L.build_struct_gep e1' 0 "tmp" builder
         in let _ = L.build_store e2' e5'' builder
         in let e6'' = L.build_struct_gep e1' 1 "tmp" builder
