@@ -273,37 +273,37 @@ let translate (globals, functions) compiling_builtin =
     L.build_call printf_func [| float_format_str ; (expr builder e symbol_table) |]
       "printf" builder
       | SCall ("length", [e]) -> let expr_builder = expr builder e symbol_table in 
-        let expr_builder = L.build_struct_gep expr_builder 0 "tmp" builder in
-        let len = L.build_load expr_builder "tmp" builder in len
+        let expr_builder = L.build_struct_gep expr_builder 0 ("tmp" ^ g_var_suffix) builder in
+        let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
       | SCall ("height", [e]) -> let expr_builder = expr builder e symbol_table in 
-        let expr_builder = L.build_struct_gep expr_builder 1 "tmp" builder in
-        let len = L.build_load expr_builder "tmp" builder in len
+        let expr_builder = L.build_struct_gep expr_builder 1 ("tmp" ^ g_var_suffix) builder in
+        let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
       | SCall ("width", [e]) -> let expr_builder = expr builder e symbol_table in 
-        let expr_builder = L.build_struct_gep expr_builder 2 "tmp" builder in
-        let len = L.build_load expr_builder "tmp" builder in len
+        let expr_builder = L.build_struct_gep expr_builder 2 ("tmp" ^ g_var_suffix) builder in
+        let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
       | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 symbol_table in let e3' = expr builder e3 symbol_table in let e4' = expr builder e4 symbol_table
-        in let mptr = L.build_array_malloc i32_t e2' "tmp" builder 
+        in let mptr = L.build_array_malloc i32_t e2' ("tmp" ^ g_var_suffix) builder 
         in let empty_ptr = L.const_pointer_null ip32_t
 
         in let init_struct = L.const_struct context [|i32_zero; i32_zero; i32_zero; empty_ptr|]
         in let e1' = L.define_global ("init_arr" ^ g_var_suffix) init_struct the_module
-        in let e5'' = L.build_struct_gep e1' 0 "tmp" builder
+        in let e5'' = L.build_struct_gep e1' 0 ("tmp" ^ g_var_suffix) builder
         in let _ = L.build_store e2' e5'' builder
-        in let e6'' = L.build_struct_gep e1' 1 "tmp" builder
+        in let e6'' = L.build_struct_gep e1' 1 ("tmp" ^ g_var_suffix) builder
         in let _ = L.build_store e3' e6'' builder
-        in let e7'' = L.build_struct_gep e1' 2 "tmp" builder
+        in let e7'' = L.build_struct_gep e1' 2 ("tmp" ^ g_var_suffix) builder
         in let _ = L.build_store e4' e7'' builder
-        in let e8'' = L.build_struct_gep e1' 3 "tmp" builder
+        in let e8'' = L.build_struct_gep e1' 3 ("tmp" ^ g_var_suffix) builder
         in let _ = L.build_store mptr e8'' builder in e1'
       | SCall ("imgcpy", [e1;e2]) -> let e1' = expr builder e1 symbol_table in let e2' = expr builder e2 symbol_table in
-        let e1_l = L.build_struct_gep e1' 0 "tmp" builder in
-        let e1_h = L.build_struct_gep e1' 1 "tmp" builder in
-        let e1_w = L.build_struct_gep e1' 2 "tmp" builder in
-        let e1_img = L.build_struct_gep e1' 3 "tmp" builder in
-        let e2_l = L.build_load (L.build_struct_gep e2' 0 "tmp" builder) "tmp_len" builder in
-        let e2_h = L.build_load (L.build_struct_gep e2' 1 "tmp" builder) "tmp_h" builder in
-        let e2_w = L.build_load (L.build_struct_gep e2' 2 "tmp" builder) "tmp_w" builder in
-        let e2_img = L.build_load (L.build_struct_gep e2' 3 "tmp" builder) "tmp_img" builder in
+        let e1_l = L.build_struct_gep e1' 0 ("tmp" ^ g_var_suffix) builder in
+        let e1_h = L.build_struct_gep e1' 1 ("tmp" ^ g_var_suffix) builder in
+        let e1_w = L.build_struct_gep e1' 2 ("tmp" ^ g_var_suffix) builder in
+        let e1_img = L.build_struct_gep e1' 3 ("tmp" ^ g_var_suffix) builder in
+        let e2_l = L.build_load (L.build_struct_gep e2' 0 ("tmp" ^ g_var_suffix) builder) "tmp_len" builder in
+        let e2_h = L.build_load (L.build_struct_gep e2' 1 ("tmp" ^ g_var_suffix) builder) "tmp_h" builder in
+        let e2_w = L.build_load (L.build_struct_gep e2' 2 ("tmp" ^ g_var_suffix) builder) "tmp_w" builder in
+        let e2_img = L.build_load (L.build_struct_gep e2' 3 ("tmp" ^ g_var_suffix) builder) "tmp_img" builder in
         let _ = L.build_store e2_l e1_l builder in
         let _ = L.build_store e2_h e1_h builder in
         let _ = L.build_store e2_w e1_w builder in
