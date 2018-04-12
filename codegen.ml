@@ -35,7 +35,8 @@ let translate (globals, functions) compiling_builtin =
   and the_module = L.create_module context "MicroC" in
 
   let ip_t       = L.pointer_type i8_t in
-  let struct_t   = L.struct_type context [|i32_t; i32_t; i32_t; ip_t|] in
+  let ip32_t       = L.pointer_type i32_t in
+  let struct_t   = L.struct_type context [|i32_t; i32_t; i32_t; ip32_t|] in
   let structp_t  = L.pointer_type struct_t                  in
 
   (* Convert MicroC types to LLVM types *)
@@ -160,11 +161,11 @@ let translate (globals, functions) compiling_builtin =
         in L.const_vector (Array.of_list ((L.const_int i32_t len)::(List.map f1 e_list)))
       | SId s -> L.build_load (lookup s symbol_table) s builder
       | SArrliteral s -> 
-      let to_array x = L.build_intcast (expr builder x symbol_table) i8_t "arr_init_elem" builder
+      let to_array x = expr builder x symbol_table
                         (*| _           -> raise (Failure ("Not yet supported for this array type"))*)
-       in let img_array = L.const_array i8_t (Array.of_list (List.map to_array s))
-       in let ipt = L.define_global ("tmp" ^ g_var_suffix) img_array the_module
-       in let img_array_ptr = L.build_pointercast ipt ip_t "tmp" builder
+       in let img_array = L.const_array i32_t (Array.of_list (List.map to_array s))
+       in let i32t = L.define_global ("tmp" ^ g_var_suffix) img_array the_module
+       in let img_array_ptr = L.build_pointercast i32t ip32_t ("tmp" ^ g_var_suffix) builder
        in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
        in let global_arr = L.define_global ("tmp" ^ g_var_suffix) const_arr the_module 
        in global_arr
@@ -184,11 +185,10 @@ let translate (globals, functions) compiling_builtin =
         let arr_builder = L.build_struct_gep expr_builder 3 "tmp" builder in
         let abxd = L.build_load arr_builder "tmp" builder in
         let abxd = L.build_in_bounds_gep abxd [|l2|] "tmp" builder in
-        let abxd = L.build_load abxd "tmp" builder in
-        let abxd_i32 = L.build_zext_or_bitcast abxd i32_t "tmp" builder in abxd_i32
+        let abxd = L.build_load abxd "tmp" builder in abxd
       | SArrAssign (e1, e_rhs) -> (
           let expr_rhs = expr builder e_rhs symbol_table in
-          let expr_rhs = L.build_intcast expr_rhs i8_t "tmp" builder in
+          let expr_rhs = L.build_intcast expr_rhs i32_t "tmp" builder in
           let (_, sx) = e1 in match sx with 
                SArrsub(e, sexpr_list) -> 
                   let expr_builder = expr builder e symbol_table in
@@ -282,8 +282,8 @@ let translate (globals, functions) compiling_builtin =
         let expr_builder = L.build_struct_gep expr_builder 2 "tmp" builder in
         let len = L.build_load expr_builder "tmp" builder in len
       | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 symbol_table in let e3' = expr builder e3 symbol_table in let e4' = expr builder e4 symbol_table
-        in let mptr = L.build_array_malloc i8_t e2' "tmp" builder 
-        in let empty_ptr = L.const_pointer_null ip_t
+        in let mptr = L.build_array_malloc i32_t e2' "tmp" builder 
+        in let empty_ptr = L.const_pointer_null ip32_t
 
         in let init_struct = L.const_struct context [|i32_zero; i32_zero; i32_zero; empty_ptr|]
         in let e1' = L.define_global ("init_arr" ^ g_var_suffix) init_struct the_module
