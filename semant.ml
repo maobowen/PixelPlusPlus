@@ -143,7 +143,12 @@ in let built_in_decls = StringMap.add "close" {typ = Void; fname = "close"; form
   in let built_in_decls = StringMap.add "save" {typ = Void; fname = "save"; formals = [(Arr, "x"); (String, "y")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "init" {typ = Arr; fname = "init"; formals = [(Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "imgcpy" {typ = Arr; fname = "imgcpy"; formals = [(Arr, "i1"); (Arr, "i2")]; locals=[]; body=[]} built_in_decls
-in let build_in_decls_final = (if not compiling_builtin then let built_in_decls = StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "float_of" {typ = Float; fname = "float_of"; formals = [(Int, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "int_of" {typ = Int; fname = "int_of"; formals = [(Float, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "set_hw" {typ = Arr; fname = "set_hw"; formals = [(Arr, "i1"); (Int, "h"); (Int, "w")]; locals=[]; body=[]} built_in_decls
+in let build_in_decls_final = (if not compiling_builtin then 
+   let built_in_decls = StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "apply_conv_filter" {typ = Void; fname = "apply_conv_filter"; formals = [(Arr, "img"); (Arr, "filter")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_final in
   (* Add function name to symbol table *)
@@ -186,7 +191,7 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
     | Block sl :: tl -> 
       let rec find_locals_in_block sl locals= match sl with
             | Block sl :: tl  -> find_locals_in_block (sl @ tl) locals(* Flatten blocks *)
-            | Var(b, _) :: tl  -> (b :: (find_locals tl locals)) @ (find_locals_in_block tl locals)
+            | Var(b, _) :: tl  -> (b :: (find_locals tl locals))
             | _ ::tl       -> find_locals_in_block tl locals
             | [] -> locals
             in (find_locals_in_block sl locals) @ (find_locals tl locals)

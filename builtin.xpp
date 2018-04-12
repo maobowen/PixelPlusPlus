@@ -164,8 +164,7 @@ func void scifi_filter(arr img) {
   imgcpy(img, img2);
 }
 
-func void blur_filter(arr img) {
-  /* Gaussian Blur with sigma = 1 and kernel size = 5 * 5 */
+func void apply_conv_filter(arr img, arr filter) {
   int len;
   int i;
   int j;
@@ -176,11 +175,6 @@ func void blur_filter(arr img) {
   int b;
   int height;
   int width;
-  arr kernel;
-  arr x_axis;
-  arr y_axis;
-  int coef1;
-  int coef2;
   int kernel_r;
   int kernel_g;
   int kernel_b;
@@ -189,39 +183,43 @@ func void blur_filter(arr img) {
   int b_tmp;
   int m;
   int n;
-  arr coef = [1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1];
-  x_axis = [-2, -1, 0, 1, 2];
-  y_axis = [-2, -1, 0, 1, 2];
+  int sum = 0;
+  for (i = 0; i < length(filter); i = i + 1) {
+      sum = sum + filter[i];
+  }
+  /*arr filter = [1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1];*/
+  int filter_height = height(filter);
+  int filter_width = width(filter);
+  int x_offset = (filter_height - 1) / 2;
+  int y_offset = (filter_width - 1) / 2;
   len = length(img);
   height = height(img);
   width = width(img);
   img2 = init(len, height, width(img));
   for (i = 0; i < height; i = i + 1) {
-    print(i);
-    print(height);
     for (j = 0; j < width; j = j + 1) {
       r = (width * i + j) * 3;
       g = r + 1;
       b = r + 2;
 
-      if (i - 2 >= 0 and i + 2 < height and j - 2 >= 0 and j + 2 < width) {
+      if (i - x_offset >= 0 and i + x_offset < height and j - y_offset >= 0 and j + y_offset < width) {
         kernel_r = 0;
         kernel_g = 0;
         kernel_b = 0;
-        for (m = 0; m < 5; m = m + 1) {
-          for (n = 0; n < 5; n = n + 1) {
-            r_tmp = (width * (i + m - 2) + n - 2 + j) * 3;
+        for (m = 0; m < filter_height; m = m + 1) {
+          for (n = 0; n < filter_width; n = n + 1) {
+            r_tmp = (width * (i + m - x_offset) + j + n - y_offset) * 3;
             g_tmp = r_tmp + 1;
             b_tmp = r_tmp + 2;
 
-            kernel_r = kernel_r + coef[m * 5 + n] * img[r_tmp];
-            kernel_g = kernel_g + coef[m * 5 + n] * img[g_tmp];
-            kernel_b = kernel_b + coef[m * 5 + n] * img[b_tmp];
+            kernel_r = kernel_r + filter[m * filter_width + n] * img[r_tmp];
+            kernel_g = kernel_g + filter[m * filter_width + n] * img[g_tmp];
+            kernel_b = kernel_b + filter[m * filter_width + n] * img[b_tmp];
           }
         }
-        img2[r] = kernel_r / 273;
-        img2[g] = kernel_g / 273;
-        img2[b] = kernel_b / 273;
+        img2[r] = kernel_r / sum;
+        img2[g] = kernel_g / sum;
+        img2[b] = kernel_b / sum;
       } else {
         img2[r] = img[r];
         img2[g] = img[g];
@@ -230,5 +228,25 @@ func void blur_filter(arr img) {
     }
   }
   close(img, 1);
+  /* Normalize */
+  int k;
+  for (k = 0; k < 3; k = k + 1) {
+    int min = 255;
+    int max = 0;
+  for (i = 0; i < height; i = i + 1) {
+    for (j = 0; j < width; j = j + 1) {
+      r = img2[(i * width + j) * 3 + k];
+      if (min > r) { min = r; }
+      if (max < r) { max = r; }
+    }
+  }
+  int span = max - min;
+  for (i = 0; i < height; i = i + 1) {
+    for (j = 0; j < width; j = j + 1) {
+      r = img2[(i * width + j) * 3 + k];
+      img2[(i * width + j) * 3 + k] = int_of((float_of(r - min) / float_of(span)) * float_of(255));
+    }
+  }
+  }
   imgcpy(img, img2);
 }

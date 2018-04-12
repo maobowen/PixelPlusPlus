@@ -87,12 +87,14 @@ let translate (globals, functions) compiling_builtin =
   let exp_t = L.function_type i32_t [| i32_t; i32_t |] in
   let mtimes_t = L.function_type structp_t [| structp_t; structp_t |] in 
   let scifi_t = L.function_type i32_t [| structp_t |] in
+  let apply_conv_filter_t = L.function_type i32_t [| structp_t; structp_t |] in
 
-  let (trans_func, expf_func, exp_func, mtimes_func, scifi_func) = 
+  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, scifi_func) = 
   if compiling_builtin 
-    then (printf_func, printf_func, printf_func, printf_func, printf_func)
+    then (printf_func, printf_func, printf_func, printf_func, printf_func, printf_func)
     else (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
           L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
+          L.declare_function "apply_conv_filter" apply_conv_filter_t the_module, 
           L.declare_function "scifi_filter" scifi_t the_module) 
   
   in
@@ -281,6 +283,13 @@ let translate (globals, functions) compiling_builtin =
       | SCall ("width", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 2 ("tmp" ^ g_var_suffix) builder in
         let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
+      | SCall ("set_hw",[e1;e2;e3]) -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table and e3' = expr builder e3 symbol_table in
+        let e4' = L.build_struct_gep e1' 1 ("tmp" ^ g_var_suffix) builder in
+        let _ = L.build_store e2' e4' builder in
+        let e5' = L.build_struct_gep e1' 2 ("tmp" ^ g_var_suffix) builder in
+        let _ = L.build_store e3' e5' builder in e1'
+      | SCall("float_of", [e]) -> let e' = expr builder e symbol_table in L.build_sitofp e' float_t ("tmp" ^ g_var_suffix) builder
+      | SCall("int_of", [e]) -> let e' = expr builder e symbol_table in L.build_fptosi e' i32_t ("tmp" ^ g_var_suffix) builder
       | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 symbol_table in let e3' = expr builder e3 symbol_table in let e4' = expr builder e4 symbol_table
         in let mptr = L.build_array_malloc i32_t e2' ("tmp" ^ g_var_suffix) builder 
         in let empty_ptr = L.const_pointer_null ip32_t
@@ -314,6 +323,8 @@ let translate (globals, functions) compiling_builtin =
       "printf" builder
       | SCall ("scifi_filter", [e]) ->
     L.build_call scifi_func [| (expr builder e symbol_table) |] "scifi_filter" builder
+      | SCall ("apply_conv_filter", [e1; e2]) ->
+    L.build_call apply_conv_filter_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "apply_conv_filter" builder
       | SCall("load", [e]) ->
     L.build_call loadimg_func [| (expr builder e symbol_table) |] "load" builder
       | SCall("close", [e; e2]) ->
