@@ -283,11 +283,7 @@ let translate (globals, functions) compiling_builtin =
       | SCall ("width", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 2 ("tmp" ^ g_var_suffix) builder in
         let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
-      | SCall ("set_hw",[e1;e2;e3]) -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table and e3' = expr builder e3 symbol_table in
-        let e4' = L.build_struct_gep e1' 1 ("tmp" ^ g_var_suffix) builder in
-        let _ = L.build_store e2' e4' builder in
-        let e5' = L.build_struct_gep e1' 2 ("tmp" ^ g_var_suffix) builder in
-        let _ = L.build_store e3' e5' builder in e1'
+      
       | SCall("float_of", [e]) -> let e' = expr builder e symbol_table in L.build_sitofp e' float_t ("tmp" ^ g_var_suffix) builder
       | SCall("int_of", [e]) -> let e' = expr builder e symbol_table in L.build_fptosi e' i32_t ("tmp" ^ g_var_suffix) builder
       | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 symbol_table in let e3' = expr builder e3 symbol_table in let e4' = expr builder e4 symbol_table
