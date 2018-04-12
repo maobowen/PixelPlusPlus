@@ -1,0 +1,7 @@
+func int main() {
+  arr img1 = load("./img2.png");
+  save(img1, "./img2_filtered.png");
+  |scifi|@img1;
+  close(img1, 0);
+  return 0;
+}
