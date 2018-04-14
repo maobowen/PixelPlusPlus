@@ -87,3 +87,7 @@ $RECYCLE.BIN/
 
 
 # End of https://www.gitignore.io/api/linux,macos,ocaml,windows
+
+*.ll
+*.s
+*.exe
