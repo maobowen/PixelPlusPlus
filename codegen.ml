@@ -95,13 +95,13 @@ let translate (globals, functions) compiling_builtin =
 
   let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func, collage_func) = 
   if compiling_builtin 
-    then (printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func)
+    then (printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func)
     else (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
           L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
-          L.declare_function "collage" collage_t the_module,
           L.declare_function "apply_conv_filter" apply_conv_filter_t the_module,
           L.declare_function "apply_conv_filters" apply_conv_filters_t the_module, 
-          L.declare_function "scifi_filter" scifi_t the_module) 
+          L.declare_function "scifi_filter" scifi_t the_module,
+          L.declare_function "collage" collage_t the_module) 
   
   in
 
