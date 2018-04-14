@@ -137,6 +137,7 @@ let check (globals, functions) compiling_builtin =
   in let built_in_decls = 
     StringMap.add "load" {typ = Arr; fname = "load"; formals = [(String, "x")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls = StringMap.add "length" {typ = Int; fname = "length"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "f_len" {typ = Int; fname = "f_len"; formals = [(Kernel, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "close" {typ = Void; fname = "close"; formals = [(Arr, "x"); (Int, "y")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls = StringMap.add "width" {typ = Int; fname = "width"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
   in let built_in_decls = StringMap.add "height" {typ = Int; fname = "height"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
@@ -144,6 +145,8 @@ in let built_in_decls = StringMap.add "close" {typ = Void; fname = "close"; form
 in let built_in_decls = StringMap.add "init" {typ = Arr; fname = "init"; formals = [(Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "imgcpy" {typ = Arr; fname = "imgcpy"; formals = [(Arr, "i1"); (Arr, "i2")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "float_of" {typ = Float; fname = "float_of"; formals = [(Int, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "set_hw" {typ = Arr; fname = "set_hw"; formals = [(Arr, "i1"); (Int, "h"); (Int, "w")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "get_filter" {typ = Arr; fname = "get_filter"; formals = [(Kernel, "k"); (Int, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "int_of" {typ = Int; fname = "int_of"; formals = [(Float, "x")]; locals=[]; body=[]} built_in_decls
 
 in let build_in_decls_final = (if not compiling_builtin then 
@@ -296,7 +299,7 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
           | Less | Leq | Greater | Geq
                      when same && (t1 = Int || t1 = Float) -> Bool
           | And | Or when same && t1 = Bool -> Bool
-          | At when t1 = String && t2 = Arr -> Void
+          | At when t1 = Kernel && t2 = Arr -> Void
           | _ -> raise (
         Failure ("illegal binary operator " ^
                        string_of_typ t1 ^ " " ^ string_of_op op ^ " " ^
@@ -326,9 +329,9 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
       | Filterliteral fl -> 
         let rec check_filter fl = match fl with
             [] -> raise (Failure ("illegal empty filter"))
-          | [f] -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr" || f' = SFilter "scifi") then [(t, f')] else raise (Failure ("illegal filter keywords"))
-          | f :: n -> let (t, f') = expr f symbols in if (f' = SFilter "blur" || f' = SFilter "hdr" || f' = SFilter "scifi") then (t, f') :: check_filter n else raise (Failure ("illegal filter keywords"))
-          in (String, SFilterliteral(check_filter fl))
+          | [f] -> let (t, f') = expr f symbols in if true (*(f' = SFilter "blur" || f' = SFilter "hdr" || f' = SFilter "scifi")*) then [(t, f')] else raise (Failure ("illegal filter keywords"))
+          | f :: n -> let (t, f') = expr f symbols in if true (*(f' = SFilter "blur" || f' = SFilter "hdr" || f' = SFilter "scifi")*) then (t, f') :: check_filter n else raise (Failure ("illegal filter keywords"))
+          in (Kernel, SFilterliteral(check_filter fl))
     in
 
     let check_bool_expr e symbols = 

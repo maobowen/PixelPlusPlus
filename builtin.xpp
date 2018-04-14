@@ -250,3 +250,11 @@ func void apply_conv_filter(arr img, arr filter) {
   }
   imgcpy(img, img2);
 }
+/*
+func void apply_conv_filters(arr img, string filters) {
+  int l = f_len(filters);
+  int i = 0;
+  for (i = 0; i < l; i = i + 1) {
+    apply_conv_filter(img, get_filter(filters, i));
+  }
+}*/

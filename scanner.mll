@@ -47,6 +47,7 @@ rule token = parse
 | "int"    { INT }
 | "string" { STRING }
 | "arr"    { ARR }
+| "kernel" { KERNEL }
 | "bool"   { BOOL }
 | "float"  { FLOAT }
 | "void"   { VOID }

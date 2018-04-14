@@ -37,7 +37,8 @@ let translate (globals, functions) compiling_builtin =
   let ip_t       = L.pointer_type i8_t in
   let ip32_t       = L.pointer_type i32_t in
   let struct_t   = L.struct_type context [|i32_t; i32_t; i32_t; ip32_t|] in
-  let structp_t  = L.pointer_type struct_t                  in
+  let structp_t  = L.pointer_type struct_t in
+  let fstruct_t  = L.struct_type context [|i32_t; L.pointer_type structp_t|] in
 
   (* Convert MicroC types to LLVM types *)
   let ltype_of_typ = function
@@ -47,6 +48,7 @@ let translate (globals, functions) compiling_builtin =
     | A.Void  -> void_t
     | A.Arr   -> structp_t
     | A.String -> ip_t
+    | A.Kernel -> L.pointer_type fstruct_t
     (* | t -> raise (Failure ("Type " ^ A.string_of_typ t ^ " not implemented yet")) *)
   in
 
@@ -88,13 +90,15 @@ let translate (globals, functions) compiling_builtin =
   let mtimes_t = L.function_type structp_t [| structp_t; structp_t |] in 
   let scifi_t = L.function_type i32_t [| structp_t |] in
   let apply_conv_filter_t = L.function_type i32_t [| structp_t; structp_t |] in
+  let apply_conv_filters_t = L.function_type i32_t [| structp_t; L.pointer_type fstruct_t |] in
 
-  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, scifi_func) = 
+  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func) = 
   if compiling_builtin 
-    then (printf_func, printf_func, printf_func, printf_func, printf_func, printf_func)
+    then (printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func)
     else (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
           L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
-          L.declare_function "apply_conv_filter" apply_conv_filter_t the_module, 
+          L.declare_function "apply_conv_filter" apply_conv_filter_t the_module,
+          L.declare_function "apply_conv_filters" apply_conv_filters_t the_module, 
           L.declare_function "scifi_filter" scifi_t the_module) 
   
   in
@@ -156,19 +160,29 @@ let translate (globals, functions) compiling_builtin =
       | SNoexpr -> L.const_int i32_t 0
       | SNoassign -> init tp
       | SFilter s -> L.const_string context s 
-      | SFilterliteral e_list -> let len = List.length e_list in let f1 (_, filter_val) =  
-            (match filter_val with 
-              SFilter (s) -> L.const_string context s 
-            | _ -> raise (Failure ("The list should contain only filters!")))
-        in L.const_vector (Array.of_list ((L.const_int i32_t len)::(List.map f1 e_list)))
+      | SFilterliteral s -> 
+      let to_array x = expr builder x symbol_table
+       in let f _ = L.const_pointer_null structp_t
+       in let m1 = List.map to_array s 
+       in let img_array = L.const_array structp_t (Array.of_list (List.map f s))
+       in let ipt = L.define_global ("tmp" ^ g_var_suffix) img_array the_module
+       in let f2 idx val' = (L.build_store val' (L.build_in_bounds_gep ipt [|L.const_int i32_t 0;L.const_int i32_t idx|] "tmp" builder) builder)
+       in let _ = List.mapi f2 m1
+       in let img_array_ptr = L.build_pointercast ipt (L.pointer_type structp_t) ("tmp" ^ g_var_suffix) builder
+       in let const_arr = (L.const_struct context [| L.const_int i32_t (List.length s); img_array_ptr |]  )
+       in let global_arr = L.define_global ("tmp" ^ g_var_suffix) const_arr the_module 
+       in global_arr
       | SId s -> L.build_load (lookup s symbol_table) s builder
       | SArrliteral s -> 
       let to_array x = expr builder x symbol_table
-                        (*| _           -> raise (Failure ("Not yet supported for this array type"))*)
-       in let img_array = L.const_array i32_t (Array.of_list (List.map to_array s))
+       in let f _ = L.const_int i32_t 0
+       in let m1 = List.map to_array s 
+       in let img_array = L.const_array i32_t (Array.of_list (List.map f s))
        in let i32t = L.define_global ("tmp" ^ g_var_suffix) img_array the_module
+       in let f2 idx val' = (L.build_store val' (L.build_in_bounds_gep i32t [|L.const_int i32_t 0;L.const_int i32_t idx|] "tmp" builder) builder)
+       in let _ = List.mapi f2 m1
        in let img_array_ptr = L.build_pointercast i32t ip32_t ("tmp" ^ g_var_suffix) builder
-       in let const_arr = (L.const_struct context [|L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr|]  )
+       in let const_arr = (L.const_struct context [| L.const_int i32_t (List.length s); L.const_int i32_t 0; L.const_int i32_t 0; img_array_ptr |]  )
        in let global_arr = L.define_global ("tmp" ^ g_var_suffix) const_arr the_module 
        in global_arr
       | SArrsub (e, sexpr_list) -> let expr_builder = expr builder e symbol_table in
@@ -249,9 +263,13 @@ let translate (globals, functions) compiling_builtin =
     )
   else (match op with
       A.Mtimes -> L.build_call mtimes_func [|e1';e2'|] "mtimes" builder
-    | A.At ->  let get_vec idx = L.const_extractelement e1' (L.const_int i32_t idx) in let len_lvalue = get_vec 0 in let len = get_optional (L.int64_of_const len_lvalue)
+    | A.At -> L.build_call apply_conv_filters_func [| e2'; e1'|] "apply_conv_filters" builder(*let load_val idx = L.build_load (L.build_in_bounds_gep e1' [| L.const_int i32_t 0;  L.const_int i32_t idx |] "tmp" builder) "tmp" builder in let len_lvalue = load_val 0 in let len = get_optional (L.int64_of_const len_lvalue)
+        in let len = Int64.to_int len in let () =  print_int(len) in 
+        let conv_helper idx = L.build_call apply_conv_filter_func [| e2'; load_val idx |] "apply_conv_filter" builder in
+        conv_helper 1*)
+    (*| A.At ->  let get_vec idx = L.const_extractelement e1' (L.const_int i32_t idx) in let len_lvalue = get_vec 0 in let len = get_optional (L.int64_of_const len_lvalue)
         in let len = Int64.to_int len in let get_string idx = get_optional (L.string_of_const (get_vec idx)) 
-        in let fhelper idx = expr builder (A.Void, SCall((get_string idx) ^ "_filter", [e2])) symbol_table in let rec apply_filter q = (if q = 1 then fhelper q else (let _ = apply_filter (q - 1) in fhelper q)) in apply_filter len
+        in let fhelper idx = expr builder (A.Void, SCall((get_string idx) ^ "_filter", [e2])) symbol_table in let rec apply_filter q = (if q = 1 then fhelper q else (let _ = apply_filter (q - 1) in fhelper q)) in apply_filter len*)
     | _ -> raise (Failure "not implemented yet")
     )
       | SUnop(op, e) ->
@@ -274,6 +292,11 @@ let translate (globals, functions) compiling_builtin =
       | SCall ("printf", [e]) ->
     L.build_call printf_func [| float_format_str ; (expr builder e symbol_table) |]
       "printf" builder
+      | SCall ("set_hw",[e1;e2;e3]) -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table and e3' = expr builder e3 symbol_table in
+        let e4' = L.build_struct_gep e1' 1 ("tmp" ^ g_var_suffix) builder in
+        let _ = L.build_store e2' e4' builder in
+        let e5' = L.build_struct_gep e1' 2 ("tmp" ^ g_var_suffix) builder in
+        let _ = L.build_store e3' e5' builder in e1'
       | SCall ("length", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 0 ("tmp" ^ g_var_suffix) builder in
         let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
@@ -283,7 +306,14 @@ let translate (globals, functions) compiling_builtin =
       | SCall ("width", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 2 ("tmp" ^ g_var_suffix) builder in
         let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
-      
+      | SCall ("f_len", [e]) -> let expr_builder = expr builder e symbol_table in 
+        let expr_builder = L.build_struct_gep expr_builder 0 ("tmp" ^ g_var_suffix) builder in
+        let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
+      | SCall ("get_filter", [e1; e2]) -> let expr_builder = expr builder e1 symbol_table in 
+        let arr_builder = L.build_struct_gep expr_builder 1 "tmp" builder in
+        let abxd = L.build_load arr_builder "tmp" builder in
+        let abxd = L.build_in_bounds_gep abxd [|expr builder e2 symbol_table|] "tmp" builder in
+        let abxd = L.build_load abxd "tmp" builder in abxd
       | SCall("float_of", [e]) -> let e' = expr builder e symbol_table in L.build_sitofp e' float_t ("tmp" ^ g_var_suffix) builder
       | SCall("int_of", [e]) -> let e' = expr builder e symbol_table in L.build_fptosi e' i32_t ("tmp" ^ g_var_suffix) builder
       | SCall ("init", [e2; e3; e4]) -> let e2' = expr builder e2 symbol_table in let e3' = expr builder e3 symbol_table in let e4' = expr builder e4 symbol_table

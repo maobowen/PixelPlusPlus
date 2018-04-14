@@ -7,7 +7,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET QUOTE WRAP COMMA PLUS MINUS TIMES DIVIDE TRANS MTIMES EXPO ASSIGN
 %token NOT EQ NEQ LT LEQ GT GEQ AND OR
 %token FIL AT
-%token RETURN IF ELSE FOR WHILE INT ARR BOOL FLOAT VOID STRING
+%token RETURN IF ELSE FOR WHILE INT ARR BOOL FLOAT VOID STRING KERNEL
 %token <int> LITERAL
 %token <bool> BLIT
 %token <string> ID FLIT FILTER ID2
@@ -65,6 +65,7 @@ typ:
   | FLOAT   { Float  }
   | VOID    { Void   }
   | ARR     { Arr    }
+  | KERNEL  { Kernel }
   | STRING  { String }
 
 global:
@@ -122,7 +123,7 @@ expr:
   | LPAREN expr RPAREN { $2                   }
   /*add expr*/
   | LBRACKET args_list RBRACKET   {       Arrliteral(List.rev $2)       }
-  | WRAP filter_list WRAP         {       Filterliteral(List.rev $2)    }
+  | WRAP filter_list WRAP         {       Filterliteral($2)    }
   | ID2                           {       Slit($1)                      }
 
 arr_sub_opt:
@@ -137,8 +138,8 @@ args_opt:
   | args_list  { List.rev $1 }
 
 filter_list:
-    FILTER                      { [Filter($1)]       }
-  | filter_list FIL FILTER { Filter($3) :: $1 }
+    expr                 {    [$1] }
+  | filter_list FIL expr { $3 :: $1 }
 
 args_list:
     expr                    { [$1] }
