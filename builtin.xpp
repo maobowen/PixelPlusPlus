@@ -81,6 +81,24 @@ func arr mtimes(arr img1, arr img2) {
   return img3;
 }
 
+func arr collage(arr img1, arr img2) {
+  arr img3;
+  int i;
+  int j;
+  int len1;
+  int len2;
+  len1 = length(img1);
+  len2 = length(img2);
+  img3 = init(length(img1)+length(img2), height(img1)+height(img2), width(img1));
+  for (i = 0; i < len1; i = i + 1) {
+    img3[i] = img1[i];             
+  }
+  for (i = 0; i < len2; i = i + 1) {
+    img3[len1+i] = img2[i];
+  }
+  return img3;
+}
+
 func void rotate(arr img, int angle) {
   /* Only support rotate left(angle = -90), rotate right(angle = 90) and rotate 180 (angle = 180) */
   int len;

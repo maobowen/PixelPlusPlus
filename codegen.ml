@@ -91,12 +91,14 @@ let translate (globals, functions) compiling_builtin =
   let scifi_t = L.function_type i32_t [| structp_t |] in
   let apply_conv_filter_t = L.function_type i32_t [| structp_t; structp_t |] in
   let apply_conv_filters_t = L.function_type i32_t [| structp_t; L.pointer_type fstruct_t |] in
+  let collage_t = L.function_type structp_t [| structp_t; structp_t |] in
 
-  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func) = 
+  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func, collage_func) = 
   if compiling_builtin 
     then (printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func)
     else (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
           L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
+          L.declare_function "collage" collage_t the_module,
           L.declare_function "apply_conv_filter" apply_conv_filter_t the_module,
           L.declare_function "apply_conv_filters" apply_conv_filters_t the_module, 
           L.declare_function "scifi_filter" scifi_t the_module) 
@@ -344,6 +346,8 @@ let translate (globals, functions) compiling_builtin =
         let _ = L.build_store e2_w e1_w builder in
         let _ = L.build_store e2_img e1_img builder in
         e1'
+      | SCall ("collage", [e1; e2]) ->
+    L.build_call collage_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "collage" builder
       | SCall ("printline", [e]) -> 
     L.build_call printf_func [| string_format_str ; (expr builder e symbol_table) |]
       "printf" builder

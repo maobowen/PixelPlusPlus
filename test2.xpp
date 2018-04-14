@@ -1,7 +1,14 @@
 func int main() {
-  arr img1 = load("./img2.png");
+  /* arr img1 = load("./img2.png");
   |scifi|@img1;
   save(img1, "./img2_filtered.png");
   close(img1, 0);
+  return 0; */
+  arr img1 = load("./img2.png");
+  arr img2 = load("./img2.png");
+  arr img3 = collage(img1, img2);
+  save(img3, "./img3_collaged.png");
+  close(img1, 0);
+  close(img2, 0);
   return 0;
 }
