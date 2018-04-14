@@ -153,6 +153,7 @@ in let build_in_decls_final = (if not compiling_builtin then
    let built_in_decls = StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "apply_conv_filter" {typ = Void; fname = "apply_conv_filter"; formals = [(Arr, "img"); (Arr, "filter")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "crop" {typ = Arr; fname = "crop"; formals = [(Arr, "img"); (Int, "x"); (Int, "y"); (Int, "h"); (Int, "w")]; locals=[]; body=[]} built_in_decls
 in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_final in
   (* Add function name to symbol table *)
   let add_func map fd =
