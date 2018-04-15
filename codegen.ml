@@ -61,10 +61,6 @@ let translate (globals, functions) compiling_builtin =
   
   let g_var_suffix = if compiling_builtin then "_bn" else "" in
 
-  let get_optional opt = match opt with
-    Some x -> x
-  | _ -> raise (Failure ("Failed to get optional")) in 
-
   let global_vars = 
     let global_var m (t, n) = StringMap.add n (L.define_global (n ^ g_var_suffix) (init t) the_module) m in
     List.fold_left global_var StringMap.empty globals in
@@ -151,7 +147,6 @@ let translate (globals, functions) compiling_builtin =
 
     let rec lookup n var_list = match var_list with 
                            hd::tl -> (try StringMap.find n hd with Not_found -> lookup n tl)
-                         | [hd] -> StringMap.find n hd
                          | _ -> raise (Failure("wrong variable tables"))
     in
 
@@ -296,11 +291,7 @@ let translate (globals, functions) compiling_builtin =
       | SCall ("printf", [e]) ->
     L.build_call printf_func [| float_format_str ; (expr builder e symbol_table) |]
       "printf" builder
-      | SCall ("set_hw",[e1;e2;e3]) -> let e1' = expr builder e1 symbol_table and e2' = expr builder e2 symbol_table and e3' = expr builder e3 symbol_table in
-        let e4' = L.build_struct_gep e1' 1 ("tmp" ^ g_var_suffix) builder in
-        let _ = L.build_store e2' e4' builder in
-        let e5' = L.build_struct_gep e1' 2 ("tmp" ^ g_var_suffix) builder in
-        let _ = L.build_store e3' e5' builder in e1'
+      
       | SCall ("length", [e]) -> let expr_builder = expr builder e symbol_table in 
         let expr_builder = L.build_struct_gep expr_builder 0 ("tmp" ^ g_var_suffix) builder in
         let len = L.build_load expr_builder ("tmp" ^ g_var_suffix) builder in len
@@ -388,7 +379,7 @@ let translate (globals, functions) compiling_builtin =
                                               let symbol_table3 = (symbol_table2 :: (List.tl symbol_table)) in
                                                 (*let _ = expr builder (tp, SId(s)) symbol_table3 in *)
                                           let _ = match e2 with
-                                              (Void, SNoassign) -> init tp
+                                              (A.Void, SNoassign) -> init tp
                                             | _ -> expr builder (tp, SAssign(s, e2)) symbol_table3
            in (builder, symbol_table3)
       | SReturn e -> let _ = match fdecl.styp with
