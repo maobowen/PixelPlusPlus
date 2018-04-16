@@ -200,6 +200,32 @@ func arr crop(arr img, int x, int y, int newh, int neww) {
   return img2;
 }
 
+func arr flip(arr img) {
+  arr img2;
+  int len;
+  int h;
+  int w;
+  int i;
+  int j;
+  int k;
+
+  len = length(img);
+  h = height(img);
+  w = width(img);
+
+  img2 = init(len, h, w);
+
+  for (i = 0; i < h; i = i + 1) {
+    for (j = 0; j < w; j = j + 1) {
+      for (k = 0; k < 3; k = k + 1) {
+        img2[i * w * 3 + j * 3 + k] = img[i * w * 3 + (w - 1 - j) * 3 + k];   
+      }
+    }
+  } 
+
+  return img2;
+}
+
 /* Built-in filteres */
 
 func void scifi_filter(arr img) {
