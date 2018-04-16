@@ -327,6 +327,14 @@ let translate (globals, functions) compiling_builtin =
         in let _ = L.build_store e4' e7'' builder
         in let e8'' = L.build_struct_gep e1' 3 ("tmp" ^ g_var_suffix) builder
         in let _ = L.build_store mptr e8'' builder in e1'
+      | SCall("set",[e1;e2;e3]) -> 
+        let e1' = expr builder e1 symbol_table in 
+        let e2' = expr builder e2 symbol_table in
+        let e3' = expr builder e3 symbol_table in
+        let e2'' = L.build_struct_gep e1' 1 ("temp" ^g_var_suffix) builder in
+        let _ = L.build_store e2' e2'' builder in
+        let e3'' = L.build_struct_gep e1' 2 ("temp" ^g_var_suffix) builder in
+        let _ = L.build_store e3' e3'' builder in e1'
       | SCall ("imgcpy", [e1;e2]) -> let e1' = expr builder e1 symbol_table in let e2' = expr builder e2 symbol_table in
         let e1_l = L.build_struct_gep e1' 0 ("tmp" ^ g_var_suffix) builder in
         let e1_h = L.build_struct_gep e1' 1 ("tmp" ^ g_var_suffix) builder in

@@ -145,7 +145,7 @@ in let built_in_decls = StringMap.add "close" {typ = Void; fname = "close"; form
 in let built_in_decls = StringMap.add "init" {typ = Arr; fname = "init"; formals = [(Int, "length");(Int, "w");(Int, "h")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "imgcpy" {typ = Arr; fname = "imgcpy"; formals = [(Arr, "i1"); (Arr, "i2")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "float_of" {typ = Float; fname = "float_of"; formals = [(Int, "x")]; locals=[]; body=[]} built_in_decls
-
+in let built_in_decls = StringMap.add "set" {typ = Void; fname = "set"; formals = [(Arr, "filter");(Int, "width");(Int, "height")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "get_filter" {typ = Arr; fname = "get_filter"; formals = [(Kernel, "k"); (Int, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "int_of" {typ = Int; fname = "int_of"; formals = [(Float, "x")]; locals=[]; body=[]} built_in_decls
 

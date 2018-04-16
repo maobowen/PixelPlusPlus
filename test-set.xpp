@@ -1,0 +1,5 @@
+func int main() {
+  arr filter = [1,2,3,4];
+  set(filter, 2, 1);
+  return 0;
+}

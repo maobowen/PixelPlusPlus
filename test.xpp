@@ -18,11 +18,10 @@ func int forLoopTest() {
   int accu;
   int i;
   i = 0;
-  k = 0;
+  int k;
   accu = 0;
   for (i = a; i < b; i = i + 1) {
     accu = accu + i;
-    int k;
     for (k = b; k < b; k = k + 1){
           accu = accu + k;
     }
