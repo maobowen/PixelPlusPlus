@@ -20,6 +20,8 @@ func int main() {
   arr img7 = flip(img6);
   save(img7, "./img2_flipped.png");
   close(img6, 0);
-
+  
+  arr filter = [1,2,3,4];
+  set(filter,1,2);
   return 0;
 }
