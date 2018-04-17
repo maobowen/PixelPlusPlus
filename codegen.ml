@@ -86,15 +86,12 @@ let translate (globals, functions) compiling_builtin =
   let mtimes_t = L.function_type structp_t [| structp_t; structp_t |] in 
   let scifi_t = L.function_type i32_t [| structp_t |] in
   let apply_conv_filter_t = L.function_type i32_t [| structp_t; structp_t |] in
-  let apply_conv_filters_t = L.function_type i32_t [| structp_t; L.pointer_type fstruct_t |] in 
+  let apply_conv_filters_t = L.function_type i32_t [| L.pointer_type fstruct_t; structp_t |] in 
   let collage_t = L.function_type structp_t [| structp_t; structp_t |] in 
   let crop_t = L.function_type structp_t [| structp_t; i32_t; i32_t; i32_t; i32_t |] in 
   let flip_t = L.function_type structp_t [| structp_t |] in
-
   let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func, collage_func, crop_func, flip_func) = 
-  if compiling_builtin 
-    then (printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func, printf_func)
-    else (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
+         (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
           L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
           L.declare_function "apply_conv_filter" apply_conv_filter_t the_module,
           L.declare_function "apply_conv_filters" apply_conv_filters_t the_module, 
@@ -264,13 +261,7 @@ let translate (globals, functions) compiling_builtin =
     )
   else (match op with
       A.Mtimes -> L.build_call mtimes_func [|e1';e2'|] "mtimes" builder
-    | A.At -> L.build_call apply_conv_filters_func [| e2'; e1'|] "apply_conv_filters" builder(*let load_val idx = L.build_load (L.build_in_bounds_gep e1' [| L.const_int i32_t 0;  L.const_int i32_t idx |] "tmp" builder) "tmp" builder in let len_lvalue = load_val 0 in let len = get_optional (L.int64_of_const len_lvalue)
-        in let len = Int64.to_int len in let () =  print_int(len) in 
-        let conv_helper idx = L.build_call apply_conv_filter_func [| e2'; load_val idx |] "apply_conv_filter" builder in
-        conv_helper 1*)
-    (*| A.At ->  let get_vec idx = L.const_extractelement e1' (L.const_int i32_t idx) in let len_lvalue = get_vec 0 in let len = get_optional (L.int64_of_const len_lvalue)
-        in let len = Int64.to_int len in let get_string idx = get_optional (L.string_of_const (get_vec idx)) 
-        in let fhelper idx = expr builder (A.Void, SCall((get_string idx) ^ "_filter", [e2])) symbol_table in let rec apply_filter q = (if q = 1 then fhelper q else (let _ = apply_filter (q - 1) in fhelper q)) in apply_filter len*)
+    | A.At -> L.build_call apply_conv_filters_func [| e1'; e2'|] "apply_conv_filters" builder
     | _ -> raise (Failure "not implemented yet")
     )
       | SUnop(op, e) ->
@@ -362,6 +353,8 @@ let translate (globals, functions) compiling_builtin =
     L.build_call crop_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table); (expr builder e3 symbol_table); (expr builder e4 symbol_table); (expr builder e5 symbol_table); |] "crop" builder
       | SCall ("apply_conv_filter", [e1; e2]) ->
     L.build_call apply_conv_filter_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "apply_conv_filter" builder
+      | SCall ("apply_conv_filters", [e1; e2]) ->
+    L.build_call apply_conv_filters_func [| expr builder e1 symbol_table; expr builder e2 symbol_table |] "apply_conv_filters" builder
       | SCall("load", [e]) ->
     L.build_call loadimg_func [| (expr builder e symbol_table) |] "load" builder
       | SCall("close", [e; e2]) ->
