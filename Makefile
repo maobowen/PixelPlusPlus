@@ -10,5 +10,5 @@ toplevel.native :
 .PHONY : clean
 clean :
 	ocamlbuild -clean
-	rm -rf toplevel scanner.ml parser.ml parser.mli
+	rm -rf toplevel.native scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
