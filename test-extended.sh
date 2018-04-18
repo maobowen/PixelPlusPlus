@@ -14,16 +14,28 @@ CheckPass() {
 
     echo "Testing ${basename}..."
 
-    # Build the program
+    # Build Pixel++ program
     ../${TOPLEVEL} $1 > ${basename}.ll
     ${LLC} ${basename}.ll > ${basename}.s
     gcc -o ${basename} ${basename}.s builtin.s load.o -lm
-    ./${basename} > ${basename}.out
+    ./${basename} > ${basename}.xpp.out
 
     # Testing
+    if [[ -f ${basename}.out ]]; then  # If the comparison file exists
+        if diff -bB ${basename}.xpp.out ${basename}.out > ${basename}.diff; then
+            echo "Test passed."
+        else
+            echo "Test failed."
+            diff -bB ${basename}.xpp.out ${basename}.out
+        fi
+    else
+        # Build verification program
+        g++ -std=c++11 -g -Wall ${basename}-v.cpp -o ${basename}-v
+        ./${basename}-v
+    fi
 
     # Clean up
-    rm -f ${basename}.ll ${basename}.s ${basename} ${basename}.out
+    rm -f ${basename}.ll ${basename}.s ${basename} ${basename}.xpp.out ${basename}-v
 }
 
 cd ${basedir}
