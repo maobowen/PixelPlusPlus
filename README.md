@@ -7,10 +7,10 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 ## Group Members
 
 - Jiayang Li	jl4305@columbia.edu
-- Yilan He	yh2961@columbia.edu
-- Bowen Mao	bm2734@columbia.edu
-- Nana Pang	np2630@columbia.edu
-- Yunxuan Sun	ys3065@columbia.edu
+	 Yilan He	yh2961@columbia.edu
+	 Bowen Mao	bm2734@columbia.edu
+	 Nana Pang	np2630@columbia.edu
+	 Yunxuan Sun	ys3065@columbia.edu
 
 ## Configuration
 
@@ -73,7 +73,7 @@ If you wish to build it again, use `make clean` before `make` to clean intermedi
 	ocamlbuild -clean
 	rm -rf toplevel scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o *.s *.ll *.out *.exe
-	
+
 ### Compilation and Execution
 
 You can compile and execute the codes using our Makefile. Detailed procedure is listed as below:
@@ -94,7 +94,22 @@ You can also clean intermediate and executable files before building again using
 
 	make clean
 
-## Hello World
+## Deliverable #2: Scanner and Parser
+
+### Test Script
+
+We have also provided our own test cases. There are 10 test cases, 5 of which will compile and execute successfully and the others will not compile.
+
+To test our test script, just run:
+	
+
+```
+./testall.sh
+```
+
+For positive test cases, a message "positive test succeeded" will be printed, which indicates that the files are successfully compiled and the results match our expectation. For negative test cases, a message "negative test succeeded" will be displayed to indicate that the files are failed to compile and the error matches our expectation.
+
+## Deliverable #4: Hello World
 
 ### Test Suites
 
@@ -114,24 +129,33 @@ To test our test suites, just run:
 
 For all the five test programs, a message "Test passed." will be printed, which indicates that the files are successfully compiled and the results match our expectation. 
 
-## Scanner and Parser
+
+
+## Deliverable #5: Extended Testsuite
+
+### Test Suites
+
+Our test suites are located under the `extended-tests/` directory. For this deliverable, we have 7 positive test cases, whose filenames are in the format `extended-pos-x.xpp`, to test various functionalities of the Pixel++ language. We also have 3 negative test cases, whose filenames are in the format `extended-neg-x.xpp`, which will fail to compile due to semantic errors.
+
+- `extended-pos-0.xpp` demonstrates a built-in filter called "scifi", which is an binary operation. It takes an image and produces an image with the filter applied.
+- `extended-pos-1.xpp` demonstrates the built-in image collage function, which takes images of the same width and combine them vertically. 
+- `extended-pos-2.xpp` implements the built-in image cropping function. It lets the users specifiy an area by the starting point, width, and height and produces a cropped image.
+- `extended-pos-3.xpp` implements the built-in image flipping function. It takes an image and produces an horizontally flipped one.
+- `extended-pos-4.xpp` implements 
+- `extended-pos-5.xpp` implements an customized filter on an image.
+- `extended-pos-6.xpp` implements 
+- `extended-neg-0.xpp` produces an error. 
+- `extended-neg-1.xpp` produces an error.  
+- `extended-neg-2.xpp` produces an error.  
 
 ### Test Script
 
-We have also provided our own test cases. There are 10 test cases, 5 of which will compile and execute successfully and the others will not compile.
+To test our test suites, just run:
 
-To test our test script, just run:
-	
-	./testall.sh
+```
+./cp.sh
+```
 
-For positive test cases, a message "positive test succeeded" will be printed, which indicates that the files are successfully compiled and the results match our expectation. For negative test cases, a message "negative test succeeded" will be displayed to indicate that the files are failed to compile and the error matches our expectation.
+For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the files are successfully compiled and the results match our expectation. 
 
------
-
-So far, we have implemented all the syntax we have defined except:
-
-1. Array subscript
-2. Built-in functions
-
-We will add those in the future implementation.
-
+For all the 3 negative test cases, a message "Negative test passed." will be printed, which indicates that the files fail to compile and the errors match our expectation. 

@@ -1,3 +1,4 @@
+/* test case for customized filter */
 func int main() {
   printline("testing array");
   arr img = load("./img6.png");

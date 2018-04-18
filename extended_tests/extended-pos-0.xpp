@@ -1,0 +1,8 @@
+/* test case for builtin scifi filter */
+func int main() {
+  arr img1 = load("./img2.png");
+  |scifi|@img1;
+  save(img1, "./img2_filtered.png");
+  close(img1, 0);
+  return 0;
+}

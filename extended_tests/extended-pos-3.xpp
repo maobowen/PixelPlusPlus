@@ -1,0 +1,8 @@
+/* test case for image flipping */
+func int main() {
+  arr img6 = load("./img2.png");
+  arr img7 = flip(img6);
+  save(img7, "./img2_flipped.png");
+  close(img6, 0);
+  return 0;
+}
