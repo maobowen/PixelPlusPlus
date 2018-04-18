@@ -148,7 +148,8 @@ Our test suites are located under the `extended-tests/` directory. For this deli
 To test our test suites, just run:
 
 ```
-./cp.sh
+make clean && make -C builtin clean && make -C builtin
+./test-extended.sh
 ```
 
 For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the files are successfully compiled and the results match our expectation. 
