@@ -15,7 +15,7 @@ int main() {
     uint8_t* image1 = stbi_load(path1, &width1, &height1, &bpp, CHANNEL_NUM);
     int length1 = width1 * height1 * CHANNEL_NUM;
 
-    const char* path2 = "./extended-pos-3-v.png";
+    const char* path2 = "./extended-pos-5-v.png";
     uint8_t image2[length1];
 
     for (int i = 0; i < length1; i++) {
