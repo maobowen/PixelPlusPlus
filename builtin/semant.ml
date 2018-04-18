@@ -369,7 +369,7 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
             | []              -> []
           in let symbols_up = StringMap.empty :: symbols in (SBlock(List.map fst (check_stmt_list sl symbols_up)), symbols)
       | Var (b, e) -> 
-          let (te', e') = expr e symbols in 
+          let (te', _) = expr e symbols in 
             if (fst b) != te' && te' != Void then raise (Failure ("illegal assignment " ^ string_of_typ (fst b) ^ " = " ^ 
             string_of_typ te'))
           else
