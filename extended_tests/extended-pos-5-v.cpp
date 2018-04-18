@@ -28,7 +28,7 @@ int main() {
 	    int pixel2 = ((height - 1 - i) * width1 + (width1 - 1 - j)) * 3;
 	    image2[pixel] = image3[pixel2];
 	    image2[pixel + 1] = image3[pixel2 + 1];
-	    image2[pixel + 3] = image3[pixel2 + 2];
+	    image2[pixel + 2] = image3[pixel2 + 2];
 	}
     }
     
