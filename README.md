@@ -138,7 +138,7 @@ Our test suites are located under the `extended-tests/` directory. For this deli
 - `extended-pos-3.xpp` demonstrates an Gaussian blur filter, which takes an image and adds blur operation on that image. 
 - `extended-pos-4.xpp` implements the built-in rotate function. It takes an image and rotate the image with 180 degrees.
 - `extended-pos-5.xpp` demonstrates an sci fi effect filter, which takes an image and adds sci fi effect on that image. 
-- `extended-pos-5.xpp` implements the reverse sorting algorithm with input: 9 1 2 8 3 and output: 9 8 3 2 1.
+- `extended-pos-6.xpp` implements the reverse sorting algorithm with input: 9 1 2 8 3 and output: 9 8 3 2 1.
 - `extended-neg-0.xpp` Test undeclared variable and produce an error: Fatal error: exception Failure("undeclared identifier d").
 - `extended-neg-1.xpp` Test unmatched type in assignment and produce an error: Fatal error: exception Failure("illegal assignment int = string").   
 - `extended-neg-2.xpp` Test unmatched type in binary operation and produce an error: Fatal error: exception Failure("illegal binary operator int + string in a + b").  
