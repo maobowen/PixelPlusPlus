@@ -3,7 +3,7 @@ int j;
 int newvar;
 int superpower;
 float f;
-String s;
+string s;
 
 func void temp()
 {

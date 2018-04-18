@@ -94,7 +94,7 @@ You can compile and execute an Pixel++ program (supposing the name of the progra
 4. If you would like to use any built-in functions or filters to process images, compile the built-in library:
 	
 		make -C builtin/ clean
-		make -C builtin
+		make -C builtin/
 		./builtin/toplevel.native -c2 ./builtin/builtin.xpp > builtin.ll
 		llc builtin.ll > builtin.s
 		gcc -std=c99 -Wall -c load.c
@@ -182,6 +182,8 @@ To test our test suites, just run:
 	make -C builtin/ clean && make -C builtin/
 	./test-extended.sh
 
-For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the programs are successfully compiled or the output results match our expectation. 
+For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the programs are successfully compiled or the output results match our expectation.
+
+> For the first 6 positive test cases, the images generated are available under the `extended-tests/` directory.
 
 For all the 3 negative test cases, a message "Negative test passed." will be printed, which indicates that the programs fail to compile and the errors match our expectation.
