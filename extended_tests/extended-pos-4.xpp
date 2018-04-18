@@ -1,8 +1,0 @@
-/* test case for height, width setting */
-func int main() {
-  arr filter = [1,2,3,4];
-  set(filter,1,2);
-  print(height(filter));
-  print(width(filter));
-  return 0;
-}

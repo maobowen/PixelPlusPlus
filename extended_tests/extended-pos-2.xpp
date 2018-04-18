@@ -1,8 +1,8 @@
-/* test case for image cropping */
+/* Test case: horizontal flipping */
 func int main() {
-    arr img1 = load("./darli-fra.png");
-    arr img2 = crop(img1,  0, 700, 1080, 600);
-    save(img2, "./darli-fra_cropped.png");
+    arr img1 = load("./image.png");
+    arr img2 = flip(img1);
+    save(img2, "./image_flipped.png");
     close(img1, 0);
     return 0;
 }

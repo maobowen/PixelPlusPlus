@@ -1,8 +1,10 @@
-/* test case for image flipping */
+/* Test case: Gaussian blur 5x5 */
 func int main() {
-    arr img1 = load("./img2.png");
-    arr img2 = flip(img1);
-    save(img2, "./img2_flipped.png");
-    close(img1, 0);
+    arr img = load("./image.png");
+    arr filter = [1, 4, 7, 4, 1, 4, 16, 26, 16, 4, 7, 26, 41, 26, 7, 4, 16, 26, 16, 4, 1, 4, 7, 4, 1];
+    set(filter, 5, 5);
+    |filter|@img;
+    save(img, "./image_blur.png");
+    close(img, 0);
     return 0;
 }

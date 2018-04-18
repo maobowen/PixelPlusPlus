@@ -1,10 +1,8 @@
-/* test case for image collage */
+/* Test case: cropping */
 func int main() {
-    arr img1 = load("./img2.png");
-    arr img2 = load("./img2.png");
-    arr img3 = collage(img1, img2);
-    save(img3, "./img2_collaged.png");
+    arr img1 = load("./image.png");
+    arr img2 = crop(img1, 0, 350, 540, 300);
+    save(img2, "./image_cropped.png");
     close(img1, 0);
-    close(img2, 0);
     return 0;
 }
