@@ -150,7 +150,7 @@ in let built_in_decls = StringMap.add "get_filter" {typ = Arr; fname = "get_filt
 in let built_in_decls = StringMap.add "int_of" {typ = Int; fname = "int_of"; formals = [(Float, "x")]; locals=[]; body=[]} built_in_decls
 
 in let build_in_decls_final = (if not compiling_builtin then 
-   let built_in_decls = StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+   let built_in_decls = StringMap.add "scifi_filter" {typ = Void; fname = "scifi_filter"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "collage" {typ = Arr; fname = "collage"; formals = [(Arr, "img1"); (Arr, "img2")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "apply_conv_filter" {typ = Void; fname = "apply_conv_filter"; formals = [(Arr, "img"); (Arr, "filter")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "apply_conv_filters" {typ = Void; fname = "apply_conv_filters"; formals = [(Kernel, "filters");(Arr, "img")]; locals=[]; body=[]} built_in_decls
