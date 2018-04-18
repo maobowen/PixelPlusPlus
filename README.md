@@ -7,10 +7,10 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 ## Group Members
 
 - Jiayang Li	jl4305@columbia.edu
-	 Yilan He	yh2961@columbia.edu
-	 Bowen Mao	bm2734@columbia.edu
-	 Nana Pang	np2630@columbia.edu
-	 Yunxuan Sun	ys3065@columbia.edu
+- Yilan He	yh2961@columbia.edu
+- Bowen Mao	bm2734@columbia.edu
+- Nana Pang	np2630@columbia.edu
+- Yunxuan Sun	ys3065@columbia.edu
 
 ## Configuration
 
@@ -98,14 +98,11 @@ You can also clean intermediate and executable files before building again using
 
 ### Test Script
 
-We have also provided our own test cases. There are 10 test cases, 5 of which will compile and execute successfully and the others will not compile.
+Our test suites are located under the `syntax_tests/` directory. For this deliverable, there are 10 test cases, 5 of which will compile and execute successfully and the others will not compile.
 
 To test our test script, just run:
 	
-
-```
-./testall.sh
-```
+	./test-syntax.sh
 
 For positive test cases, a message "positive test succeeded" will be printed, which indicates that the files are successfully compiled and the results match our expectation. For negative test cases, a message "negative test succeeded" will be displayed to indicate that the files are failed to compile and the error matches our expectation.
 
@@ -113,7 +110,7 @@ For positive test cases, a message "positive test succeeded" will be printed, wh
 
 ### Test Suites
 
-Our test suites are located under the `tests/` directory. For this deliverable, we write five test cases, whose filenames are in the format `test-helloworld-x.xpp`, to test various functionalities of the Pixel++ language.
+Our test suites are located under the `helloworld_tests/` directory. For this deliverable, we write five test cases, whose filenames are in the format `test-helloworld-x.xpp`, to test various functionalities of the Pixel++ language.
 
 - `test-helloworld-0.xpp` prints a string `Hello, Pixel++!`. It mainly tests the built-in function `printline()`, which prints a string to the standard output. 
 - `test-helloworld-1.xpp` prints the first 10 Fibonacci numbers. It tests the built-in function `print()`, which prints an integer. Also it verifies that functions in Pixel++ could be recursive.
@@ -128,8 +125,6 @@ To test our test suites, just run:
 	./test-helloworld.sh
 
 For all the five test programs, a message "Test passed." will be printed, which indicates that the files are successfully compiled and the results match our expectation. 
-
-
 
 ## Deliverable #5: Extended Testsuite
 
@@ -158,4 +153,4 @@ To test our test suites, just run:
 
 For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the files are successfully compiled and the results match our expectation. 
 
-For all the 3 negative test cases, a message "Negative test passed." will be printed, which indicates that the files fail to compile and the errors match our expectation. 
+For all the 3 negative test cases, a message "Negative test passed." will be printed, which indicates that the files fail to compile and the errors match our expectation.

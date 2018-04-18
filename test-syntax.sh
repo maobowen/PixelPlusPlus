@@ -1,6 +1,6 @@
 #!/bin/bash
 
-files="tests/test-*.xpp tests/fail-*.xpp"
+files="syntax_tests/test-*.xpp syntax_tests/fail-*.xpp"
 
 TOPLEVEL="./toplevel.native"
 
