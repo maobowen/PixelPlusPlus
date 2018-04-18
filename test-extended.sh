@@ -5,7 +5,10 @@ files="extended-*.xpp"
 
 TOPLEVEL="./toplevel.native"
 LLC="llc"
-CLANG="clang"
+CC="gcc"
+CXX="g++"
+CFLAGS="-std=c99 -Wall"
+CXXFLAGS="-std=c++11 -Wall"
 HASH="sha256sum"
 
 CheckPass() {
@@ -17,7 +20,7 @@ CheckPass() {
     # Build Pixel++ program
     ../${TOPLEVEL} $1 > ${basename}.ll
     ${LLC} ${basename}.ll > ${basename}.s
-    gcc -o ${basename} ${basename}.s builtin.s load.o -lm
+    ${CC} ${CFLAGS} -o ${basename} ${basename}.s builtin.s load.o -lm
     ./${basename} > ${basename}.xpp.out
 
     # Testing
@@ -32,7 +35,7 @@ CheckPass() {
         rm -f ${basename}.diff
     else
         # Build verification program
-        g++ -std=c++11 -g -Wall ${basename}-v.cpp -o ${basename}-v
+        ${CXX} ${CXXFLAGS} ${basename}-v.cpp -o ${basename}-v
         ./${basename}-v
         # Compare two images
         hash1=`${HASH} ${basename}.png | cut -d\  -f1`
@@ -73,7 +76,7 @@ cd ${basedir}
 # Build built-in and C libraries
 ../builtin/${TOPLEVEL} -c2 ../builtin/builtin.xpp > builtin.ll
 ${LLC} builtin.ll > builtin.s
-gcc -std=c99 -c ../load.c
+${CC} ${CFLAGS} -c ../load.c
 # Start testing
 for file in $files
 do

@@ -76,23 +76,52 @@ If you wish to build it again, use `make clean` before `make` to clean intermedi
 
 ### Compilation and Execution
 
-You can compile and execute the codes using our Makefile. Detailed procedure is listed as below:
+You can compile and execute an Pixel++ program (supposing the name of the program is `myprogram.xpp`) by following the steps below:
 
-1. Produce the top level executable with the following command:
+1. Produce the top-level executable `toplevel.native`:
 
+		make clean
 		make
 
-2. Run the program with the following command:
+2. Compile the Pixel++ program and produce an LLVM IR `myprogram.ll`:
 	
-		./toplevel.native <file.xpp>
+		./toplevel.native myprogram.xpp > myprogram.ll
 
-	The function takes one argument, which is a `.xpp` file that contains some Pixel++ codes.
+3. Invokes the LLVM compiler to produce an assembly file `myprogram.s`:
+	
+		llc myprogram.ll > myprogram.s
 
-3. You will get the output immediately.
+4. If you would like to use any built-in functions or filters to process images, compile the built-in library:
+	
+		make -C builtin/ clean
+		make -C builtin
+		./builtin/toplevel.native -c2 ./builtin/builtin.xpp > builtin.ll
+		llc builtin.ll > builtin.s
+		gcc -std=c99 -Wall -c load.c
 
-You can also clean intermediate and executable files before building again using the following command:
+5. Produce an executable `myprogram.exe` for the Pixel++ program if you do not use built-in functions or filters:
+	
+		gcc myprogram.s -o myprogram.exe
+
+	If you use any built-in functions or filters, link all the assembly files and object files and produce the executable:
+
+		gcc myprogram.s builtin.s load.o -lm -o myprogram.exe
+
+6. Run your executable:
+	
+		./myprogram.exe
+
+You can also clean intermediate files and executables before building the top-level executables using:
 
 	make clean
+
+#### Options of the Top-level Executable
+
+- `./toplevel.native -a myprogram.xpp`: Print the abstract syntax tree (AST);
+- `./toplevel.native -s myprogram.xpp`: Print the semantically-checked abstract syntax tree (SAST);
+- `./toplevel.native -l myprogram.xpp`: Print the LLVM IR;
+- `./toplevel.native -c myprogram.xpp` (or `./toplevel.native myprogram.xpp`): Check and print the LLVM IR;
+- `./builtin/toplevel.native -c2 ./builtin/builtin.xpp`: Check and print the LLVM IR for the built-in library (a piece of Pixel++ code without a main function).
 
 ## Deliverable #2: Scanner and Parser
 
@@ -102,6 +131,7 @@ Our test suites are located under the `syntax_tests/` directory. For this delive
 
 To test our test script, just run:
 	
+	make clean && make
 	./test-syntax.sh
 
 For positive test cases, a message "positive test succeeded" will be printed, which indicates that the files are successfully compiled and the results match our expectation. For negative test cases, a message "negative test succeeded" will be displayed to indicate that the files are failed to compile and the error matches our expectation.
@@ -122,6 +152,7 @@ Our test suites are located under the `helloworld_tests/` directory. For this de
 
 To test our test suites, just run:
 	
+	make clean && make
 	./test-helloworld.sh
 
 For all the five test programs, a message "Test passed." will be printed, which indicates that the files are successfully compiled and the results match our expectation. 
@@ -132,26 +163,25 @@ For all the five test programs, a message "Test passed." will be printed, which 
 
 Our test suites are located under the `extended-tests/` directory. For this deliverable, we have 7 positive test cases, whose filenames are in the format `extended-pos-x.xpp`, to test various functionalities of the Pixel++ language. We also have 3 negative test cases, whose filenames are in the format `extended-neg-x.xpp`, which will fail to compile due to semantic errors.
 
-- `extended-pos-0.xpp` implements the built-in vertical collage function. It takes an image of the same width and combine them vertically. 
-- `extended-pos-1.xpp` implements the built-in image cropping function. It lets the users specifiy an area by the starting point, width, and height and produces a cropped image.
+- `extended-pos-0.xpp` implements the built-in vertical collage function. It takes an image of the same width and combines them vertically. 
+- `extended-pos-1.xpp` implements the built-in image cropping function. It lets the users specifiy an area by the starting point, height and width, and produces a cropped one.
 - `extended-pos-2.xpp` implements the built-in image flipping function. It takes an image and produces a horizontally flipped one.
-- `extended-pos-3.xpp` demonstrates an Gaussian blur filter, which takes an image and adds blur operation on that image. 
-- `extended-pos-4.xpp` implements the built-in rotate function. It takes an image and rotate the image with 180 degrees.
-- `extended-pos-5.xpp` demonstrates an sci fi effect filter, which takes an image and adds sci fi effect on that image. 
-- `extended-pos-6.xpp` implements the reverse sorting algorithm with input: 9 1 2 8 3 and output: 9 8 3 2 1.
-- `extended-neg-0.xpp` Test undeclared variable and produce an error: Fatal error: exception Failure("undeclared identifier d").
-- `extended-neg-1.xpp` Test unmatched type in assignment and produce an error: Fatal error: exception Failure("illegal assignment int = string").   
-- `extended-neg-2.xpp` Test unmatched type in binary operation and produce an error: Fatal error: exception Failure("illegal binary operator int + string in a + b").  
+- `extended-pos-3.xpp` demonstrates a self-defined Gaussian blur filter, which takes an image and applies blurring operation on it. 
+- `extended-pos-4.xpp` implements the built-in rotation function. It takes an image and rotates it by 180 degrees.
+- `extended-pos-5.xpp` demonstrates a built-in sci fi effect filter, which takes an image and adds sci fi effect on it. 
+- `extended-pos-6.xpp` implements a reverse sorting algorithm with input `9 1 2 8 3` and output `9 8 3 2 1`.
+- `extended-neg-0.xpp` tests undeclared variable and produces an error: Fatal error: exception Failure("undeclared identifier d").
+- `extended-neg-1.xpp` tests unmatched type in assignment and produces an error: Fatal error: exception Failure("illegal assignment int = string").   
+- `extended-neg-2.xpp` tests unmatched type in binary operation and produces an error: Fatal error: exception Failure("illegal binary operator int + string in a + b").  
 
 ### Test Script
 
 To test our test suites, just run:
 
-```
-make clean && make -C builtin clean && make -C builtin
-./test-extended.sh
-```
+	make clean && make
+	make -C builtin/ clean && make -C builtin/
+	./test-extended.sh
 
-For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the files are successfully compiled and the results match our expectation. 
+For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the programs are successfully compiled or the output results match our expectation. 
 
-For all the 3 negative test cases, a message "Negative test passed." will be printed, which indicates that the files fail to compile and the errors match our expectation.
+For all the 3 negative test cases, a message "Negative test passed." will be printed, which indicates that the programs fail to compile and the errors match our expectation.
