@@ -26,8 +26,8 @@ let check (globals, functions) compiling_builtin =
                     (* No duplicate bindings *)
                       ((_, n2) :: _) when n1 = n2 -> raise (Failure dup_err)
                     | _ -> binding :: checked
-    in  List.fold_left check_it [] (List.sort compare to_check) 
-       (* in to_check *)
+    in let _ = List.fold_left check_it [] (List.sort compare to_check) 
+        in to_check 
   in 
 
   let check_globals (kind : string) (to_check : global list) = 

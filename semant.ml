@@ -26,8 +26,8 @@ let check (globals, functions) compiling_builtin =
                     (* No duplicate bindings *)
                       ((_, n2) :: _) when n1 = n2 -> raise (Failure dup_err)
                     | _ -> binding :: checked
-    in  List.fold_left check_it [] (List.sort compare to_check) 
-       (* in to_check *)
+    in let _ = List.fold_left check_it [] (List.sort compare to_check) 
+        in to_check 
   in 
 
   let check_globals (kind : string) (to_check : global list) = 
@@ -185,12 +185,11 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
   let check_function func =
     (* Make sure no formals are void or duplicates *)
     let formals' = check_binds "formal" func.formals in
-
     (* Raise an exception if the given rvalue type cannot be assigned to
        the given lvalue type *)
     let check_assign lvaluet rvaluet err =
        if lvaluet = rvaluet then lvaluet else raise (Failure err)
-    in     
+    in  
   
   (* add local symbol table of variables for this function *)
   let rec find_locals stmt_list locals= match stmt_list with
