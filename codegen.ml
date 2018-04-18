@@ -90,7 +90,8 @@ let translate (globals, functions) compiling_builtin =
   let collage_t = L.function_type structp_t [| structp_t; structp_t |] in 
   let crop_t = L.function_type structp_t [| structp_t; i32_t; i32_t; i32_t; i32_t |] in 
   let flip_t = L.function_type structp_t [| structp_t |] in
-  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func, collage_func, crop_func, flip_func) = 
+  let rotate_t = L.function_type i32_t [| structp_t ; i32_t |] in
+  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func, collage_func, crop_func, flip_func, rotate_func) = 
          (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
           L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
           L.declare_function "apply_conv_filter" apply_conv_filter_t the_module,
@@ -98,7 +99,8 @@ let translate (globals, functions) compiling_builtin =
           L.declare_function "scifi_filter" scifi_t the_module,
           L.declare_function "collage" collage_t the_module,
           L.declare_function "crop" crop_t the_module,
-          L.declare_function "flip" flip_t the_module)
+          L.declare_function "flip" flip_t the_module,
+          L.declare_function "rotate" rotate_t the_module)
   
   in
 
@@ -342,6 +344,8 @@ let translate (globals, functions) compiling_builtin =
         e1'
       | SCall ("flip", [e]) ->
     L.build_call flip_func [| (expr builder e symbol_table) |] "flip" builder
+      | SCall ("rotate", [e; e2]) ->
+    L.build_call rotate_func [| (expr builder e symbol_table); (expr builder e2 symbol_table) |] "rotate" builder
       | SCall ("collage", [e1; e2]) ->
     L.build_call collage_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "collage" builder
       | SCall ("printline", [e]) -> 

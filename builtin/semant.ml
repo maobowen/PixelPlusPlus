@@ -157,6 +157,7 @@ in let built_in_decls = StringMap.add "apply_conv_filters" {typ = Void; fname = 
 in let built_in_decls = StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "crop" {typ = Arr; fname = "crop"; formals = [(Arr, "img"); (Int, "x"); (Int, "y"); (Int, "h"); (Int, "w")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "flip" {typ = Arr; fname = "flip"; formals = [(Arr, "img")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "rotate" {typ = Void; fname = "rotate"; formals = [(Arr, "img"); (Int, "angle")]; locals=[]; body=[]} built_in_decls
 in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_final in
   (* Add function name to symbol table *)
   let add_func map fd =
