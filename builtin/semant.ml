@@ -105,7 +105,7 @@ let check (globals, functions) compiling_builtin =
       | ((t1, n1), _) -> if StringMap.mem n1 global_map then raise (Failure dup_err) else
                         let global_map = StringMap.add (snd binding) ((fst binding), tx) global_map in
                         if tx = t1 || tx = Void then (((binding, (tx, ex')) :: checked), global_map)
-                      else raise (Failure ("unmatch types " ^ string_of_typ t1 ^  n1 ^ " and " ^ string_of_typ tx))
+                      else raise (Failure ("unmatch types " ^ string_of_typ t1 ^ " and " ^ string_of_typ tx))
 
     in let _ = List.fold_left check_it ([], StringMap.empty) to_check
        in to_check
@@ -367,7 +367,12 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
             | s :: ss         -> let (a,b) = check_stmt s symbols in (a,b) :: (check_stmt_list ss b)
             | []              -> []
           in let symbols_up = StringMap.empty :: symbols in (SBlock(List.map fst (check_stmt_list sl symbols_up)), symbols)
-      | Var (b, e) -> let entry = StringMap.add (snd b) (fst b) (List.hd symbols) in let symbols_up = 
+      | Var (b, e) -> 
+          let (te', e') = expr e symbols in 
+            if (fst b) != te' && te' != Void then raise (Failure ("illegal assignment " ^ string_of_typ (fst b) ^ " = " ^ 
+            string_of_typ te'))
+          else
+            let entry = StringMap.add (snd b) (fst b) (List.hd symbols) in let symbols_up = 
             match symbols with
               [_] -> [entry]
             | _ :: tl -> entry :: tl
