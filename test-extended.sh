@@ -60,9 +60,8 @@ CheckFail() {
     # Build Pixel++ program
 
     ../${TOPLEVEL} $1 2> ${basename}.xpp.err
-    cat ${basename}.xpp.err
 
-    if diff -bB ${basename}.xpp.err ${reffile}.err > ${basename}.diff; then
+    if diff -bB ${basename}.xpp.err ${basename}.err > ${basename}.diff; then
         echo "Negative test passed. The expected error messages are generated."
     else
         echo "Negative test failed. The expected error messages are not generated."
