@@ -1,0 +1,8 @@
+/* Test case: image rotation */
+func int main() {
+  arr img = load("./extended_tests/image.png");
+  rotate(img, 180);
+  save(img, "./img2_rotated.png");
+  close(img, 0);
+  return 0;
+}
