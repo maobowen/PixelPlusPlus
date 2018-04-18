@@ -2,7 +2,7 @@
 func int main() {
     arr img1 = load("./image.png");
     arr img2 = crop(img1, 0, 350, 540, 300);
-    save(img2, "./image_cropped.png");
+    save(img2, "./extended-pos-1.png");
     close(img1, 0);
     return 0;
 }
