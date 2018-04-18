@@ -1,8 +1,8 @@
 /* test case for image flipping */
 func int main() {
-  arr img6 = load("./img2.png");
-  arr img7 = flip(img6);
-  save(img7, "./img2_flipped.png");
-  close(img6, 0);
-  return 0;
+    arr img1 = load("./img2.png");
+    arr img2 = flip(img1);
+    save(img2, "./img2_flipped.png");
+    close(img1, 0);
+    return 0;
 }

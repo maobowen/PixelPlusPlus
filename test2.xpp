@@ -11,9 +11,9 @@ func int main() {
   close(img1, 0);
   close(img2, 0);
 
-  arr img4 = load("./img2.png");
-  arr img5 = crop(img4, 50, 50, 100, 100);
-  save(img5, "./img2_cropped.png");
+  arr img4 = load("./darli-fra.png");
+  arr img5 = crop(img4, 0, 700, 1080, 600);
+  save(img5, "./darli-fra_cropped.png");
   close(img4, 0);
 
   arr img6 = load("./img2.png");

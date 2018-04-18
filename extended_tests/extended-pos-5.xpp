@@ -1,12 +1,12 @@
 /* test case for customized filter */
 func int main() {
-  printline("testing array");
-  arr img = load("./img6.png");
-  arr filter = [1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1];
-  set(filter, 5, 5);
-  |filter|@img;
-  save(img, "./img6_copy.png");
-  close(img, 0);
-  return 0;
+    printline("testing array");
+    arr img = load("./img6.png");
+    arr filter = [1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1];
+    set(filter, 5, 5);
+    |filter|@img;
+    save(img, "./img6_copy.png");
+    close(img, 0);
+    return 0;
 }
 
