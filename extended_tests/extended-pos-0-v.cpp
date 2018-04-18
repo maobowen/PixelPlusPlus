@@ -19,7 +19,7 @@ int main()
     int width2 = width1;
     int height2 = height1 * 2;
     int length2 = width2 * height2 * CHANNEL_NUM;
-    uint8_t image2[length2 + 10];
+    uint8_t image2[length2];
 
     int k = 0;
     for (int i = 0; i < 2; i++)

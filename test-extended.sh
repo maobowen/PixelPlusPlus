@@ -28,6 +28,7 @@ CheckPass() {
             echo "Test failed."
             diff -bB ${basename}.xpp.out ${basename}.out
         fi
+        rm -f ${basename}.diff
     else
         # Build verification program
         g++ -std=c++11 -g -Wall ${basename}-v.cpp -o ${basename}-v
