@@ -132,16 +132,16 @@ For all the five test programs, a message "Test passed." will be printed, which 
 
 Our test suites are located under the `extended-tests/` directory. For this deliverable, we have 7 positive test cases, whose filenames are in the format `extended-pos-x.xpp`, to test various functionalities of the Pixel++ language. We also have 3 negative test cases, whose filenames are in the format `extended-neg-x.xpp`, which will fail to compile due to semantic errors.
 
-- `extended-pos-0.xpp` demonstrates a built-in filter called "scifi", which is an binary operation. It takes an image and produces an image with the filter applied.
-- `extended-pos-1.xpp` demonstrates the built-in image collage function, which takes images of the same width and combine them vertically. 
-- `extended-pos-2.xpp` implements the built-in image cropping function. It lets the users specifiy an area by the starting point, width, and height and produces a cropped image.
-- `extended-pos-3.xpp` implements the built-in image flipping function. It takes an image and produces an horizontally flipped one.
-- `extended-pos-4.xpp` implements 
-- `extended-pos-5.xpp` implements an customized filter on an image.
-- `extended-pos-6.xpp` implements 
-- `extended-neg-0.xpp` produces an error. 
-- `extended-neg-1.xpp` produces an error.  
-- `extended-neg-2.xpp` produces an error.  
+- `extended-pos-0.xpp` implements the built-in vertical collage function. It takes an image of the same width and combine them vertically. 
+- `extended-pos-1.xpp` implements the built-in image cropping function. It lets the users specifiy an area by the starting point, width, and height and produces a cropped image.
+- `extended-pos-2.xpp` implements the built-in image flipping function. It takes an image and produces a horizontally flipped one.
+- `extended-pos-3.xpp` demonstrates an Gaussian blur filter, which takes an image and adds blur operation on that image. 
+- `extended-pos-4.xpp` implements the built-in rotate function. It takes an image and rotate the image with 180 degrees.
+- `extended-pos-5.xpp` demonstrates an sci fi effect filter, which takes an image and adds sci fi effect on that image. 
+- `extended-pos-5.xpp` implements the reverse sorting algorithm with input: 9 1 2 8 3 and output: 9 8 3 2 1.
+- `extended-neg-0.xpp` Test undeclared variable and produce an error: Fatal error: exception Failure("undeclared identifier d").
+- `extended-neg-1.xpp` Test unmatched type in assignment and produce an error: Fatal error: exception Failure("illegal assignment int = string").   
+- `extended-neg-2.xpp` Test unmatched type in binary operation and produce an error: Fatal error: exception Failure("illegal binary operator int + string in a + b").  
 
 ### Test Script
 
