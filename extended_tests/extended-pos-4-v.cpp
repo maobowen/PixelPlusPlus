@@ -22,9 +22,9 @@ int main() {
     	for (int j = 0; j < width1; j++) {
 	    int pixel = (i * width1 + j) * 3;
 	    int pixel2 = ((height1 - 1 - i) * width1 + (width1 - 1 - j)) * 3;
-	    image2[pixel] = image[pixel2];
-	    image2[pixel + 1] = image[pixel2 + 1];
-	    image2[pixel + 2] = image[pixel2 + 2];
+	    image2[pixel] = image1[pixel2];
+	    image2[pixel + 1] = image1[pixel2 + 1];
+	    image2[pixel + 2] = image1[pixel2 + 2];
 	    }
     }
     
