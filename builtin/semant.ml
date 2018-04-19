@@ -150,10 +150,10 @@ in let built_in_decls = StringMap.add "get_filter" {typ = Arr; fname = "get_filt
 in let built_in_decls = StringMap.add "int_of" {typ = Int; fname = "int_of"; formals = [(Float, "x")]; locals=[]; body=[]} built_in_decls
 
 in let build_in_decls_final = (if not compiling_builtin then 
-   let built_in_decls = StringMap.add "scifi_filter" {typ = Void; fname = "scifi_filter"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+   let built_in_decls = StringMap.add "scifi" {typ = Void; fname = "scifi"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "collage" {typ = Arr; fname = "collage"; formals = [(Arr, "img1"); (Arr, "img2")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "apply_conv_filter" {typ = Void; fname = "apply_conv_filter"; formals = [(Arr, "img"); (Arr, "filter")]; locals=[]; body=[]} built_in_decls
-in let built_in_decls = StringMap.add "apply_conv_filters" {typ = Void; fname = "apply_conv_filters"; formals = [(Kernel, "filters");(Arr, "img")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "apply_conv_filters" {typ = Void; fname = "apply_conv_filters"; formals = [(Arr, "img"); (Kernel, "filters")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "crop" {typ = Arr; fname = "crop"; formals = [(Arr, "img"); (Int, "x"); (Int, "y"); (Int, "h"); (Int, "w")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "flip" {typ = Arr; fname = "flip"; formals = [(Arr, "img")]; locals=[]; body=[]} built_in_decls
@@ -186,11 +186,12 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
   let check_function func =
     (* Make sure no formals are void or duplicates *)
     let formals' = check_binds "formal" func.formals in
+
     (* Raise an exception if the given rvalue type cannot be assigned to
        the given lvalue type *)
     let check_assign lvaluet rvaluet err =
        if lvaluet = rvaluet then lvaluet else raise (Failure err)
-    in  
+    in     
   
   (* add local symbol table of variables for this function *)
   let rec find_locals stmt_list locals= match stmt_list with

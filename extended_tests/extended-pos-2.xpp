@@ -1,0 +1,8 @@
+/* Test case: horizontal flipping */
+func int main() {
+    arr img1 = load("./image.png");
+    arr img2 = flip(img1);
+    save(img2, "./extended-pos-2.png");
+    close(img1, 0);
+    return 0;
+}

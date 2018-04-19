@@ -79,30 +79,7 @@ let translate (globals, functions) compiling_builtin =
 
   let saveimg_t = L.function_type i32_t [| structp_t; ip_t |] in
   let saveimg_func = L.declare_function "save" saveimg_t the_module in
-
-  let trans_t = L.function_type structp_t [| structp_t |] in
-  let expf_t = L.function_type float_t [| float_t ; i32_t |] in
-  let exp_t = L.function_type i32_t [| i32_t; i32_t |] in
-  let mtimes_t = L.function_type structp_t [| structp_t; structp_t |] in 
-  let scifi_t = L.function_type i32_t [| structp_t |] in
-  let apply_conv_filter_t = L.function_type i32_t [| structp_t; structp_t |] in
-  let apply_conv_filters_t = L.function_type i32_t [| L.pointer_type fstruct_t; structp_t |] in 
-  let collage_t = L.function_type structp_t [| structp_t; structp_t |] in 
-  let crop_t = L.function_type structp_t [| structp_t; i32_t; i32_t; i32_t; i32_t |] in 
-  let flip_t = L.function_type structp_t [| structp_t |] in
-  let rotate_t = L.function_type i32_t [| structp_t ; i32_t |] in
-  let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func, collage_func, crop_func, flip_func, rotate_func) = 
-         (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
-          L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
-          L.declare_function "apply_conv_filter" apply_conv_filter_t the_module,
-          L.declare_function "apply_conv_filters" apply_conv_filters_t the_module, 
-          L.declare_function "scifi_filter" scifi_t the_module,
-          L.declare_function "collage" collage_t the_module,
-          L.declare_function "crop" crop_t the_module,
-          L.declare_function "flip" flip_t the_module,
-          L.declare_function "rotate" rotate_t the_module)
   
-  in
 
   let to_imp str = raise (Failure ("Not yet implemented: " ^ str)) in
 
@@ -241,7 +218,7 @@ let translate (globals, functions) compiling_builtin =
     | A.Leq     -> L.build_fcmp L.Fcmp.Ole e1' e2' "tmp" builder
     | A.Greater -> L.build_fcmp L.Fcmp.Ogt e1' e2' "tmp" builder
     | A.Geq     -> L.build_fcmp L.Fcmp.Oge e1' e2' "tmp" builder
-    | A.Expo    -> L.build_call expf_func [|e1';e2'|] "expf" builder
+    | A.Expo 
     | A.And | A.Or | A.Mtimes | A.At ->
         raise (Failure "internal error: semant should have rejected and/or on float")
     )
@@ -258,12 +235,18 @@ let translate (globals, functions) compiling_builtin =
     | A.Leq     -> L.build_icmp L.Icmp.Sle e1' e2' "tmp" builder
     | A.Greater -> L.build_icmp L.Icmp.Sgt e1' e2' "tmp" builder
     | A.Geq     -> L.build_icmp L.Icmp.Sge e1' e2' "tmp" builder
-    | A.Expo    -> L.build_call exp_func [|e1';e2'|] "exp" builder
+    | A.Expo 
     | A.Mtimes | A.At -> raise (Failure "internal error: semant should have rejected and/or on int")
     )
   else (match op with
-      A.Mtimes -> L.build_call mtimes_func [|e1';e2'|] "mtimes" builder
-    | A.At -> L.build_call apply_conv_filters_func [| e1'; e2'|] "apply_conv_filters" builder
+      A.Mtimes -> raise (Failure "internal error: builtin Mtimes not defined")
+    | A.At -> raise (Failure "internal error: builtin @ operator not defined")(*let load_val idx = L.build_load (L.build_in_bounds_gep e1' [| L.const_int i32_t 0;  L.const_int i32_t idx |] "tmp" builder) "tmp" builder in let len_lvalue = load_val 0 in let len = get_optional (L.int64_of_const len_lvalue)
+        in let len = Int64.to_int len in let () =  print_int(len) in 
+        let conv_helper idx = L.build_call apply_conv_filter_func [| e2'; load_val idx |] "apply_conv_filter" builder in
+        conv_helper 1*)
+    (*| A.At ->  let get_vec idx = L.const_extractelement e1' (L.const_int i32_t idx) in let len_lvalue = get_vec 0 in let len = get_optional (L.int64_of_const len_lvalue)
+        in let len = Int64.to_int len in let get_string idx = get_optional (L.string_of_const (get_vec idx)) 
+        in let fhelper idx = expr builder (A.Void, SCall((get_string idx) ^ "_filter", [e2])) symbol_table in let rec apply_filter q = (if q = 1 then fhelper q else (let _ = apply_filter (q - 1) in fhelper q)) in apply_filter len*)
     | _ -> raise (Failure "not implemented yet")
     )
       | SUnop(op, e) ->
@@ -272,8 +255,7 @@ let translate (globals, functions) compiling_builtin =
       A.Neg when t = A.Float -> L.build_fneg e' "tmp" builder
     | A.Neg              -> L.build_neg e' "tmp" builder
     | A.Not              -> L.build_not e' "tmp" builder
-    | A.Trans when t = A.Arr -> let _ = L.build_call trans_func [|e'|] "trans" builder in e'
-    | A.Trans -> raise (Failure "internal error: can't perform matrix operation on scalar")) 
+    | A.Trans -> raise (Failure "Trans not defined in builtin")) 
       | SAssign (s, e) -> let e' = expr builder e symbol_table in
                           let e'  = (match e with 
                               (_, SArrsub(_, _)) -> L.build_intcast e' i32_t "tmp" builder
@@ -342,23 +324,10 @@ let translate (globals, functions) compiling_builtin =
         let _ = L.build_store e2_w e1_w builder in
         let _ = L.build_store e2_img e1_img builder in
         e1'
-      | SCall ("flip", [e]) ->
-    L.build_call flip_func [| (expr builder e symbol_table) |] "flip" builder
-      | SCall ("rotate", [e; e2]) ->
-    L.build_call rotate_func [| (expr builder e symbol_table); (expr builder e2 symbol_table) |] "rotate" builder
-      | SCall ("collage", [e1; e2]) ->
-    L.build_call collage_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "collage" builder
+      
       | SCall ("printline", [e]) -> 
     L.build_call printf_func [| string_format_str ; (expr builder e symbol_table) |]
       "printf" builder
-      | SCall ("scifi_filter", [e]) ->
-    L.build_call scifi_func [| (expr builder e symbol_table) |] "scifi_filter" builder
-      | SCall ("crop", [e1; e2; e3; e4; e5]) ->
-    L.build_call crop_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table); (expr builder e3 symbol_table); (expr builder e4 symbol_table); (expr builder e5 symbol_table); |] "crop" builder
-      | SCall ("apply_conv_filter", [e1; e2]) ->
-    L.build_call apply_conv_filter_func [| (expr builder e1 symbol_table); (expr builder e2 symbol_table) |] "apply_conv_filter" builder
-      | SCall ("apply_conv_filters", [e1; e2]) ->
-    L.build_call apply_conv_filters_func [| expr builder e1 symbol_table; expr builder e2 symbol_table |] "apply_conv_filters" builder
       | SCall("load", [e]) ->
     L.build_call loadimg_func [| (expr builder e symbol_table) |] "load" builder
       | SCall("close", [e; e2]) ->

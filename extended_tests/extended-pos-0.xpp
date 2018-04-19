@@ -1,0 +1,10 @@
+/* Test case: vertical collage */
+func int main() {
+    arr img1 = load("./image.png");
+    arr img2 = load("./image.png");
+    arr img3 = collage(img1, img2);
+    save(img3, "./extended-pos-0.png");
+    close(img1, 0);
+    close(img2, 0);
+    return 0;
+}

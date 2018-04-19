@@ -1,0 +1,8 @@
+/* Failed test case: illegal binary operation */
+func int main() {
+    int a = 1;
+    string b = "hello";
+    int c;
+    c = a + b;
+    return 0;
+}

@@ -3,7 +3,7 @@
 open Ast
 
 type sexpr = typ * sx
-and sx =
+and sx = 
     SLiteral of int
   | SFliteral of string
   | SBoolLit of bool

@@ -1,8 +1,10 @@
 #!/bin/bash
 
-files="tests/test-helloworld-*.xpp"
+files="helloworld_tests/test-helloworld-*.xpp"
 
 TOPLEVEL="./toplevel.native"
+CC="clang"
+CFLAGS="-Wall"
 
 Check() {
     basename=`echo $1 | sed 's/.*\\///
@@ -13,7 +15,7 @@ Check() {
     echo "Testing ${basename}..."
 
     $TOPLEVEL -l $1 > ${reffile}.ll
-    clang -Wall ${reffile}.ll -o ${reffile}
+    ${CC} ${CFLAGS} ${reffile}.ll -o ${reffile}
     ./${reffile} > ${basename}.out 
 
     if diff -bB ${basename}.out ${reffile}.out > ${basename}.diff

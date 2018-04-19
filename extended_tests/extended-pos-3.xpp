@@ -1,0 +1,10 @@
+/* Test case: Gaussian blur 5x5 */
+func int main() {
+    arr img = load("./image.png");
+    arr filter = [1, 4, 7, 4, 1, 4, 16, 26, 16, 4, 7, 26, 41, 26, 7, 4, 16, 26, 16, 4, 1, 4, 7, 4, 1];
+    set(filter, 5, 5);
+    |filter|@img;
+    save(img, "./extended-pos-3.png");
+    close(img, 0);
+    return 0;
+}

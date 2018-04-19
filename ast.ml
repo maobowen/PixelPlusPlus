@@ -6,7 +6,7 @@ type op = Add | Sub | Mult | Div | Equal | Neq
 
 type uop = Neg | Not | Trans
 
-type typ = Int | Bool | Float | Arr | Void |String 
+type typ = Int | Bool | Float | Arr | Void | String | Kernel
 
 type bind = typ * string 
 
@@ -28,7 +28,6 @@ type expr =
   | Filter of string
   | Filterliteral of expr list
   | Arrsub of expr * expr list
-  (*| Mliteral of expr list*)
 
 type stmt =
     Block of stmt list
@@ -81,6 +80,7 @@ let string_of_typ = function
   | Float -> "float"
   | Void -> "void"
   | Arr -> "arr"
+  | Kernel -> "kernel"
   | String -> "string"
 
 

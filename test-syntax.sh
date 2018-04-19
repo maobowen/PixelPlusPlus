@@ -1,6 +1,6 @@
 #!/bin/bash
 
-files="tests/test-*.xpp tests/fail-*.xpp"
+files="syntax_tests/test-*.xpp syntax_tests/fail-*.xpp"
 
 TOPLEVEL="./toplevel.native"
 
@@ -12,7 +12,7 @@ Check() {
 
     echo "Testing ${basename}..."
 
-    $TOPLEVEL $1 > ${basename}.out
+    $TOPLEVEL -a $1 > ${basename}.out
 
     if diff -bB ${basename}.out ${reffile}.out > ${basename}.diff
     then
@@ -31,7 +31,7 @@ CheckFail() {
 
     echo "Testing ${basename}..."
 
-    $TOPLEVEL $1 2> ${basename}.err
+    $TOPLEVEL -a $1 2> ${basename}.err
 
     if diff -bB ${basename}.err ${reffile}.err > ${basename}.diff
     then
