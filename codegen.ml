@@ -92,7 +92,7 @@ let translate (globals, functions) compiling_builtin =
   let flip_t = L.function_type structp_t [| structp_t |] in
   let rotate_t = L.function_type i32_t [| structp_t ; i32_t |] in
   let (trans_func, expf_func, exp_func, mtimes_func, apply_conv_filter_func, apply_conv_filters_func, scifi_func, collage_func, crop_func, flip_func, rotate_func) = 
-         (L.declare_function "trans" trans_t the_module, L.declare_function "expf" expf_t the_module, 
+         (L.declare_function "transpose" trans_t the_module, L.declare_function "expf" expf_t the_module, 
           L.declare_function "exp" exp_t the_module, L.declare_function "mtimes" mtimes_t the_module,
           L.declare_function "apply_conv_filter" apply_conv_filter_t the_module,
           L.declare_function "apply_conv_filters" apply_conv_filters_t the_module, 
