@@ -1,1 +1,5 @@
+title: Pixel++
+description: Pixel++ is a programming language for efficient manipulation of images coded in OCaml.
+show_downloads: true
+google_analytics:
 theme: jekyll-theme-cayman
