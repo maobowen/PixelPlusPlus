@@ -81,7 +81,7 @@ func arr mtimes(arr img1, arr img2) {
   l2 = length(img2);
   h = height(img1);
   w = width(img1);
-  if (h != height(img2) or w != width(img2)) {
+  if (h != height(img2) or w != width(img2) or l1 != l2) {
     printline("error! arr shape not equal!");
     return img1;
   }
