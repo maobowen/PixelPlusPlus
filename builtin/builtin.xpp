@@ -40,7 +40,7 @@ func arr transpose(arr img) {
   len = length(img);
   h = height(img);
   w = width(img);
-  img2 = init(len, h, w);
+  img2 = init(len, w, h); /* new height is w and new width is h since it is a tranpose operation */
   for (i = 0; i < h; i = i + 1) {
     for (j = 0; j < w; j = j + 1) {
       o1 = (i * w + j) * 3;
