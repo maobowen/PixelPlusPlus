@@ -40,21 +40,33 @@ func arr transpose(arr img) {
   len = length(img);
   h = height(img);
   w = width(img);
+  if (h == 0 or w == 0) {
+    return img;
+  }
   img2 = init(len, w, h); /* new height is w and new width is h since it is a tranpose operation */
-  for (i = 0; i < h; i = i + 1) {
-    for (j = 0; j < w; j = j + 1) {
-      o1 = (i * w + j) * 3;
-      o2 = (j * h + i) * 3;
-      img2[o2] = img[o1];
-      o21 = o2 + 1;
-      o11 = o1 + 1;
-      o22 = o2 + 2;
-      o12 = o1 + 2;
-      img2[o21] = img[o11];
-      img2[o22] = img[o12];
+  if (len == w * h * 3) {
+    for (i = 0; i < h; i = i + 1) {
+      for (j = 0; j < w; j = j + 1) {
+        o1 = (i * w + j) * 3;
+        o2 = (j * h + i) * 3;
+        img2[o2] = img[o1];
+        o21 = o2 + 1;
+        o11 = o1 + 1;
+        o22 = o2 + 2;
+        o12 = o1 + 2;
+        img2[o21] = img[o11];
+        img2[o22] = img[o12];
+      }
+    }
+  } else {
+    for (i = 0; i < h; i = i + 1) {
+      for (j = 0; j < w; j = j + 1) {
+        o1 = (i * w + j) * 3;
+        o2 = (j * h + i) * 3;
+        img2[o2] = img[o1];
+      }
     }
   }
-
   return img2;
 }
 
