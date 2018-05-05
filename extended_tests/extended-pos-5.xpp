@@ -1,8 +1,8 @@
 /* Test case: scifi effect */
 func int main() {
-  arr img1 = load("./image.png");
-  scifi_filter(img1);
-  save(img1, "./extended-pos-5.png");
-  close(img1, 0); 
-  return 0;
+    arr img1 = load("./image.png");
+    scifi_filter(img1);
+    save(img1, "./extended-pos-5.png");
+    close(img1, 0); 
+    return 0;
 }

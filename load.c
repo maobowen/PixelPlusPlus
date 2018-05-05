@@ -7,10 +7,10 @@
 #include "stb_image_write.h"
 
 struct Img {
-	int length;
+    int length;
     int height;
     int width;
-	int* arr;
+    int* arr;
 };
 
 struct Img* load(char* path) {
@@ -41,10 +41,10 @@ void save(struct Img *img, char* path) {
 }
 
 void close(struct Img* img, int i) {
-  free(img->arr);
-  if (i == 0)
-    free(img);
-  printf("close completed!\n");
+    free(img->arr);
+    if (i == 0)
+        free(img);
+    printf("close completed!\n");
 }
 
 #ifdef BUILD_TEST

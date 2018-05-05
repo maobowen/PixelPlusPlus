@@ -5,19 +5,19 @@ int superpower;
 float f;
 String s;
 func void temp() {
-  /*int a;
-  int b;*/
-  a = 123;
-  b = 321;
-  f = 1.21;
-  s = "anc";
+    /*int a;
+    int b;*/
+    a = 123;
+    b = 321;
+    f = 1.21;
+    s = "anc";
 }
 
 func int main() {
-  int a = 1;
-  int b;
-  int c;
-  b = 2;
-  c = 3;
-  temp();
+    int a = 1;
+    int b;
+    int c;
+    b = 2;
+    c = 3;
+    temp();
 }

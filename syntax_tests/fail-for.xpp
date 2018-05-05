@@ -1,9 +1,8 @@
 func int foo() {
-  int i;
-  int accu;
-  for ( ;  ; ) {
-    accu = accu + i;
-  }
-  return accu;
+    int i;
+    int accu;
+    for ( ;  ; ) {
+        accu = accu + i;
+    }
+    return accu;
 }
-

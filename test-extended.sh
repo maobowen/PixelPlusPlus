@@ -9,7 +9,7 @@ CC="gcc"
 CXX="g++"
 CFLAGS="-std=c99 -Wall"
 CXXFLAGS="-std=c++11 -Wall"
-HASH="sha256sum"
+HASH="shasum -a 256"
 
 CheckPass() {
     basename=`echo $1 | sed 's/.*\\///
@@ -20,7 +20,7 @@ CheckPass() {
     # Build Pixel++ program
     ../${TOPLEVEL} $1 > ${basename}.ll
     ${LLC} ${basename}.ll > ${basename}.s
-    ${CC} ${CFLAGS} -o ${basename} ${basename}.s builtin.s load.o -lm
+    ${CC} ${CFLAGS} -o ${basename} ${basename}.s stdlib.s load.o -lm
     ./${basename} > ${basename}.xpp.out
 
     # Testing
@@ -74,8 +74,8 @@ CheckFail() {
 
 cd ${basedir}
 # Build built-in and C libraries
-../builtin/${TOPLEVEL} -c2 ../builtin/builtin.xpp > builtin.ll
-${LLC} builtin.ll > builtin.s
+../stdlib/${TOPLEVEL} -c2 ../stdlib/stdlib.xpp > stdlib.ll
+${LLC} stdlib.ll > stdlib.s
 ${CC} ${CFLAGS} -c ../load.c
 # Start testing
 for file in $files

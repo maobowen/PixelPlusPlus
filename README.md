@@ -6,11 +6,11 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 
 ## Group Members
 
-- Jiayang Li	jl4305@columbia.edu
-- Yilan He	yh2961@columbia.edu
-- Bowen Mao	bm2734@columbia.edu
-- Nana Pang	np2630@columbia.edu
-- Yunxuan Sun	ys3065@columbia.edu
+- Jiayang Li ([@jiayangli2](https://github.com/jiayangli2)) jl4305@columbia.edu
+- Yilan He ([@elenahoho](https://github.com/elenahoho)) yh2961@columbia.edu
+- Bowen Mao ([@maobowen](https://github.com/maobowen)) bm2734@columbia.edu
+- Nana Pang ([@nanahpang](https://github.com/nanahpang)) np2630@columbia.edu
+- Yunxuan Sun ([@yunxuansun](https://github.com/yunxuansun)) ys3065@columbia.edu
 
 ## Configuration
 
@@ -91,21 +91,21 @@ You can compile and execute an Pixel++ program (supposing the name of the progra
 	
 		llc myprogram.ll > myprogram.s
 
-4. If you would like to use any built-in functions or filters to process images, compile the built-in library:
+4. If you would like to use any functions in the standard library to process images, compile the file `stdlib.xpp`:
 	
-		make -C builtin/ clean
-		make -C builtin/
-		./builtin/toplevel.native -c2 ./builtin/builtin.xpp > builtin.ll
-		llc builtin.ll > builtin.s
+		make -C stdlib/ clean
+		make -C stdlib/
+		./stdlib/toplevel.native -c2 ./stdlib/stdlib.xpp > stdlib.ll
+		llc stdlib.ll > stdlib.s
 		gcc -std=c99 -Wall -c load.c
 
-5. Produce an executable `myprogram.exe` for the Pixel++ program if you do not use built-in functions or filters:
+5. Produce an executable `myprogram.exe` for the Pixel++ program if you do not use functions in the standard library:
 	
 		gcc myprogram.s -o myprogram.exe
 
-	If you use any built-in functions or filters, link all the assembly files and object files and produce the executable:
+	If you use any functions in the standard library, link all the assembly files and object files and produce the executable:
 
-		gcc myprogram.s builtin.s load.o -lm -o myprogram.exe
+		gcc myprogram.s stdlib.s load.o -lm -o myprogram.exe
 
 6. Run your executable:
 	
@@ -121,7 +121,7 @@ You can also clean intermediate files and executables before building the top-le
 - `./toplevel.native -s myprogram.xpp`: Print the semantically-checked abstract syntax tree (SAST);
 - `./toplevel.native -l myprogram.xpp`: Print the LLVM IR;
 - `./toplevel.native -c myprogram.xpp` (or `./toplevel.native myprogram.xpp`): Check and print the LLVM IR;
-- `./builtin/toplevel.native -c2 ./builtin/builtin.xpp`: Check and print the LLVM IR for the built-in library (a piece of Pixel++ code without a main function).
+- `./stdlib/toplevel.native -c2 ./stdlib/stdlib.xpp`: Check and print the LLVM IR for the standard library (a piece of Pixel++ code without a main function).
 
 ## Deliverable #2: Scanner and Parser
 
@@ -163,12 +163,12 @@ For all the five test programs, a message "Test passed." will be printed, which 
 
 Our test suites are located under the `extended-tests/` directory. For this deliverable, we have 7 positive test cases, whose filenames are in the format `extended-pos-x.xpp`, to test various functionalities of the Pixel++ language. We also have 3 negative test cases, whose filenames are in the format `extended-neg-x.xpp`, which will fail to compile due to semantic errors.
 
-- `extended-pos-0.xpp` implements the built-in vertical collage function. It takes an image of the same width and combines them vertically. 
-- `extended-pos-1.xpp` implements the built-in image cropping function. It lets the users specifiy an area by the starting point, height and width, and produces a cropped one.
-- `extended-pos-2.xpp` implements the built-in image flipping function. It takes an image and produces a horizontally flipped one.
+- `extended-pos-0.xpp` implements the vertical collage function in the standard library. It takes an image of the same width and combines them vertically. 
+- `extended-pos-1.xpp` implements the image cropping function in the standard library. It lets the users specifiy an area by the starting point, height and width, and produces a cropped one.
+- `extended-pos-2.xpp` implements the image flipping function in the standard library. It takes an image and produces a horizontally flipped one.
 - `extended-pos-3.xpp` demonstrates a self-defined Gaussian blur filter, which takes an image and applies blurring operation on it. 
-- `extended-pos-4.xpp` implements the built-in rotation function. It takes an image and rotates it by 180 degrees.
-- `extended-pos-5.xpp` demonstrates a built-in Sci-Fi effect filter, which takes an image and adds Sci-Fi effect on it. 
+- `extended-pos-4.xpp` implements the rotation function in the standard library. It takes an image and rotates it by 180 degrees.
+- `extended-pos-5.xpp` demonstrates a Sci-Fi effect filter defined in the standard library, which takes an image and adds Sci-Fi effect on it. 
 - `extended-pos-6.xpp` implements a reverse sorting algorithm with input `9 1 2 8 3` and output `9 8 3 2 1`.
 - `extended-neg-0.xpp` tests undeclared variable and produces an error: Fatal error: exception Failure("undeclared identifier d").
 - `extended-neg-1.xpp` tests unmatched type in assignment and produces an error: Fatal error: exception Failure("illegal assignment int = string").   
@@ -179,7 +179,7 @@ Our test suites are located under the `extended-tests/` directory. For this deli
 To test our test suites, just run:
 
 	make clean && make
-	make -C builtin/ clean && make -C builtin/
+	make -C stdlib/ clean && make -C stdlib/
 	./test-extended.sh
 
 For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the programs are successfully compiled and the output results match our expectation.

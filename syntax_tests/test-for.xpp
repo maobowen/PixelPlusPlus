@@ -1,11 +1,11 @@
 func int forLoopTest() {
-  int accu;
-  int i;
-  i = 0;
-  accu = 0;
-  for (i = a; i < b; i = i + 1) {
-    accu = accu + i;
-  }
-  a=gcd(5050,100);
-  return a;
+    int accu;
+    int i;
+    i = 0;
+    accu = 0;
+    for (i = a; i < b; i = i + 1) {
+        accu = accu + i;
+    }
+    a = gcd(5050,100);
+    return a;
 }
