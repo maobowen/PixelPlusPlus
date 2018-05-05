@@ -272,7 +272,7 @@ let translate (globals, functions) compiling_builtin =
       A.Neg when t = A.Float -> L.build_fneg e' "tmp" builder
     | A.Neg              -> L.build_neg e' "tmp" builder
     | A.Not              -> L.build_not e' "tmp" builder
-    | A.Trans when t = A.Arr -> let _ = L.build_call trans_func [|e'|] "trans" builder in e'
+    | A.Trans when t = A.Arr -> let e'' = L.build_call trans_func [|e'|] "transpose" builder in e''
     | A.Trans -> raise (Failure "internal error: can't perform matrix operation on scalar")) 
       | SAssign (s, e) -> let e' = expr builder e symbol_table in
                           let e'  = (match e with 
