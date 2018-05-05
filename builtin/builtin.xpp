@@ -54,9 +54,8 @@ func arr transpose(arr img) {
       img2[o22] = img[o12];
     }
   }
-  close(img, 1);
-  imgcpy(img, img2);
-  return img;
+
+  return img2;
 }
 
 func arr mtimes(arr img1, arr img2) {
