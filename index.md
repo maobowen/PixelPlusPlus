@@ -2,6 +2,8 @@
 title: Pixel++
 layout: default
 ---
+Pixel++ is a programming language for efficient manipulation of images coded in OCaml.
+
 # 1 Introduction
 
 # 2 Language Tutorial
@@ -86,7 +88,7 @@ Some other words are reserved by the language or the standard library `stdlib.xp
 There are seven primitive data types in the language specification of Pixel++.
 
 - `void`: `void` is only used as the return type of functions which have no return values. Variables **cannot** be declared as `void` type.
-- `int`: A 32-bit signed integer ranging from \\(-2^{31}\\) to \\(2^{31}-1\\).
+- `int`: A 32-bit signed integer ranging from -2<sup>31</sup> to 2<sup>31</sup>-1.
 - `float`: A 32-bit signed floating point number.
 - `bool`: A boolean value, either `true` or `false`.
 - `string`: A sequence of characters. A `string` is **immutable**.
@@ -418,7 +420,7 @@ The built-in functions listed below are defined in the language and are availabl
     - **Parameters**:
         - `int height`: The height (in pixel) of the image.
         - `int width`: The width (in pixel) of the image.
-        - `int length`: The length of the image array. The value of this parameter **must be** `height` \times `width` \times 3.
+        - `int length`: The length of the image array. The value of this parameter **must be** `height` &times; `width` &times; 3.
     - **Return**: An image array.
     - **Example**: `arr image = init(768 * 1024 * 3, 768, 1024);`
 
@@ -470,7 +472,7 @@ The built-in functions listed below are defined in the language and are availabl
     - **Prototype**: `func int length(arr image);`
     - **Parameters**:
         - `arr image`: The image.
-    - **Return**: The length of an image array. This value **must be** `height(image)` \\(\times\\) `width(image)` \\(\times 3\\).
+    - **Return**: The length of an image array. This value **must be** `height(image)` &times; `width(image)` &times; 3.
     - **Example**: `int l = length(image);`
 
 12. `set(arr filter, int height, int width)`
@@ -487,7 +489,7 @@ The built-in functions listed below are defined in the language and are availabl
 
 There are some standard library functions to perform easy manipulation on images. They are in the standard library `stdlib.xpp`. To use them, users need link `stdlib.xpp` during compilation.
 
-### 3.9.1 Image Operations {#manual!stdlib!imgop}
+### 3.9.1 Image Operations
 
 1.  `collage(arr image1, arr image2)`\
     - **Description**: Produce a vertical collage of two images. The images should have the same width.
@@ -555,7 +557,7 @@ If an image is loaded by the `load` built-in function, for example, `arr image =
 
 If an image is created by the `init` built-in function, for example, `arr image = init(768 * 1024 * 3, 768, 1024);`, users **do not need** to set the height and the width, since they have been recorded by the arguments.
 
-If a filter is created by the Pixel++ statement `arr filter = [1, 3, 1, 1, 3, 1, 1, 3, 1];` and its shape is \\(3 \times 3\\), the compiler only knows that its length is 9. It does not know the height or the width. Therefore, users **need** to use the built-in function `set(filter, 3, 3);` to set the height and the width manually.
+If a filter is created by the Pixel++ statement `arr filter = [1, 3, 1, 1, 3, 1, 1, 3, 1];` and its shape is 3 &times; 3, the compiler only knows that its length is 9. It does not know the height or the width. Therefore, users **need** to use the built-in function `set(filter, 3, 3);` to set the height and the width manually.
 
 ### 3.11.2 Pixels
 
