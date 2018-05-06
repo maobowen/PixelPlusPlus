@@ -3,3 +3,5 @@ description: A programming language for efficient manipulation of images
 show_downloads: true
 google_analytics:
 theme: jekyll-theme-cayman
+plugins:
+  - jekyll-gist
