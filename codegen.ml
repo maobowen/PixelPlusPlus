@@ -411,7 +411,7 @@ let translate (globals, functions) compiling_builtin =
 
    let _ = L.build_cond_br bool_val then_bb else_bb builder in
 
-   (L.builder_at_end context merge_bb, symbol_table, pbuilder)
+   (L.builder_at_end context merge_bb, symbol_table, L.builder_at_end context merge_bb)
 
       | SWhile (predicate, body) ->
    let pred_bb = L.append_block context "while" the_function in
@@ -426,7 +426,7 @@ let translate (globals, functions) compiling_builtin =
    let merge_bb = L.append_block context "merge" the_function in
    let _ = L.build_cond_br bool_val body_bb merge_bb pred_builder in
    let () = add_terminal builder branch_instr0 in
-   (L.builder_at_end context merge_bb, symbol_table, pbuilder)
+   (L.builder_at_end context merge_bb, symbol_table, L.builder_at_end context merge_bb)
 
       | SFor (e1, e2, e3, body) -> stmt (builder, symbol_table, pbuilder)
       ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] ) 
