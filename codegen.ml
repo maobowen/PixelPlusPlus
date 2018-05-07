@@ -381,58 +381,61 @@ let translate (globals, functions) compiling_builtin =
   Some _ -> ()
       | None -> ignore (f builder) in
 
-    let rec stmt (builder,symbol_table) = function
-  SBlock sl -> List.fold_left stmt (builder, symbol_table) sl
-      | SExpr e -> let _ = expr builder e symbol_table in (builder, symbol_table) 
-      | SVar (e1, e2) -> let (tp, s) = e1 in let (symbol_table2, _) = add_local (List.hd symbol_table, builder) (tp, s) in
+    let rec stmt (builder, symbol_table, pbuilder) = function
+  SBlock sl -> List.fold_left stmt (builder, StringMap.empty :: symbol_table, pbuilder) sl
+      | SExpr e -> let _ = expr builder e symbol_table in (builder, symbol_table, pbuilder)
+      | SVar (e1, e2) -> let (tp, s) = e1 in let (symbol_table2, _) = add_local (List.hd symbol_table, pbuilder) (tp, s) in
                                               let symbol_table3 = (symbol_table2 :: (List.tl symbol_table)) in
-                                                (*let _ = expr builder (tp, SId(s)) symbol_table3 in *)
+
                                           let _ = match e2 with
                                               (A.Void, SNoassign) -> init tp
                                             | _ -> expr builder (tp, SAssign(s, e2)) symbol_table3
-           in (builder, symbol_table3)
+           in (builder, symbol_table3, pbuilder)
       | SReturn e -> let _ = match fdecl.styp with
                               A.Int -> L.build_ret (expr builder e symbol_table) builder 
                             | A.Arr -> L.build_ret (expr builder e symbol_table) builder
                             | A.Float -> L.build_ret (expr builder e symbol_table) builder
                             | _ -> to_imp (A.string_of_typ fdecl.styp)
-                     in (builder, symbol_table)
+                     in (builder, symbol_table, pbuilder)
       | SIf (predicate, then_stmt, else_stmt) ->
          let bool_val = expr builder predicate symbol_table in
    let merge_bb = L.append_block context "merge" the_function in
          let branch_instr = L.build_br merge_bb in
    let then_bb = L.append_block context "then" the_function in
-         let then_builder = fst (stmt ((L.builder_at_end context then_bb), symbol_table) then_stmt) in 
+         let (then_builder, _, _) = (stmt ((L.builder_at_end context then_bb), symbol_table, pbuilder) then_stmt) in 
    let () = add_terminal then_builder branch_instr in
 
    let else_bb = L.append_block context "else" the_function in
-         let else_builder = fst (stmt ((L.builder_at_end context else_bb), symbol_table) else_stmt) in
+         let (else_builder, _, _) = (stmt ((L.builder_at_end context else_bb), symbol_table, pbuilder) else_stmt) in
    let () = add_terminal else_builder branch_instr in
 
    let _ = L.build_cond_br bool_val then_bb else_bb builder in
 
-   (L.builder_at_end context merge_bb, symbol_table)
+   (L.builder_at_end context merge_bb, symbol_table, pbuilder)
 
       | SWhile (predicate, body) ->
    let pred_bb = L.append_block context "while" the_function in
-   let _ = L.build_br pred_bb builder in
+   let branch_instr0 = L.build_br pred_bb in
+   
    let body_bb = L.append_block context "while_body" the_function in
-         let while_builder = fst (stmt ((L.builder_at_end context body_bb), symbol_table) body) in
+          
+         let (while_builder, _, _) = (stmt ((L.builder_at_end context body_bb), symbol_table, pbuilder) body) in
    let () = add_terminal while_builder (L.build_br pred_bb) in
    let pred_builder = L.builder_at_end context pred_bb in
    let bool_val = expr pred_builder predicate symbol_table in
    let merge_bb = L.append_block context "merge" the_function in
    let _ = L.build_cond_br bool_val body_bb merge_bb pred_builder in
-   (L.builder_at_end context merge_bb, symbol_table)
+   let () = add_terminal builder branch_instr0 in
+   (L.builder_at_end context merge_bb, symbol_table, pbuilder)
 
-      | SFor (e1, e2, e3, body) -> stmt (builder, symbol_table)
+      | SFor (e1, e2, e3, body) -> stmt (builder, symbol_table, pbuilder)
       ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] ) 
       (* | s -> to_imp (string_of_sstmt s) *)
     (* Generate the instructions for the function's body, 
        which mutates the_module *)
     in
 
-    let builder = fst (stmt (builder, scoped_vars) (SBlock fdecl.sbody)) in
+    let (builder, _, _) = (stmt (builder, scoped_vars, builder) (SBlock fdecl.sbody)) in
 
     add_terminal builder (match fdecl.styp with
         A.Void -> L.build_ret_void
