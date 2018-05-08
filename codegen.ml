@@ -32,7 +32,7 @@ let translate (globals, functions) compiling_builtin =
   
   (* Create an LLVM module -- this is a "container" into which we'll 
      generate actual code *)
-  and the_module = L.create_module context "MicroC" in
+  and the_module = L.create_module context "Pixel++" in
 
   let ip_t       = L.pointer_type i8_t in
   let ip32_t       = L.pointer_type i32_t in
@@ -40,7 +40,7 @@ let translate (globals, functions) compiling_builtin =
   let structp_t  = L.pointer_type struct_t in
   let fstruct_t  = L.struct_type context [|i32_t; L.pointer_type structp_t|] in
 
-  (* Convert MicroC types to LLVM types *)
+  (* Convert Pixel++ types to LLVM types *)
   let ltype_of_typ = function
       A.Int   -> i32_t
     | A.Bool  -> i1_t
@@ -65,7 +65,7 @@ let translate (globals, functions) compiling_builtin =
     let global_var m (t, n) = StringMap.add n (L.define_global (n ^ g_var_suffix) (init t) the_module) m in
     List.fold_left global_var StringMap.empty globals in
 
-  (* Declare a "printf" function to implement MicroC's "print". *)
+  (* Declare a "printf" function to implement Pixel++'s "print". *)
   let printf_t : L.lltype = 
       L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func : L.llvalue = 
@@ -151,7 +151,7 @@ let translate (globals, functions) compiling_builtin =
                          | _ -> raise (Failure("wrong variable tables"))
     in
 
-    (* Generate LLVM code for a call to MicroC's "print" *)
+    (* Generate LLVM code for a call to Pixel++'s "print" *)
     let rec expr builder ((tp, e) : sexpr) symbol_table = match e with
   SLiteral i -> L.const_int i32_t i (* Generate a constant integer *)
       | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
