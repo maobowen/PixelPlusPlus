@@ -32,11 +32,12 @@ struct Img* load(char* path) {
 }
 
 void save(struct Img *img, char* path) {
-    uint8_t arr_i8[img->length];
+    uint8_t *arr_i8 = (uint8_t*) malloc(sizeof(uint8_t) * (img->length));
     for (int i = 0; i < img->length; i++) {
         arr_i8[i] = (uint8_t) (img->arr[i]);
     }
     stbi_write_png(path, img->width, img->height, 3, arr_i8, img->width * 3);
+    free(arr_i8);
     printf("saving image completed!\n");
 }
 
