@@ -1,0 +1,16 @@
+func int main()
+{
+    arr image = load("./jc.png");
+    int i = 0;
+    /* grey scaling */
+    for (i = 0; i < length(image); i= i + 3)
+    {
+        int temp = (image[i] + image[i + 1] + image[i + 2]) / 3;
+    	image[i] = temp;
+        image[i + 1] = temp;
+        image[i + 2] = temp;
+    }
+
+    save(image, "./jc_grey.png");
+    close(image, 0);
+}

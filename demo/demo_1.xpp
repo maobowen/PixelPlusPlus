@@ -1,0 +1,16 @@
+func int main()
+{
+    arr image = load("./jc.png");
+    
+
+    arr f1 = [-2,-1,0,-1,1,1,0,1,2];
+    arr f2 = [1,1,1,1,1,1,1,1,1];
+
+    set(f1, 3, 3);
+    set(f2, 3, 3);
+
+    |f1->f2->f2->f2->f2->f2->f2->f2|@image;
+
+    save(image, "./jc_stack.png");
+    close(image, 0);
+}

@@ -1,0 +1,19 @@
+func int main()
+{
+    arr image = load("./jc.png");
+    int i = 0;
+    /* scaling */
+    print(height(image));
+    print(width(image));
+    for (i = 0; i < length(image); i= i + 1)
+    {
+    	image[i] = int_of(float_of(image[i]) * 0.6);
+    	if (image[i] > 255)
+    	{
+    		image[i] = 255;
+    	}
+    }
+
+    save(image, "./jc_dim.png");
+    close(image, 0);
+}

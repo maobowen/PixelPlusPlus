@@ -1,0 +1,8 @@
+func int main()
+{
+    arr image = load("./jc.png");
+    arr image2 = load("./jc.png");
+    scifi_filter(image2);
+    save(collage(image, image2), "./jc_collage.png");
+    close(image, 0);
+}
