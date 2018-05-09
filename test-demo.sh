@@ -9,7 +9,7 @@ TOPLEVEL="./toplevel.native"
 LLC="llc"
 CC="gcc"
 CXX="g++"
-CFLAGS="-std=c99 -Wall"
+CFLAGS="-std=c99 -no-pie -Wall"
 CXXFLAGS="-std=c++11 -Wall"
 HASH="shasum -a 256"
 

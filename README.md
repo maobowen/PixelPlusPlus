@@ -1,6 +1,6 @@
 # Pixel++
 
-Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a documentation intended for the compilation and execution instructions.
+Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a documentation intended for the compilation and execution instructions. The full language manual is available at https://maobowen.github.io/PixelPlusPlus.
 
 This is a class project for COMS W4115 Programming Languages and Translators, Spring 2018 at Columbia University.
 
@@ -18,18 +18,27 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 
 #### Ubuntu
 
-Our compiler is tested on Ubuntu 17.10 with OCaml 4.04 and LLVM 6.0. To set up the environment, please run the following commands:
+Our compiler is developed and has been tested on
+
+- Ubuntu 16.04 with [OCaml 4.02](https://packages.ubuntu.com/xenial/ocaml) and [LLVM 6.0](http://apt.llvm.org/);
+- Ubuntu 17.10 with [OCaml 4.04](https://packages.ubuntu.com/artful/ocaml) and LLVM 6.0;
+- Ubuntu 18.04 with [OCaml 4.05](https://packages.ubuntu.com/bionic/ocaml) and [LLVM 6.0](https://packages.ubuntu.com/bionic/llvm).
+
+To set up the environment, please run the following commands:
 
 ```bash
 #!/bin/bash 
 
-# Add LLVM repositories
 LLVM_VERSION=6.0
 OCAML_LLVM_VERSION=6.0.0
 UBUNTU_CODENAME=`lsb_release --codename | cut -f2`
-wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
-echo "deb-src http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee -a /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+UBUNTU_VERSION=`lsb_release -r | awk '{ print $2 }' | sed 's/[.]//'`
+if [ ${UBUNTU_VERSION} -lt 1804 ]; then
+    # Add LLVM repositories for Ubuntu version 17.10 and lower
+    wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+    echo "deb-src http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee -a /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+fi
 sudo apt update
 
 # Install OCaml and LLVM
@@ -50,7 +59,11 @@ You may also run the following command to take changes into effect:
 
 #### macOS
 
-To set up the environment on macOS 10.13 with OCaml 4.06 and LLVM 6.0, please run the following commands (with [Homebrew](https://brew.sh/) installed):
+Our compiler has been tested on
+
+- macOS 10.13 with [OCaml 4.06](http://formulae.brew.sh/formula/ocaml) and [LLVM 6.0](http://formulae.brew.sh/formula/llvm@6).
+
+To set up the environment, please run the following commands (with [Homebrew](https://brew.sh/) installed):
 
 ```bash
 brew update
@@ -101,11 +114,11 @@ You can compile and execute an Pixel++ program (supposing the name of the progra
 
 5. Produce an executable `myprogram.exe` for the Pixel++ program if you do not use functions in the standard library:
 	
-		gcc myprogram.s -o myprogram.exe
+		gcc -no-pie -Wall myprogram.s -o myprogram.exe
 
 	If you use any functions in the standard library, link all the assembly files and object files and produce the executable:
 
-		gcc myprogram.s stdlib.s load.o -lm -o myprogram.exe
+		gcc -no-pie -Wall myprogram.s stdlib.s load.o -lm -o myprogram.exe
 
 6. Run your executable:
 	
