@@ -1,3 +1,5 @@
+/* Author: Jiayang (jl4305), Bowen (bm2734) */
+
 #include <memory.h>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION

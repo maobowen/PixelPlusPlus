@@ -1,3 +1,5 @@
+/* Author: Bowen (bm2734) */
+
 #ifndef __XPPSTDLIB_H__
 #define __XPPSTDLIB_H__
 #define CHANNEL_NUM 3

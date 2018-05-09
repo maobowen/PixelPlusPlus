@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Author: Bowen (bm2734)
+
 basedir="extended_tests"
 files="extended-*.xpp"
 

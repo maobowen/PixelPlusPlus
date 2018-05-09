@@ -1,3 +1,5 @@
+/* Author: Yilan (yh2961) */
+
 /* Failed test case: unmatched types */
 func int main() {
     int a = 1;

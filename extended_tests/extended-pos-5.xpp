@@ -1,3 +1,5 @@
+/* Author: Jiayang (jl4305), Yilan (yh2961), Bowen (bm2734) */
+
 /* Test case: scifi effect */
 func int main() {
     arr img1 = load("./image.png");

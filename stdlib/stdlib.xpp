@@ -1,363 +1,363 @@
+/* Author: Jiayang (jl4305), Yilan (yh2961), Bowen (bm2734), Nana (np2630), Yunxuan (ys3065) */
+
 /* Implement some scalar operations */
 
-
-
 func int exp(int num, int pow) {
-  int j;
-  int res;
-  res = 1;
-  for (j = 0; j < pow; j = j + 1) {
-    res = res * num;
-  }
-  return res;
+    int j;
+    int res;
+    res = 1;
+    for (j = 0; j < pow; j = j + 1) {
+        res = res * num;
+    }
+    return res;
 }
 
 func float exp2(float num, int pow) {
-  int j;
-  float res;
-  res = 1.0;
-  for (j = 0; j < pow; j = j + 1) {
-    res = res * num;
-  }
-  return res;
+    int j;
+    float res;
+    res = 1.0;
+    for (j = 0; j < pow; j = j + 1) {
+        res = res * num;
+    }
+    return res;
 }
 
 /* Implement matrix operations */
 
 func arr transpose(arr img) {
-  arr img2;
-  int len;
-  int i;
-  int j;
-  int h;
-  int w;
-  int o1;
-  int o2;
-  int o11;
-  int o21;
-  int o12;
-  int o22;
-  len = length(img);
-  h = height(img);
-  w = width(img);
-  if (h == 0 or w == 0) {
-    return img;
-  }
-  img2 = init(len, w, h); /* new height is w and new width is h since it is a tranpose operation */
-  if (len == w * h * 3) {
-    for (i = 0; i < h; i = i + 1) {
-      for (j = 0; j < w; j = j + 1) {
-        o1 = (i * w + j) * 3;
-        o2 = (j * h + i) * 3;
-        img2[o2] = img[o1];
-        o21 = o2 + 1;
-        o11 = o1 + 1;
-        o22 = o2 + 2;
-        o12 = o1 + 2;
-        img2[o21] = img[o11];
-        img2[o22] = img[o12];
-      }
+    arr img2;
+    int len;
+    int i;
+    int j;
+    int h;
+    int w;
+    int o1;
+    int o2;
+    int o11;
+    int o21;
+    int o12;
+    int o22;
+    len = length(img);
+    h = height(img);
+    w = width(img);
+    if (h == 0 or w == 0) {
+        return img;
     }
-  } else {
-    for (i = 0; i < h; i = i + 1) {
-      for (j = 0; j < w; j = j + 1) {
-        o1 = i * w + j;
-        o2 = j * h + i;
-        img2[o2] = img[o1];
-      }
+    img2 = init(len, w, h); /* new height is w and new width is h since it is a tranpose operation */
+    if (len == w * h * 3) {
+        for (i = 0; i < h; i = i + 1) {
+            for (j = 0; j < w; j = j + 1) {
+                o1 = (i * w + j) * 3;
+                o2 = (j * h + i) * 3;
+                img2[o2] = img[o1];
+                o21 = o2 + 1;
+                o11 = o1 + 1;
+                o22 = o2 + 2;
+                o12 = o1 + 2;
+                img2[o21] = img[o11];
+                img2[o22] = img[o12];
+            }
+        }
+    } else {
+        for (i = 0; i < h; i = i + 1) {
+            for (j = 0; j < w; j = j + 1) {
+                o1 = i * w + j;
+                o2 = j * h + i;
+                img2[o2] = img[o1];
+            }
+        }
     }
-  }
-  return img2;
+    return img2;
 }
 
 func arr mtimes(arr img1, arr img2) {
-  int i;
-  int l1;
-  int l2;
-  int h;
-  int w;
-  arr img3;
-  l1 = length(img1);
-  l2 = length(img2);
-  h = height(img1);
-  w = width(img1);
-  if (h != height(img2) or w != width(img2) or l1 != l2) {
-    printline("error! arr shape not equal!");
-    return img1;
-  }
-  img3 = init(l1, h, w);
-  for (i = 0; i < l1; i = i + 1) {
-    img3[i] = img1[i] * img2[i];
-  }
-  return img3;
+    int i;
+    int l1;
+    int l2;
+    int h;
+    int w;
+    arr img3;
+    l1 = length(img1);
+    l2 = length(img2);
+    h = height(img1);
+    w = width(img1);
+    if (h != height(img2) or w != width(img2) or l1 != l2) {
+        printline("error! arr shape not equal!");
+        return img1;
+    }
+    img3 = init(l1, h, w);
+    for (i = 0; i < l1; i = i + 1) {
+        img3[i] = img1[i] * img2[i];
+    }
+    return img3;
 }
 
 func arr collage(arr img1, arr img2) {
-  arr img3;
-  int i;
-  int j;
-  int len1;
-  int len2;
-  len1 = length(img1);
-  len2 = length(img2);
-  img3 = init(length(img1)+length(img2), height(img1)+height(img2), width(img1));
-  for (i = 0; i < len1; i = i + 1) {
-    img3[i] = img1[i];             
-  }
-  for (i = 0; i < len2; i = i + 1) {
-    img3[len1+i] = img2[i];
-  }
-  return img3;
+    arr img3;
+    int i;
+    int j;
+    int len1;
+    int len2;
+    len1 = length(img1);
+    len2 = length(img2);
+    img3 = init(length(img1)+length(img2), height(img1)+height(img2), width(img1));
+    for (i = 0; i < len1; i = i + 1) {
+        img3[i] = img1[i];                         
+    }
+    for (i = 0; i < len2; i = i + 1) {
+        img3[len1+i] = img2[i];
+    }
+    return img3;
 }
 
 func void rotate(arr img, int angle) {
-  /* Only support rotate left(angle = -90), rotate right(angle = 90) and rotate 180 (angle = 180) */
-  int len;
-  int i;
-  int j;
-  int h;
-  int w;
-  int o1;
-  int o2;
-  int o11;
-  int o12;
-  int o21;
-  int o22;
-  arr img2;
-  len = length(img);
-  h = height(img);
-  w = width(img);
-  if (angle == 180) {
-    img2 = init(len, h, w);
-    for (i = 0; (i * 3 + 2) < len; i = i + 1) {
-      o1 = i * 3;
-      o2 = len - (i + 1) * 3;
-      o11 = o1 + 1;
-      o21 = o2 + 1;
-      o12 = o1 + 2;
-      o22 = o2 + 2;
-      img2[o1] = img[o2];
-      img2[o11] = img[o21];
-      img2[o12] = img[o22];
+    /* Only support rotate left(angle = -90), rotate right(angle = 90) and rotate 180 (angle = 180) */
+    int len;
+    int i;
+    int j;
+    int h;
+    int w;
+    int o1;
+    int o2;
+    int o11;
+    int o12;
+    int o21;
+    int o22;
+    arr img2;
+    len = length(img);
+    h = height(img);
+    w = width(img);
+    if (angle == 180) {
+        img2 = init(len, h, w);
+        for (i = 0; (i * 3 + 2) < len; i = i + 1) {
+            o1 = i * 3;
+            o2 = len - (i + 1) * 3;
+            o11 = o1 + 1;
+            o21 = o2 + 1;
+            o12 = o1 + 2;
+            o22 = o2 + 2;
+            img2[o1] = img[o2];
+            img2[o11] = img[o21];
+            img2[o12] = img[o22];
+        }
+    } else if (angle == 90) {
+        img2 = init(len, w, h);
+        for (i = 0; i < h; i = i + 1) {
+            for (j = 0; j < w; j = j + 1) {
+                o1 = (i * w + j) * 3;
+                o2 = (j * h + (h - 1 - i)) * 3;
+                o11 = o1 + 1;
+                o21 = o2 + 1;
+                o12 = o1 + 2;
+                o22 = o2 + 2;
+                img2[o2] = img[o1];
+                img2[o21] = img[o11];
+                img2[o22] = img[o12];
+            }
+        }
+    } else if (angle == -90) {
+        img2 = init(len, w, h);
+        for (i = 0; i < h; i = i + 1) {
+            for (j = 0; j < w; j = j + 1) {
+                o1 = (i * w + j) * 3;
+                o2 = ((w - 1 - j) * h + i) * 3;
+                o11 = o1 + 1;
+                o21 = o2 + 1;
+                o12 = o1 + 2;
+                o22 = o2 + 2;
+                img2[o2] = img[o1];
+                img2[o21] = img[o11];
+                img2[o22] = img[o12];
+            }
+        }
     }
-  } else if (angle == 90) {
-    img2 = init(len, w, h);
-    for (i = 0; i < h; i = i + 1) {
-      for (j = 0; j < w; j = j + 1) {
-        o1 = (i * w + j) * 3;
-        o2 = (j * h + (h - 1 - i)) * 3;
-        o11 = o1 + 1;
-        o21 = o2 + 1;
-        o12 = o1 + 2;
-        o22 = o2 + 2;
-        img2[o2] = img[o1];
-        img2[o21] = img[o11];
-        img2[o22] = img[o12];
-      }
-    }
-  } else if (angle == -90) {
-    img2 = init(len, w, h);
-    for (i = 0; i < h; i = i + 1) {
-      for (j = 0; j < w; j = j + 1) {
-        o1 = (i * w + j) * 3;
-        o2 = ((w - 1 - j) * h + i) * 3;
-        o11 = o1 + 1;
-        o21 = o2 + 1;
-        o12 = o1 + 2;
-        o22 = o2 + 2;
-        img2[o2] = img[o1];
-        img2[o21] = img[o11];
-        img2[o22] = img[o12];
-      }
-    }
-  }
-  close(img, 1);
-  imgcpy(img, img2);
+    close(img, 1);
+    imgcpy(img, img2);
 }
 
 func arr crop(arr img, int x, int y, int newh, int neww) {
-  arr img2;
-  int len;
-  int h;
-  int w;
-  int i;
-  int j;
-  int k;
-  len = length(img);
-  h = height(img);
-  w = width(img);
+    arr img2;
+    int len;
+    int h;
+    int w;
+    int i;
+    int j;
+    int k;
+    len = length(img);
+    h = height(img);
+    w = width(img);
 
-  if ((x < 0) or (x > h)) {
-    x = 0;
-  }
-  if ((y < 0) or (y > w)) {
-    y = 0;
-  }
-  if (x + newh > h) {
-    newh = h - x;
-  }
-  if (y + neww > w) {
-    neww = w - y;
-  }
-
-  img2 = init(newh * neww * 3, newh, neww);
-  for (i = 0; i < newh; i = i + 1) {
-    for (j = 0; j < neww; j = j + 1) {
-      for (k = 0; k < 3; k = k + 1) {
-        img2[(i * neww + j) * 3 + k] = img[((x + i) * w + (y + j)) * 3 + k];
-      }
+    if ((x < 0) or (x > h)) {
+        x = 0;
     }
-  }
-  return img2;
+    if ((y < 0) or (y > w)) {
+        y = 0;
+    }
+    if (x + newh > h) {
+        newh = h - x;
+    }
+    if (y + neww > w) {
+        neww = w - y;
+    }
+
+    img2 = init(newh * neww * 3, newh, neww);
+    for (i = 0; i < newh; i = i + 1) {
+        for (j = 0; j < neww; j = j + 1) {
+            for (k = 0; k < 3; k = k + 1) {
+                img2[(i * neww + j) * 3 + k] = img[((x + i) * w + (y + j)) * 3 + k];
+            }
+        }
+    }
+    return img2;
 }
 
 func arr flip(arr img) {
-  arr img2;
-  int len;
-  int h;
-  int w;
-  int i;
-  int j;
-  int k;
+    arr img2;
+    int len;
+    int h;
+    int w;
+    int i;
+    int j;
+    int k;
 
-  len = length(img);
-  h = height(img);
-  w = width(img);
+    len = length(img);
+    h = height(img);
+    w = width(img);
 
-  img2 = init(len, h, w);
+    img2 = init(len, h, w);
 
-  for (i = 0; i < h; i = i + 1) {
-    for (j = 0; j < w; j = j + 1) {
-      for (k = 0; k < 3; k = k + 1) {
-        img2[i * w * 3 + j * 3 + k] = img[i * w * 3 + (w - 1 - j) * 3 + k];   
-      }
-    }
-  } 
+    for (i = 0; i < h; i = i + 1) {
+        for (j = 0; j < w; j = j + 1) {
+            for (k = 0; k < 3; k = k + 1) {
+                img2[i * w * 3 + j * 3 + k] = img[i * w * 3 + (w - 1 - j) * 3 + k];     
+            }
+        }
+    } 
 
-  return img2;
+    return img2;
 }
 
 /* Built-in filteres */
 
 func void scifi_filter(arr img) {
-  int len;
-  int i;
-  arr img2;
-  int o;
-  len = length(img);
-  img2 = init(len, height(img), width(img));
-  for (i = 0; i < len; i = i + 1) {
-    o = len - 1 - i;
-    img2[i] = img[o];
-  }
-  rotate(img2, 180);
-  close(img, 1);
-  imgcpy(img, img2);
+    int len;
+    int i;
+    arr img2;
+    int o;
+    len = length(img);
+    img2 = init(len, height(img), width(img));
+    for (i = 0; i < len; i = i + 1) {
+        o = len - 1 - i;
+        img2[i] = img[o];
+    }
+    rotate(img2, 180);
+    close(img, 1);
+    imgcpy(img, img2);
 }
 
 func void apply_conv_filter(arr img, arr filter) {
-  int len;
-  int i;
-  int j;
-  arr img2;
-  int o;
-  int r;
-  int g;
-  int b;
-  int height;
-  int width;
-  int kernel_r;
-  int kernel_g;
-  int kernel_b;
-  int r_tmp;
-  int g_tmp;
-  int b_tmp;
-  int m;
-  int n;
-  int sum = 0;
-  for (i = 0; i < length(filter); i = i + 1) {
-      sum = sum + filter[i];
-  }
-
-  /*arr filter = [1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1];*/
-  int filter_height = height(filter);
-  int filter_width = width(filter);
-  int x_offset = (filter_height - 1) / 2;
-  int y_offset = (filter_width - 1) / 2;
-  len = length(img);
-  height = height(img);
-  width = width(img);
-  img2 = init(len, height, width(img));
-  for (i = 0; i < height; i = i + 1) {
-    for (j = 0; j < width; j = j + 1) {
-      r = (width * i + j) * 3;
-      g = r + 1;
-      b = r + 2;
-
-      if (i - x_offset >= 0 and i + x_offset < height and j - y_offset >= 0 and j + y_offset < width) {
-        kernel_r = 0;
-        kernel_g = 0;
-        kernel_b = 0;
-        for (m = 0; m < filter_height; m = m + 1) {
-          for (n = 0; n < filter_width; n = n + 1) {
-            r_tmp = (width * (i + m - x_offset) + j + n - y_offset) * 3;
-            g_tmp = r_tmp + 1;
-            b_tmp = r_tmp + 2;
-
-            kernel_r = kernel_r + filter[(filter_height - m - 1) * filter_width + (filter_width - n - 1)] * img[r_tmp];
-            kernel_g = kernel_g + filter[(filter_height - m - 1) * filter_width + (filter_width - n - 1)] * img[g_tmp];
-            kernel_b = kernel_b + filter[(filter_height - m - 1) * filter_width + (filter_width - n - 1)] * img[b_tmp];
-          }
-        }
-        if (sum != 0) {
-          img2[r] = kernel_r / sum;
-          img2[g] = kernel_g / sum;
-          img2[b] = kernel_b / sum;
-        } else {
-          img2[r] = kernel_r - 128;
-          img2[g] = kernel_g - 128;
-          img2[b] = kernel_b - 128;
-        }
-
-      } else {
-        img2[r] = img[r];
-        img2[g] = img[g];
-        img2[b] = img[b];
-      }
+    int len;
+    int i;
+    int j;
+    arr img2;
+    int o;
+    int r;
+    int g;
+    int b;
+    int height;
+    int width;
+    int kernel_r;
+    int kernel_g;
+    int kernel_b;
+    int r_tmp;
+    int g_tmp;
+    int b_tmp;
+    int m;
+    int n;
+    int sum = 0;
+    for (i = 0; i < length(filter); i = i + 1) {
+            sum = sum + filter[i];
     }
-  }
-  close(img, 1);
-  /* Normalize */
-  int k;
-  for (k = 0; k < 3; k = k + 1) {
-    int min = 255;
-    int max = 0;
+
+    /*arr filter = [1,4,7,4,1,4,16,26,16,4,7,26,41,26,7,4,16,26,16,4,1,4,7,4,1];*/
+    int filter_height = height(filter);
+    int filter_width = width(filter);
+    int x_offset = (filter_height - 1) / 2;
+    int y_offset = (filter_width - 1) / 2;
+    len = length(img);
+    height = height(img);
+    width = width(img);
+    img2 = init(len, height, width(img));
     for (i = 0; i < height; i = i + 1) {
-      for (j = 0; j < width; j = j + 1) {
-        r = img2[(i * width + j) * 3 + k];
-        if (min > r) { min = r; }
-        if (max < r) { max = r; }
-      }
+        for (j = 0; j < width; j = j + 1) {
+            r = (width * i + j) * 3;
+            g = r + 1;
+            b = r + 2;
+
+            if (i - x_offset >= 0 and i + x_offset < height and j - y_offset >= 0 and j + y_offset < width) {
+                kernel_r = 0;
+                kernel_g = 0;
+                kernel_b = 0;
+                for (m = 0; m < filter_height; m = m + 1) {
+                    for (n = 0; n < filter_width; n = n + 1) {
+                        r_tmp = (width * (i + m - x_offset) + j + n - y_offset) * 3;
+                        g_tmp = r_tmp + 1;
+                        b_tmp = r_tmp + 2;
+
+                        kernel_r = kernel_r + filter[(filter_height - m - 1) * filter_width + (filter_width - n - 1)] * img[r_tmp];
+                        kernel_g = kernel_g + filter[(filter_height - m - 1) * filter_width + (filter_width - n - 1)] * img[g_tmp];
+                        kernel_b = kernel_b + filter[(filter_height - m - 1) * filter_width + (filter_width - n - 1)] * img[b_tmp];
+                    }
+                }
+                if (sum != 0) {
+                    img2[r] = kernel_r / sum;
+                    img2[g] = kernel_g / sum;
+                    img2[b] = kernel_b / sum;
+                } else {
+                    img2[r] = kernel_r - 128;
+                    img2[g] = kernel_g - 128;
+                    img2[b] = kernel_b - 128;
+                }
+
+            } else {
+                img2[r] = img[r];
+                img2[g] = img[g];
+                img2[b] = img[b];
+            }
+        }
     }
-    int span = max - min;
-    print(max);
-    print(min);
-    for (i = 0; i < height; i = i + 1) {
-      for (j = 0; j < width; j = j + 1) {
-        r = img2[(i * width + j) * 3 + k];
-        if (r < 0) { img2[(i * width + j) * 3 + k] = 0; }
-        if (r > 255) { img2[(i * width + j) * 3 + k] = 255; }
-        /*img2[(i * width + j) * 3 + k] = int_of((float_of(r - min) / float_of(span)) * float_of(max));*/
-      }
+    close(img, 1);
+    /* Normalize */
+    int k;
+    for (k = 0; k < 3; k = k + 1) {
+        int min = 255;
+        int max = 0;
+        for (i = 0; i < height; i = i + 1) {
+            for (j = 0; j < width; j = j + 1) {
+                r = img2[(i * width + j) * 3 + k];
+                if (min > r) { min = r; }
+                if (max < r) { max = r; }
+            }
+        }
+        int span = max - min;
+        print(max);
+        print(min);
+        for (i = 0; i < height; i = i + 1) {
+            for (j = 0; j < width; j = j + 1) {
+                r = img2[(i * width + j) * 3 + k];
+                if (r < 0) { img2[(i * width + j) * 3 + k] = 0; }
+                if (r > 255) { img2[(i * width + j) * 3 + k] = 255; }
+                /*img2[(i * width + j) * 3 + k] = int_of((float_of(r - min) / float_of(span)) * float_of(max));*/
+            }
+        }
     }
-  }
-  imgcpy(img, img2);
+    imgcpy(img, img2);
 }
 
 func void apply_conv_filters(kernel filters, arr img) {
-  int l = f_len(filters);
-  int i = 0;
-  for (i = 0; i < l; i = i + 1) {
-    apply_conv_filter(img, get_filter(filters, i));
-  }
+    int l = f_len(filters);
+    int i = 0;
+    for (i = 0; i < l; i = i + 1) {
+        apply_conv_filter(img, get_filter(filters, i));
+    }
 }

@@ -1,3 +1,5 @@
+/* Author: Yunxuan (ys3065) */
+
 func int forLoopTest() {
     int accu;
     int i;

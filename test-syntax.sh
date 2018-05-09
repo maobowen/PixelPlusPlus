@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Author: Bowen (bm2734), Yunxuan (ys3065)
+
 files="syntax_tests/test-*.xpp syntax_tests/fail-*.xpp"
 
 TOPLEVEL="./toplevel.native"

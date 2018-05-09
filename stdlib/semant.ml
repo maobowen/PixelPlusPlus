@@ -1,4 +1,5 @@
 (* Semantic checking for the MicroC compiler *)
+(* Author: Jiayang (jl4305) *)
 
 open Ast
 open Sast
