@@ -72,7 +72,7 @@ Keywords are reserved by the language so that they cannot be used for other purp
 
 Some words are reserved by the language as built-in functions. Users are welcome to call these functions, but they are not expected to use these words to name other functions. These words include:
 
-- Built-in functions (See Section [3.8.3](#383-built-in-function)): `close`, `height`, `imgcpy`, `init`, `length`, `load`, `print`, `printf`, `printline`, `save`, `set`, `width`.
+- Built-in functions (See Section [3.8.3](#383-built-in-function)): `close`, ``float_of`, height`, `imgcpy`, `init`, `int_of`, `length`, `load`, `print`, `printf`, `printline`, `save`, `set`, `width`.
 
 Some words are reserved in the standard library `stdlib.xpp`. Users are welcome to call these functions or filters, but they should not use these words for other purposes provided that the standard library will be linked during compilation. These words include:
 
@@ -80,7 +80,7 @@ Some words are reserved in the standard library `stdlib.xpp`. Users are welcome 
 
 Some other words are reserved by the language or the standard library `stdlib.xpp`. They are “helper functions” for developers, and thus users are neither expected to call these functions nor to use these words to name other functions. These words include:
 
-- Built-in functions: `float_of`, `f_len`, `get_filter`, `int_of`;
+- Built-in functions: `f_len`, `get_filter`;
 - Standard library functions: `apply_conv_filter`, `apply_conv_filters`, `exp`, `exp2`, `mtimes`, `transpose`.
 
 ### 3.3.4 Data Types
@@ -219,19 +219,19 @@ A mathematical expression contains operators, identifiers, and literals. An exam
 b = a + 2
 ```
 
-Additionally, Pixel++ offers two matrix operators: component-wise multiplication and transpose. Pixel++ **does not** have a native matrix type. Here, a matrix means **a 1-dimensional array with height and width**, which looks like a 2-dimensional array. For more information, please refer to Section [3.8.3](#383-built-in-function) and [3.11.1](#3111-images-and-filters). Some examples of valid matrix expressions would
-be:
+Additionally, Pixel++ offers two matrix operators: component-wise multiplication and transpose. Pixel++ **does not** have a native matrix type. Here, a matrix means **a 1-dimensional array with height and width**, which looks like a 2-dimensional array. For more information, please refer to Section [3.8.3](#383-built-in-function) and [3.11.1](#3111-images-and-filters). Some examples of valid matrix expressions would be:
 
 ```cpp
 m = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 set(m, 3, 3);
+
 m2 = **m      /* Transpose */
 m3 = m :* m2  /* Component-wise multiplication */
 ```
 
 ### 3.6.2 Image Filter Expression
 
-An image filter expression contains operators `@` and `->`. `@` means operating on an image and `->` means stacking filters. For example, if we have two filters `blur` and `smooth`, `blur->smooth` means first applying the blurring filter and then the smoothing filter. Valid filtering expressions can be:
+An image filter expression contains operators `@` and `->`. `@` means operating on an image and `->` means stacking filters. For example, if we have two filters `blur` and `smooth`, `blur->smooth` means first applying the blurring filter and then the smoothing filter (since in this example `smooth` is physically closer to the `image` operand). Valid filtering expressions can be:
 
 ```cpp
 func void applyFilter()
@@ -303,7 +303,8 @@ func int forLoopTest()
 {
     int b = 10;
     int accu = 0;
-    for (int i = 0; i < b; i = i + 1)
+    int i;
+    for (i = 0; i < b; i = i + 1)
     {
         accu = accu + i;
     }
@@ -522,12 +523,12 @@ There are some standard library functions to perform easy manipulation on images
 
 4.  `rotate(arr image, int angle)`
     - **Description**: Rotate the image by either 90&deg; counterclockwise, 90&deg; clockwise or 180&deg;.
-    - **Prototype**: `func arr rotate(arr image, int angle);`
+    - **Prototype**: `func void rotate(arr image, int angle);`
     - **Parameters**:
         - `arr image`: The input image.
         - `int angle`: `-90` for rotating 90&deg; counterclockwise, `90` for rotating rotating 90&deg; clockwise, or `180` for rotating 180&deg;.
-    - **Return**: The image after rotation.
-    - **Example**: `arr image2 = rotate(image, 90)`;
+    - **Return**: Nothing.
+    - **Example**: `rotate(image, 90)`;
 
 5.  `scifi_filter(arr image)`
     - **Description**: Apply a sci-fi effect to the image.
@@ -624,7 +625,7 @@ func void main()
     arr image3 = collage(image1, image2);         /* Concatenate two images vertically */
     arr image4 = flip(image3);                    /* Concatenate the images horizontally */
     arr image5 = crop(image4, 0, 350, 540, 300);  /* Crop the images */
-    save(image3, "~/Documents/image_transformed.png");
+    save(image5, "~/Documents/image_transformed.png");
 }
 ```
 
