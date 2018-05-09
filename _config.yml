@@ -5,3 +5,6 @@ google_analytics:
 theme: jekyll-theme-cayman
 plugins:
   - jekyll-gist
+github:
+  zip_url: https://github.com/maobowen/PixelPlusPlus/zipball/master
+  tar_url: https://github.com/maobowen/PixelPlusPlus/tarball/master
