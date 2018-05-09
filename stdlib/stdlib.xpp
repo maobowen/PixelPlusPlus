@@ -145,7 +145,7 @@ func void rotate(arr img, int angle) {
     for (i = 0; i < h; i = i + 1) {
       for (j = 0; j < w; j = j + 1) {
         o1 = (i * w + j) * 3;
-        o2 = (j * h + (h - i)) * 3;
+        o2 = (j * h + (h - 1 - i)) * 3;
         o11 = o1 + 1;
         o21 = o2 + 1;
         o12 = o1 + 2;
@@ -160,7 +160,7 @@ func void rotate(arr img, int angle) {
     for (i = 0; i < h; i = i + 1) {
       for (j = 0; j < w; j = j + 1) {
         o1 = (i * w + j) * 3;
-        o2 = ((w - j) * h + i) * 3;
+        o2 = ((w - 1 - j) * h + i) * 3;
         o11 = o1 + 1;
         o21 = o2 + 1;
         o12 = o1 + 2;
