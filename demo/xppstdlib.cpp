@@ -30,18 +30,27 @@ void apply_convolution(uint8_t *image1, int width, int height, uint8_t *image2, 
                         kernel_g += kernel.kernel[(kernel.height - m - 1) * kernel.width + (kernel.width - n - 1)] * image1[g_tmp];
                         kernel_b += kernel.kernel[(kernel.height - m - 1) * kernel.width + (kernel.width - n - 1)] * image1[b_tmp];
                     }
+                int r_before_normalize;
+                int g_before_normalize;
+                int b_before_normalize;
                 if (sum != 0)
                 {
-                    image2[r] = kernel_r / sum;
-                    image2[g] = kernel_g / sum;
-                    image2[b] = kernel_b / sum;
+                    r_before_normalize = kernel_r / sum;
+                    g_before_normalize = kernel_g / sum;
+                    b_before_normalize = kernel_b / sum;
                 }
                 else
                 {
-                    image2[r] = kernel_r - 128;
-                    image2[g] = kernel_g - 128;
-                    image2[b] = kernel_b - 128;
+                    r_before_normalize = kernel_r - 128;
+                    g_before_normalize = kernel_g - 128;
+                    b_before_normalize = kernel_b - 128;
                 }
+                image2[r] = (r_before_normalize > 255) ? 255 : r_before_normalize;
+                image2[r] = (r_before_normalize < 0) ? 0 : image2[r];
+                image2[g] = (g_before_normalize > 255) ? 255 : g_before_normalize;
+                image2[g] = (g_before_normalize < 0) ? 0 : image2[g];
+                image2[b] = (b_before_normalize > 255) ? 255 : b_before_normalize;
+                image2[b] = (b_before_normalize < 0) ? 0 : image2[b];
             }
             else
             {
@@ -50,17 +59,6 @@ void apply_convolution(uint8_t *image1, int width, int height, uint8_t *image2, 
                 image2[b] = image1[b];
             }
         }
-
-    for (int k = 0; k < 3; k++)
-        for (int i = 0; i < height; i++)
-            for (int j = 0; j < width; j++)
-            {
-                int pixel = image2[(i * width + j) * 3 + k];
-                if (pixel < 0)
-                    image2[(i * width + j) * 3 + k] = 0;
-                if (pixel > 255)
-                    image2[(i * width + j) * 3 + k] = 255;
-            }
 }
 
 void collage(uint8_t *image1, int width, int height, uint8_t *image2, uint8_t *image3)
