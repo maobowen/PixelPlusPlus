@@ -20,7 +20,7 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 
 Our compiler is developed and has been tested on
 
-- Ubuntu 16.04 with [OCaml 4.02](https://packages.ubuntu.com/xenial/ocaml) and [LLVM 6.0](http://apt.llvm.org/);
+- Ubuntu 14.04 with [OCaml 4.02](https://launchpad.net/~avsm/+archive/ubuntu/ocaml42+opam12) and [LLVM 6.0](http://apt.llvm.org/);
 - Ubuntu 17.10 with [OCaml 4.04](https://packages.ubuntu.com/artful/ocaml) and LLVM 6.0;
 - Ubuntu 18.04 with [OCaml 4.05](https://packages.ubuntu.com/bionic/ocaml) and [LLVM 6.0](https://packages.ubuntu.com/bionic/llvm).
 
