@@ -26,13 +26,15 @@ int main()
         3
     };
     uint8_t *image3 = (uint8_t*) malloc(sizeof(uint8_t) * length1);
-    apply_convolution(image1, width1, height1, image3, emboss);
+    /*apply_convolution(image1, width1, height1, image3, emboss);*/
+    memcpy(image3, image1, sizeof(uint8_t) * length1);
     uint8_t *image4 = (uint8_t*) malloc(sizeof(uint8_t) * length1);
     for (int i = 0; i < 7; i++)
     {
         apply_convolution(image3, width1, height1, image4, blur);
         memcpy(image3, image4, sizeof(uint8_t) * length1);
     }
+    apply_convolution(image4, width1, height1, image3, emboss);
 
     // Flip
     flip(image3, width1, height1, image4);
@@ -42,7 +44,7 @@ int main()
     crop(image4, width1, image2, 550, 650, 350, 200);
 
     const char *path2 = "./demo-0-v.png";
-    stbi_write_png(path2, width1, height1, CHANNEL_NUM, image2, width1 * CHANNEL_NUM);
+    stbi_write_png(path2, 550, 650, CHANNEL_NUM, image2, 550 * CHANNEL_NUM);
 
     stbi_image_free(image1);
     free(image2);
