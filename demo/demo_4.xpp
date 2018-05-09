@@ -1,9 +1,0 @@
-func int main()
-{
-    arr image = load("./jc.png");
-    int i = 0;
-    /* flip */
-    
-    save(flip(image), "./jc_flip.png");
-    close(image, 0);
-}

@@ -1,0 +1,31 @@
+func int main()
+{
+    arr image = load("./jc.png");
+    int i = 0;
+
+    /* Dim the image by scaling */
+    print(height(image));
+    print(width(image));
+    for (i = 0; i < length(image); i = i + 1)
+    {
+    	image[i] = int_of(float_of(image[i]) * 0.6);
+    	if (image[i] > 255)
+    	{
+    		image[i] = 255;
+    	}
+    }
+
+    /* Rotate */
+    rotate(image, 180);
+
+    /* Sharpen */
+    /*
+    arr sharpen = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+    set(sharpen, 3, 3);
+    kernel k = |sharpen|;
+    k@image;
+    */
+
+    save(image, "./demo-1.png");
+    close(image, 0);
+}

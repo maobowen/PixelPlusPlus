@@ -20,7 +20,7 @@ CheckPass() {
     # Build Pixel++ program
     ../${TOPLEVEL} $1 > ${basename}.ll
     ${LLC} ${basename}.ll > ${basename}.s
-    ${CC} ${CFLAGS} -o ${basename} ${basename}.s stdlib.s load.o -lm
+    ${CC} ${CFLAGS} ${basename}.s stdlib.s load.o -lm -o ${basename}
     ./${basename} > ${basename}.xpp.out
 
     # Testing
@@ -35,7 +35,7 @@ CheckPass() {
         rm -f ${basename}.diff
     else
         # Build verification program
-        ${CXX} ${CXXFLAGS} ${basename}-v.cpp -o ${basename}-v
+        ${CXX} ${CXXFLAGS} ${basename}-v.cpp xppstdlib.cpp -o ${basename}-v
         ./${basename}-v
         # Compare two images
         hash1=`${HASH} ${basename}.png | cut -d\  -f1`

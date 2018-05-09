@@ -2,7 +2,8 @@ func int main()
 {
     arr image = load("./jc.png");
     int i = 0;
-    /* grey scaling */
+
+    /* Grey scaling */
     for (i = 0; i < length(image); i= i + 3)
     {
         int temp = (image[i] + image[i + 1] + image[i + 2]) / 3;
@@ -11,6 +12,13 @@ func int main()
         image[i + 2] = temp;
     }
 
-    save(image, "./jc_grey.png");
+    /* Apply Sci-Fi effect */
+    arr image2 = load("./jc.png");
+    scifi_filter(image2);
+
+    /* Collage */
+    save(collage(image, image2), "./demo-2.png");
+
     close(image, 0);
+    close(image2, 0);
 }
