@@ -6,7 +6,167 @@ Pixel++ is a programming language for efficient manipulation of images coded in 
 
 # 1 Introduction
 
+## 1.1 Overview
+
+In this document, we propose Pixel++, a domain-specific language designed for efficient manipulation on images, which contains features that allow users to edit image with convenience and conciseness. Pixel++ provides a foundation for image processing through the development of powerful yet simple primitive data types, operators, built-in functions and standard library. We will demonstrate the usability of Pixel++ by explaining the essential components in a programming language such as architectural design, reference manual, language testing, etc.
+
+## 1.2 Aims and Motivations
+
+Since posting photos on social media has become an important part of people’s lives in the 21<sup>st</sup> century, it would bring a huge impact to the society if one can create a tool to help people easily edit photos and apply effects on them to reach goals such as expressing feelings or conveying messages. While Photoshop and some other cutting-edge software do a pretty good job at image editing, most of them still requires a large amount of manual labor. There exists few programming languages or software that enable automatic image manipulation. Therefore, we designed the Pixel++ programming language, which enables users to modify an image by changing its RGB pixel values.
+
+## 1.3 Context
+
+Our programming language represents an image as an integer array and stores the pixel values in that array. We allow user to add effects on images by self-defined filters or Pixel++’s pre-defined filters, and we provide filter operators for users to apply convolution matrices on images. In order to process images presented in arrays, we also provide operators such as component-wise multiplication operator, transpose operator, subscript operator, etc. Additionally, there are built-in functions for users to load images, initialize blank images, set  height and width of a filter, etc. and a standard library for users to crop, rotate, flip, collage and apply sci-fi effect to images. These features give users the flexibility to transform their images by simply operating on the arrays. 
+
+The syntax of Pixel++ is similar to the syntax of C, excluding some  irrelevant details such as inheritance, template, etc. Since Pixel++ includes the array data type and other relative operators, it does not only implement image processing but also grants users the ability to manipulate images on a pixel scale and the freedom to define their own filters based on individual preference.
+
+Combining these features could considerably simplify real-life tasks such as adjusting brightness and contrast of images, editing the sizes, flipping and concatenating images, adding interesting effects on images, and so on.
+
 # 2 Language Tutorial
+
+## 2.1 Environment Setup
+
+### 2.1.1 Ubuntu
+
+Our compiler is developed and has been tested on
+
+- Ubuntu 14.04 with [OCaml 4.02](https://launchpad.net/~avsm/+archive/ubuntu/ocaml42+opam12) and [LLVM 6.0](http://apt.llvm.org/);
+- Ubuntu 17.10 with [OCaml 4.04](https://packages.ubuntu.com/artful/ocaml) and LLVM 6.0.
+
+To set up the environment, please run the following commands:
+
+```bash
+#!/bin/bash 
+
+LLVM_VERSION=6.0
+OCAML_LLVM_VERSION=6.0.0
+UBUNTU_CODENAME=`lsb_release --codename | cut -f2`
+UBUNTU_VERSION=`lsb_release -r | awk '{ print $2 }' | sed 's/[.]//'`
+if [ ${UBUNTU_VERSION} -lt 1804 ]; then
+    # Add LLVM repositories for Ubuntu version 17.10 and lower
+    wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+    echo "deb-src http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee -a /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+fi
+sudo apt update
+
+# Install OCaml and LLVM
+sudo apt install ocaml opam m4 clang-${LLVM_VERSION} llvm-${LLVM_VERSION} llvm-${LLVM_VERSION}-runtime cmake pkg-config build-essential
+opam init
+
+# Install OCaml LLVM library
+opam install llvm.${OCAML_LLVM_VERSION}
+tee -a ~/.bashrc << EOF
+export PATH="/usr/lib/llvm-${LLVM_VERSION}/bin:\$PATH"
+eval \`opam config env\`
+EOF
+```
+
+You may also run the following command to take changes into effect:
+
+```bash
+source ~/.bashrc
+```
+
+### 2.1.2 macOS
+
+Our compiler has been tested on
+
+- macOS 10.13 with [OCaml 4.06](http://formulae.brew.sh/formula/ocaml) and [LLVM 6.0](http://formulae.brew.sh/formula/llvm@6).
+
+To set up the environment, please run the following commands (with [Homebrew](https://brew.sh/) installed):
+
+```bash
+brew update
+brew install ocaml opam llvm
+echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+opam init
+eval `opam config env`
+opam install llvm.6.0.0
+```
+
+## 2.2 Building Pixel++ Compiler
+
+After you setup your environment correctly, the first thing you should do is to build our Pixel++ compiler. We provide a Makefile to make this process convenient for you. To build the compiler, just use the following command:
+
+```bash
+make
+```
+
+## 2.3 Compiling and Running Your Pixel++ Program
+
+First things first: pick up your favorite text editor, and write a Pixel++ program! You can just copy and paste the sample program in Section [2.4](#24-a-sample-program), name it as `myprogram.xpp`, and put it under the root directory of the compiler. Don't forget to include your favorite images (only PNG format is supported). If you use the sample program, just name an image as `image.png`.
+
+Now let's compile our program step by step.
+
+First, compile the Pixel++ program and produce an LLVM IR `myprogram.ll`:
+
+```bash
+./toplevel.native myprogram.xpp > myprogram.ll
+```
+
+Next, Invokes the LLVM compiler to produce an assembly file `myprogram.s`:
+
+```bash
+llc myprogram.ll > myprogram.s
+```
+
+If you would like to use any functions in the standard library to process images (for example, the sample program in Section [2.4](#24-a-sample-program) uses a sci-fi effect filter in the stardary library), compile the file `stdlib.xpp`:
+
+```bash
+make -C stdlib/
+./stdlib/toplevel.native -c2 ./stdlib/stdlib.xpp > stdlib.llllc stdlib.ll > stdlib.s
+gcc -std=c99 -Wall -c load.c
+```
+
+Now produce an executable `myprogram.exe` for the Pixel++ program if you do not use functions in the standard library:
+
+```bash
+gcc -Wall myprogram.s -o myprogram.exe
+```
+
+If you use any functions in the standard library, link all the assembly files and object files and produce the executable:
+
+```
+gcc -Wall myprogram.s stdlib.s load.o -lm -o myprogram.exe
+```
+
+> You might need to add the `-no-pie` flag to GCC if you experience any relocation errors when linking on Ubuntu 18.04.
+
+Finally, run your executable and see the result:
+
+```bash
+./myprogram.exe
+```
+
+If you follow our sample program, you can find a file named `image2.png` generated under the root directory. Check it out and see what has happened!
+
+You can also clean intermediate files and executables before building the top-level executables using:
+
+```
+make clean
+make -C stdlib/ clean
+```
+
+## 2.4 A Sample Program
+
+Since Pixel++ is designed for image processing, let’s look at a beginner program on how to manipulate images in Pixel++.
+
+```cpp
+func int main() {
+    arr img1 = load("./image.png");
+    scifi_filter(img1);
+    save(img1, "./image2.png");
+    close(img1, 0);
+    return 0;
+}
+```
+
+- Line 1: Every Pixel++ program must have a main function. It’s the entry point of a Pixel++ program. 
+- Line 2: `load()` function loads the picture file `image.png` from the disk into a variable `img1`. Every image in Pixel++ is of type `arr`, which stands for array. `load()` is a built-in function provided by Pixel++. `save()` and `close()` are also built-in functions. To see a full list of built-in functions, please refer to Section [3.8.3](#383-built-in-function). 
+- Line 3: `scifi_filter()` applies the sci-fi effect filter to the loaded image. `scifi_filter()` is a function in the Pixel++ standard library. Other standard library functions include `crop()`, `collage()`, `flip()`, etc. To see a full list of functions in the standard library, please refer to Section [3.9](#39-standard-library).
+- Line 4: The built-in `save()` function saves the changes you made on the image to the disk. 
+- Line 5: Don’t forget to close the image file when you are done manipulating the image using the built-in `close()` function.
 
 # 3 Language Manual
 
@@ -573,7 +733,7 @@ int blue  = img[(x * w + y) * 3 + 2];  /* Blue value on (x, y) */
 
 ## 3.12 Code Listings
 
-We will demonstrate three programs which illustrate the key features of Pixel++.
+We will demonstrate three programs which illustrate the key features of Pixel++. For more sample programs, please refer to the test suites for [Deliverable #4 Hello World](https://github.com/maobowen/PixelPlusPlus/tree/master/helloworld_tests), [Deliverable #5 Extended Testsuite](https://github.com/maobowen/PixelPlusPlus/tree/master/extended_tests) and [Demo](https://github.com/maobowen/PixelPlusPlus/tree/master/demo).
 
 ### 3.12.1 Greatest common divisor (GCD)
 
