@@ -21,12 +21,12 @@ func int main()
     rotate(image, 180);
 
     /* Sharpen */
-    /*
+    
     arr sharpen = [0, -1, 0, -1, 5, -1, 0, -1, 0];
     set(sharpen, 3, 3);
     kernel k = |sharpen|;
     k@image;
-    */
+    
 
     save(image, "./demo-1.png");
     close(image, 0);
