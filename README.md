@@ -21,8 +21,7 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 Our compiler is developed and has been tested on
 
 - Ubuntu 14.04 with [OCaml 4.02](https://launchpad.net/~avsm/+archive/ubuntu/ocaml42+opam12) and [LLVM 6.0](http://apt.llvm.org/);
-- Ubuntu 17.10 with [OCaml 4.04](https://packages.ubuntu.com/artful/ocaml) and LLVM 6.0;
-- Ubuntu 18.04 with [OCaml 4.05](https://packages.ubuntu.com/bionic/ocaml) and [LLVM 6.0](https://packages.ubuntu.com/bionic/llvm).
+- Ubuntu 17.10 with [OCaml 4.04](https://packages.ubuntu.com/artful/ocaml) and LLVM 6.0.
 
 To set up the environment, please run the following commands:
 
@@ -114,11 +113,13 @@ You can compile and execute an Pixel++ program (supposing the name of the progra
 
 5. Produce an executable `myprogram.exe` for the Pixel++ program if you do not use functions in the standard library:
 	
-		gcc -no-pie -Wall myprogram.s -o myprogram.exe
+		gcc -Wall myprogram.s -o myprogram.exe
 
 	If you use any functions in the standard library, link all the assembly files and object files and produce the executable:
 
-		gcc -no-pie -Wall myprogram.s stdlib.s load.o -lm -o myprogram.exe
+		gcc -Wall myprogram.s stdlib.s load.o -lm -o myprogram.exe
+
+	You might need to add the `-no-pie` flag to GCC if you experience any relocation errors when linking on Ubuntu 18.04.
 
 6. Run your executable:
 	

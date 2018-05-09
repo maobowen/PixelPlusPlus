@@ -9,7 +9,7 @@ TOPLEVEL="./toplevel.native"
 LLC="llc"
 CC="gcc"
 CXX="g++"
-CFLAGS="-std=c99 -no-pie -Wall"
+CFLAGS="-std=c99 -Wall"  # Add -no-pie here for relocation error
 CXXFLAGS="-std=c++11 -Wall"
 HASH="shasum -a 256"
 
