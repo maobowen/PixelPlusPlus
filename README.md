@@ -1,16 +1,16 @@
 # Pixel++
 
-Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a documentation intended for the compilation and execution instructions.
+Pixel++ is a programming language for efficient manipulation of images coded in OCaml. This is a documentation intended for the compilation and execution instructions. The full language manual is available at https://maobowen.github.io/PixelPlusPlus.
 
 This is a class project for COMS W4115 Programming Languages and Translators, Spring 2018 at Columbia University.
 
 ## Group Members
 
-- Jiayang Li	jl4305@columbia.edu
-- Yilan He	yh2961@columbia.edu
-- Bowen Mao	bm2734@columbia.edu
-- Nana Pang	np2630@columbia.edu
-- Yunxuan Sun	ys3065@columbia.edu
+- Jiayang Li ([@jiayangli2](https://github.com/jiayangli2)) jl4305@columbia.edu
+- Yilan He ([@elenahoho](https://github.com/elenahoho)) yh2961@columbia.edu
+- Bowen Mao ([@maobowen](https://github.com/maobowen)) bm2734@columbia.edu
+- Nana Pang ([@nanahpang](https://github.com/nanahpang)) np2630@columbia.edu
+- Yunxuan Sun ([@yunxuansun](https://github.com/yunxuansun)) ys3065@columbia.edu
 
 ## Configuration
 
@@ -18,18 +18,26 @@ This is a class project for COMS W4115 Programming Languages and Translators, Sp
 
 #### Ubuntu
 
-Our compiler is tested on Ubuntu 17.10 with OCaml 4.04 and LLVM 6.0. To set up the environment, please run the following commands:
+Our compiler is developed and has been tested on
+
+- Ubuntu 14.04 with [OCaml 4.02](https://launchpad.net/~avsm/+archive/ubuntu/ocaml42+opam12) and [LLVM 6.0](http://apt.llvm.org/);
+- Ubuntu 17.10 with [OCaml 4.04](https://packages.ubuntu.com/artful/ocaml) and LLVM 6.0.
+
+To set up the environment, please run the following commands:
 
 ```bash
 #!/bin/bash 
 
-# Add LLVM repositories
 LLVM_VERSION=6.0
 OCAML_LLVM_VERSION=6.0.0
 UBUNTU_CODENAME=`lsb_release --codename | cut -f2`
-wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
-echo "deb-src http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee -a /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+UBUNTU_VERSION=`lsb_release -r | awk '{ print $2 }' | sed 's/[.]//'`
+if [ ${UBUNTU_VERSION} -lt 1804 ]; then
+    # Add LLVM repositories for Ubuntu version 17.10 and lower
+    wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    echo "deb http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+    echo "deb-src http://apt.llvm.org/${UBUNTU_CODENAME}/ llvm-toolchain-${UBUNTU_CODENAME}-${LLVM_VERSION} main" | sudo tee -a /etc/apt/sources.list.d/llvm-${LLVM_VERSION}.list
+fi
 sudo apt update
 
 # Install OCaml and LLVM
@@ -50,7 +58,11 @@ You may also run the following command to take changes into effect:
 
 #### macOS
 
-To set up the environment on macOS 10.13 with OCaml 4.06 and LLVM 6.0, please run the following commands (with [Homebrew](https://brew.sh/) installed):
+Our compiler has been tested on
+
+- macOS 10.13 with [OCaml 4.06](http://formulae.brew.sh/formula/ocaml) and [LLVM 6.0](http://formulae.brew.sh/formula/llvm@6).
+
+To set up the environment, please run the following commands (with [Homebrew](https://brew.sh/) installed):
 
 ```bash
 brew update
@@ -91,21 +103,23 @@ You can compile and execute an Pixel++ program (supposing the name of the progra
 	
 		llc myprogram.ll > myprogram.s
 
-4. If you would like to use any built-in functions or filters to process images, compile the built-in library:
+4. If you would like to use any functions in the standard library to process images, compile the file `stdlib.xpp`:
 	
-		make -C builtin/ clean
-		make -C builtin/
-		./builtin/toplevel.native -c2 ./builtin/builtin.xpp > builtin.ll
-		llc builtin.ll > builtin.s
+		make -C stdlib/ clean
+		make -C stdlib/
+		./stdlib/toplevel.native -c2 ./stdlib/stdlib.xpp > stdlib.ll
+		llc stdlib.ll > stdlib.s
 		gcc -std=c99 -Wall -c load.c
 
-5. Produce an executable `myprogram.exe` for the Pixel++ program if you do not use built-in functions or filters:
+5. Produce an executable `myprogram.exe` for the Pixel++ program if you do not use functions in the standard library:
 	
-		gcc myprogram.s -o myprogram.exe
+		gcc -Wall myprogram.s -o myprogram.exe
 
-	If you use any built-in functions or filters, link all the assembly files and object files and produce the executable:
+	If you use any functions in the standard library, link all the assembly files and object files and produce the executable:
 
-		gcc myprogram.s builtin.s load.o -lm -o myprogram.exe
+		gcc -Wall myprogram.s stdlib.s load.o -lm -o myprogram.exe
+
+	You might need to add the `-no-pie` flag to GCC if you experience any relocation errors when linking on Ubuntu 18.04.
 
 6. Run your executable:
 	
@@ -121,7 +135,7 @@ You can also clean intermediate files and executables before building the top-le
 - `./toplevel.native -s myprogram.xpp`: Print the semantically-checked abstract syntax tree (SAST);
 - `./toplevel.native -l myprogram.xpp`: Print the LLVM IR;
 - `./toplevel.native -c myprogram.xpp` (or `./toplevel.native myprogram.xpp`): Check and print the LLVM IR;
-- `./builtin/toplevel.native -c2 ./builtin/builtin.xpp`: Check and print the LLVM IR for the built-in library (a piece of Pixel++ code without a main function).
+- `./stdlib/toplevel.native -c2 ./stdlib/stdlib.xpp`: Check and print the LLVM IR for the standard library (a piece of Pixel++ code without a main function).
 
 ## Deliverable #2: Scanner and Parser
 
@@ -163,12 +177,12 @@ For all the five test programs, a message "Test passed." will be printed, which 
 
 Our test suites are located under the `extended-tests/` directory. For this deliverable, we have 7 positive test cases, whose filenames are in the format `extended-pos-x.xpp`, to test various functionalities of the Pixel++ language. We also have 3 negative test cases, whose filenames are in the format `extended-neg-x.xpp`, which will fail to compile due to semantic errors.
 
-- `extended-pos-0.xpp` implements the built-in vertical collage function. It takes an image of the same width and combines them vertically. 
-- `extended-pos-1.xpp` implements the built-in image cropping function. It lets the users specifiy an area by the starting point, height and width, and produces a cropped one.
-- `extended-pos-2.xpp` implements the built-in image flipping function. It takes an image and produces a horizontally flipped one.
+- `extended-pos-0.xpp` implements the vertical collage function in the standard library. It takes an image of the same width and combines them vertically. 
+- `extended-pos-1.xpp` implements the image cropping function in the standard library. It lets the users specifiy an area by the starting point, height and width, and produces a cropped one.
+- `extended-pos-2.xpp` implements the image flipping function in the standard library. It takes an image and produces a horizontally flipped one.
 - `extended-pos-3.xpp` demonstrates a self-defined Gaussian blur filter, which takes an image and applies blurring operation on it. 
-- `extended-pos-4.xpp` implements the built-in rotation function. It takes an image and rotates it by 180 degrees.
-- `extended-pos-5.xpp` demonstrates a built-in Sci-Fi effect filter, which takes an image and adds Sci-Fi effect on it. 
+- `extended-pos-4.xpp` implements the rotation function in the standard library. It takes an image and rotates it by 180 degrees.
+- `extended-pos-5.xpp` demonstrates a Sci-Fi effect filter defined in the standard library, which takes an image and adds Sci-Fi effect on it. 
 - `extended-pos-6.xpp` implements a reverse sorting algorithm with input `9 1 2 8 3` and output `9 8 3 2 1`.
 - `extended-neg-0.xpp` tests undeclared variable and produces an error: Fatal error: exception Failure("undeclared identifier d").
 - `extended-neg-1.xpp` tests unmatched type in assignment and produces an error: Fatal error: exception Failure("illegal assignment int = string").   
@@ -179,13 +193,35 @@ Our test suites are located under the `extended-tests/` directory. For this deli
 To test our test suites, just run:
 
 	make clean && make
-	make -C builtin/ clean && make -C builtin/
+	make -C stdlib/ clean && make -C stdlib/
 	./test-extended.sh
 
 For all the 7 positive test cases, a message "Positive test passed." will be printed, which indicates that the programs are successfully compiled and the output results match our expectation.
 
 > For the first 6 positive test cases, the images generated are available under the `extended-tests/` directory.
 >
-> For each of these test cases, an equivalent C++ program `extended-pos-x.cpp` is provided for validation. A test case passes if the hash value of the image generated by the Pixel++ program matches the hash value of the image generated by its equivalent C++ program.
+> For each of these test cases, an equivalent C++ program `extended-pos-x-v.cpp` is provided for validation. A test case passes if the hash value of the image generated by the Pixel++ program matches the hash value of the image generated by its equivalent C++ program.
 
 For all the 3 negative test cases, a message "Negative test passed." will be printed, which indicates that the programs fail to compile and the errors match our expectations.
+
+## Final Deliverable
+
+### Test Suites
+
+Our test suites are located under the `demo/` directory. For this deliverable, we have 3 positive test cases, whose filenames are in the format `demo-x.xpp`, to test major features of the Pixel++ language.
+
+- `demo-0.xpp` demostrates stacking and applying self-defined filters, flipping and cropping.
+- `demo-1.xpp` demostrates dimming (by pixel manipulation), rotating and applying a self-defined sharpening filter.
+- `demo-2.xpp` demostrates greying (by pixel manipulation), applying the Sci-Fi effect filter in the standard library and making collage.
+
+### Test Script
+
+To test our test suites, just run:
+
+	make clean && make
+	make -C stdlib/ clean && make -C stdlib/
+	./test-demo.sh
+
+For all the test cases, a message "Positive test passed." will be printed, which indicates that the programs are successfully compiled and the output results match our expectation.The images generated are available under the `demo/` directory.
+
+For each of these test cases, an equivalent C++ program `demo-x-v.cpp` is provided for validation. A test case passes if the hash value of the image generated by the Pixel++ program matches the hash value of the image generated by its equivalent C++ program.

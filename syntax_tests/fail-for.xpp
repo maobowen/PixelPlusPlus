@@ -1,9 +1,10 @@
-func int foo() {
-  int i;
-  int accu;
-  for ( ;  ; ) {
-    accu = accu + i;
-  }
-  return accu;
-}
+/* Author: Yunxuan (ys3065) */
 
+func int foo() {
+    int i;
+    int accu;
+    for ( ;  ; ) {
+        accu = accu + i;
+    }
+    return accu;
+}

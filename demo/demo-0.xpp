@@ -1,0 +1,23 @@
+/* Author: Jiayang (jl4305), Bowen (bm2734) */
+
+func int main()
+{
+    arr image = load("./jc.png");
+
+    arr emboss = [-2, -1, 0, -1, 1, 1, 0, 1, 2];  /* Emboss */ 
+    arr blur = [1, 1, 1, 1, 1, 1, 1, 1, 1];       /* Box blur */
+    set(emboss, 3, 3);
+    set(blur, 3, 3);
+
+    /* Stack filters */
+    |emboss->blur->blur->blur->blur->blur->blur->blur|@image;
+
+    /* Flip */
+    arr image2 = flip(image);
+
+    /* Crop */
+    arr image3 = crop(image2, 350, 200, 650, 550);
+
+    save(image3, "./demo-0.png");
+    close(image, 0);
+}

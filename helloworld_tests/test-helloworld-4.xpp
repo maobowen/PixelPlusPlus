@@ -1,3 +1,5 @@
+/* Author: Bowen (bm2734) */
+
 func int main()
 {
     arr a = [1, 4, 2, 8, 5, 7];

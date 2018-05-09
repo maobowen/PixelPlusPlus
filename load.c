@@ -1,3 +1,5 @@
+/* Author: Jiayang (jl4305) */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <memory.h>
@@ -7,10 +9,10 @@
 #include "stb_image_write.h"
 
 struct Img {
-	int length;
+    int length;
     int height;
     int width;
-	int* arr;
+    int* arr;
 };
 
 struct Img* load(char* path) {
@@ -32,19 +34,20 @@ struct Img* load(char* path) {
 }
 
 void save(struct Img *img, char* path) {
-    uint8_t arr_i8[img->length];
+    uint8_t *arr_i8 = (uint8_t*) malloc(sizeof(uint8_t) * (img->length));
     for (int i = 0; i < img->length; i++) {
         arr_i8[i] = (uint8_t) (img->arr[i]);
     }
     stbi_write_png(path, img->width, img->height, 3, arr_i8, img->width * 3);
+    free(arr_i8);
     printf("saving image completed!\n");
 }
 
 void close(struct Img* img, int i) {
-  free(img->arr);
-  if (i == 0)
-    free(img);
-  printf("close completed!\n");
+    free(img->arr);
+    if (i == 0)
+        free(img);
+    printf("close completed!\n");
 }
 
 #ifdef BUILD_TEST

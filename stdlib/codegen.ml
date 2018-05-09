@@ -1,16 +1,5 @@
-(* Code generation: translate takes a semantically checked AST and
-produces LLVM IR
-
-LLVM tutorial: Make sure to read the OCaml version of the tutorial
-
-http://llvm.org/docs/tutorial/index.html
-
-Detailed documentation on the OCaml LLVM library:
-
-http://llvm.moe/
-http://llvm.moe/ocaml/
-
-*)
+(* Code generation: translate takes a semantically checked AST and produces LLVM IR *)
+(* Author: Jiayang (jl4305) *)
 
 (* We'll refer to Llvm and Ast constructs with module names *)
 module L = Llvm
@@ -32,7 +21,7 @@ let translate (globals, functions) compiling_builtin =
   
   (* Create an LLVM module -- this is a "container" into which we'll 
      generate actual code *)
-  and the_module = L.create_module context "MicroC" in
+  and the_module = L.create_module context "Pixel++" in
 
   let ip_t       = L.pointer_type i8_t in
   let ip32_t       = L.pointer_type i32_t in
@@ -40,7 +29,7 @@ let translate (globals, functions) compiling_builtin =
   let structp_t  = L.pointer_type struct_t in
   let fstruct_t  = L.struct_type context [|i32_t; L.pointer_type structp_t|] in
 
-  (* Convert MicroC types to LLVM types *)
+  (* Convert Pixel++ types to LLVM types *)
   let ltype_of_typ = function
       A.Int   -> i32_t
     | A.Bool  -> i1_t
@@ -65,7 +54,7 @@ let translate (globals, functions) compiling_builtin =
     let global_var m (t, n) = StringMap.add n (L.define_global (n ^ g_var_suffix) (init t) the_module) m in
     List.fold_left global_var StringMap.empty globals in
 
-  (* Declare a "printf" function to implement MicroC's "print". *)
+  (* Declare a "printf" function to implement Pixel++'s "print". *)
   let printf_t : L.lltype = 
       L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func : L.llvalue = 
@@ -128,7 +117,7 @@ let translate (globals, functions) compiling_builtin =
                          | _ -> raise (Failure("wrong variable tables"))
     in
 
-    (* Generate LLVM code for a call to MicroC's "print" *)
+    (* Generate LLVM code for a call to Pixel++'s "print" *)
     let rec expr builder ((tp, e) : sexpr) symbol_table = match e with
   SLiteral i -> L.const_int i32_t i (* Generate a constant integer *)
       | SBoolLit b -> L.const_int i1_t (if b then 1 else 0)
@@ -350,58 +339,61 @@ let translate (globals, functions) compiling_builtin =
   Some _ -> ()
       | None -> ignore (f builder) in
 
-    let rec stmt (builder,symbol_table) = function
-  SBlock sl -> List.fold_left stmt (builder, symbol_table) sl
-      | SExpr e -> let _ = expr builder e symbol_table in (builder, symbol_table) 
-      | SVar (e1, e2) -> let (tp, s) = e1 in let (symbol_table2, _) = add_local (List.hd symbol_table, builder) (tp, s) in
+    let rec stmt (builder, symbol_table, pbuilder) = function
+  SBlock sl -> List.fold_left stmt (builder, StringMap.empty :: symbol_table, pbuilder) sl
+      | SExpr e -> let _ = expr builder e symbol_table in (builder, symbol_table, pbuilder)
+      | SVar (e1, e2) -> let (tp, s) = e1 in let (symbol_table2, _) = add_local (List.hd symbol_table, pbuilder) (tp, s) in
                                               let symbol_table3 = (symbol_table2 :: (List.tl symbol_table)) in
-                                                (*let _ = expr builder (tp, SId(s)) symbol_table3 in *)
+
                                           let _ = match e2 with
                                               (A.Void, SNoassign) -> init tp
                                             | _ -> expr builder (tp, SAssign(s, e2)) symbol_table3
-           in (builder, symbol_table3)
+           in (builder, symbol_table3, pbuilder)
       | SReturn e -> let _ = match fdecl.styp with
                               A.Int -> L.build_ret (expr builder e symbol_table) builder 
                             | A.Arr -> L.build_ret (expr builder e symbol_table) builder
                             | A.Float -> L.build_ret (expr builder e symbol_table) builder
                             | _ -> to_imp (A.string_of_typ fdecl.styp)
-                     in (builder, symbol_table)
+                     in (builder, symbol_table, pbuilder)
       | SIf (predicate, then_stmt, else_stmt) ->
          let bool_val = expr builder predicate symbol_table in
    let merge_bb = L.append_block context "merge" the_function in
          let branch_instr = L.build_br merge_bb in
    let then_bb = L.append_block context "then" the_function in
-         let then_builder = fst (stmt ((L.builder_at_end context then_bb), symbol_table) then_stmt) in 
+         let (then_builder, _, _) = (stmt ((L.builder_at_end context then_bb), symbol_table, pbuilder) then_stmt) in 
    let () = add_terminal then_builder branch_instr in
 
    let else_bb = L.append_block context "else" the_function in
-         let else_builder = fst (stmt ((L.builder_at_end context else_bb), symbol_table) else_stmt) in
+         let (else_builder, _, _) = (stmt ((L.builder_at_end context else_bb), symbol_table, pbuilder) else_stmt) in
    let () = add_terminal else_builder branch_instr in
 
    let _ = L.build_cond_br bool_val then_bb else_bb builder in
 
-   (L.builder_at_end context merge_bb, symbol_table)
+   (L.builder_at_end context merge_bb, symbol_table, L.builder_at_end context merge_bb)
 
       | SWhile (predicate, body) ->
    let pred_bb = L.append_block context "while" the_function in
-   let _ = L.build_br pred_bb builder in
+   let branch_instr0 = L.build_br pred_bb in
+   
    let body_bb = L.append_block context "while_body" the_function in
-         let while_builder = fst (stmt ((L.builder_at_end context body_bb), symbol_table) body) in
+          
+         let (while_builder, _, _) = (stmt ((L.builder_at_end context body_bb), symbol_table, pbuilder) body) in
    let () = add_terminal while_builder (L.build_br pred_bb) in
    let pred_builder = L.builder_at_end context pred_bb in
    let bool_val = expr pred_builder predicate symbol_table in
    let merge_bb = L.append_block context "merge" the_function in
    let _ = L.build_cond_br bool_val body_bb merge_bb pred_builder in
-   (L.builder_at_end context merge_bb, symbol_table)
+   let () = add_terminal builder branch_instr0 in
+   (L.builder_at_end context merge_bb, symbol_table, L.builder_at_end context merge_bb)
 
-      | SFor (e1, e2, e3, body) -> stmt (builder, symbol_table)
+      | SFor (e1, e2, e3, body) -> stmt (builder, symbol_table, pbuilder)
       ( SBlock [SExpr e1 ; SWhile (e2, SBlock [body ; SExpr e3]) ] ) 
       (* | s -> to_imp (string_of_sstmt s) *)
     (* Generate the instructions for the function's body, 
        which mutates the_module *)
     in
 
-    let builder = fst (stmt (builder, scoped_vars) (SBlock fdecl.sbody)) in
+    let (builder, _, _) = (stmt (builder, scoped_vars, builder) (SBlock fdecl.sbody)) in
 
     add_terminal builder (match fdecl.styp with
         A.Void -> L.build_ret_void

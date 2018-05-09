@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Author: Bowen (bm2734), Yunxuan (ys3065)
+
 files="helloworld_tests/test-helloworld-*.xpp"
 
 TOPLEVEL="./toplevel.native"

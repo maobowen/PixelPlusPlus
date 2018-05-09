@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Author: Bowen (bm2734)
+
 basedir="extended_tests"
 files="extended-*.xpp"
 
@@ -7,9 +9,9 @@ TOPLEVEL="./toplevel.native"
 LLC="llc"
 CC="gcc"
 CXX="g++"
-CFLAGS="-std=c99 -Wall"
+CFLAGS="-std=c99 -Wall"  # Add -no-pie here for relocation error
 CXXFLAGS="-std=c++11 -Wall"
-HASH="sha256sum"
+HASH="shasum -a 256"
 
 CheckPass() {
     basename=`echo $1 | sed 's/.*\\///
@@ -20,7 +22,7 @@ CheckPass() {
     # Build Pixel++ program
     ../${TOPLEVEL} $1 > ${basename}.ll
     ${LLC} ${basename}.ll > ${basename}.s
-    ${CC} ${CFLAGS} -o ${basename} ${basename}.s builtin.s load.o -lm
+    ${CC} ${CFLAGS} ${basename}.s stdlib.s load.o -lm -o ${basename}
     ./${basename} > ${basename}.xpp.out
 
     # Testing
@@ -35,7 +37,7 @@ CheckPass() {
         rm -f ${basename}.diff
     else
         # Build verification program
-        ${CXX} ${CXXFLAGS} ${basename}-v.cpp -o ${basename}-v
+        ${CXX} ${CXXFLAGS} ${basename}-v.cpp xppstdlib.cpp -o ${basename}-v
         ./${basename}-v
         # Compare two images
         hash1=`${HASH} ${basename}.png | cut -d\  -f1`
@@ -74,8 +76,8 @@ CheckFail() {
 
 cd ${basedir}
 # Build built-in and C libraries
-../builtin/${TOPLEVEL} -c2 ../builtin/builtin.xpp > builtin.ll
-${LLC} builtin.ll > builtin.s
+../stdlib/${TOPLEVEL} -c2 ../stdlib/stdlib.xpp > stdlib.ll
+${LLC} stdlib.ll > stdlib.s
 ${CC} ${CFLAGS} -c ../load.c
 # Start testing
 for file in $files

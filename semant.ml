@@ -1,4 +1,5 @@
 (* Semantic checking for the MicroC compiler *)
+(* Author: Jiayang (jl4305), Yilan (yh2961), Nana (np2630) *)
 
 open Ast
 open Sast
@@ -71,6 +72,7 @@ let check (globals, functions) compiling_builtin =
           let (t, e') = expr e in
           let ty = match op with
             Neg when t = Int || t = Float -> t
+          | Trans when t = Arr -> t
           | Not when t = Bool -> Bool
           | _ -> raise (Failure ("illegal unary operator " ^ 
                                  string_of_uop op ^ string_of_typ t ^
@@ -86,6 +88,9 @@ let check (globals, functions) compiling_builtin =
             Add | Sub | Mult | Div when same && t1 = Int   -> Int
           | Add | Sub | Mult | Div when same && t1 = Float -> Float
           | Equal | Neq            when same               -> Bool
+          | Expo                   when t1 = Int && t2 = Int -> Int
+          | Expo                   when t1 = Float && t2 = Int -> Float
+          | Mtimes                 when same && t1 = Arr   -> Arr
           | Less | Leq | Greater | Geq
                      when same && (t1 = Int || t1 = Float) -> Bool
           | And | Or when same && t1 = Bool -> Bool
@@ -154,7 +159,7 @@ in let build_in_decls_final = (if not compiling_builtin then
 in let built_in_decls = StringMap.add "collage" {typ = Arr; fname = "collage"; formals = [(Arr, "img1"); (Arr, "img2")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "apply_conv_filter" {typ = Void; fname = "apply_conv_filter"; formals = [(Arr, "img"); (Arr, "filter")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "apply_conv_filters" {typ = Void; fname = "apply_conv_filters"; formals = [(Kernel, "filters");(Arr, "img")]; locals=[]; body=[]} built_in_decls
-in let built_in_decls = StringMap.add "trans" {typ = Arr; fname = "trans"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
+in let built_in_decls = StringMap.add "transpose" {typ = Arr; fname = "transpose"; formals = [(Arr, "x")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "crop" {typ = Arr; fname = "crop"; formals = [(Arr, "img"); (Int, "x"); (Int, "y"); (Int, "h"); (Int, "w")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "flip" {typ = Arr; fname = "flip"; formals = [(Arr, "img")]; locals=[]; body=[]} built_in_decls
 in let built_in_decls = StringMap.add "rotate" {typ = Void; fname = "rotate"; formals = [(Arr, "img"); (Int, "angle")]; locals=[]; body=[]} built_in_decls
@@ -285,6 +290,7 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
           let (t, e') = expr e symbols in
           let ty = match op with
             Neg when t = Int || t = Float -> t
+          | Trans when t = Arr -> t
           | Not when t = Bool -> Bool
           | _ -> raise (Failure ("illegal unary operator " ^ 
                                  string_of_uop op ^ string_of_typ t ^
@@ -300,6 +306,9 @@ in built_in_decls else built_in_decls) in let built_in_decls = build_in_decls_fi
             Add | Sub | Mult | Div when same && t1 = Int   -> Int
           | Add | Sub | Mult | Div when same && t1 = Float -> Float
           | Equal | Neq            when same               -> Bool
+          | Expo                   when t1 = Int && t2 = Int -> Int
+          | Expo                   when t1 = Float && t2 = Int -> Float
+          | Mtimes                 when same && t1 = Arr   -> Arr
           | Less | Leq | Greater | Geq
                      when same && (t1 = Int || t1 = Float) -> Bool
           | And | Or when same && t1 = Bool -> Bool

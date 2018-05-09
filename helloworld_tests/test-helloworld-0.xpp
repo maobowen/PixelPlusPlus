@@ -1,3 +1,5 @@
+/* Author: Bowen (bm2734) */
+
 func int main()
 {
     printline("Hello, Pixel++!");

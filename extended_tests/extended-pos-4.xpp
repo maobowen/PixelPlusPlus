@@ -1,3 +1,5 @@
+/* Author: Yilan (yh2961), Bowen (bm2734) */
+
 /* Test case: image rotation */
 func int main() {
     arr img = load("./image.png");

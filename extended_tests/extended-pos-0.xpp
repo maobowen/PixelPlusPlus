@@ -1,3 +1,5 @@
+/* Author: Yilan (yh2961), Bowen (bm2734) */
+
 /* Test case: vertical collage */
 func int main() {
     arr img1 = load("./image.png");

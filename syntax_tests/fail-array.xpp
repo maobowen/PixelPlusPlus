@@ -1,8 +1,10 @@
+/* Author: Yunxuan (ys3065) */
+
 func int main()
 {
-  arr arr1;
-  arr arr2;
-  arr1 = [];
-  arr2 = [1, 2];
-  arr1 * arr2;
+    arr arr1;
+    arr arr2;
+    arr1 = [];
+    arr2 = [1, 2];
+    arr1 * arr2;
 }
