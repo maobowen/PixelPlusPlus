@@ -791,6 +791,86 @@ func void main()
 
 # 4 Project Plan
 
+## 4.1 Process Overview
+
+We started the proposal discussion from the first week and held regular meetings every one or two weeks. Due to a common interest, we decided to design an image processing language. We met before each deliverable submissions to make sure that our work had met the requirements. During the meetings with Nimo Ni, our TA, we also received much advice on our project progress. Therefore, even though we did not have much experience on computer vision or related fields before, the whole process went smoothly.
+
+As for the specification process, we started by defining our expected functionalities. Aiming at the image domain, we expected our language to be able to apply some transformations to image files. After we agreed on the proposal, we then defined our language rules and started coding up the scanner and parser. Though, we added several new rules by ourselves, such as the filter rules based on our discussions. As we went through each stage, we were getting closer to our original expectation. Certainly, modification of our original plan was necessary. Once we found some issues that would require us to make a big change, we would hold a meeting to discuss it together.
+
+During the development, we divided work among us in each meeting. We set up a Github repository to cooperate: <https://github.com/maobowen/PixelPlusPlus>. It had been difficult for us to divide the work at the beginning since we were not familiar with OCaml and MicroC at all. During that period, we met and went through the codes of MicroC together to understand the process before we could figure out how we should start the work. We met with our TA and took meeting minutes for our later reference. The situation got better as we were more familiar with the compiling process and the whole structure. Therefore, in the following stages, each of us was mainly responsible for one component, and we worked on the same branch before merging to our master branch.
+
+## 4.2 Programming Style Guide
+
+### 4.2.1 General Rules
+
+-   Indentation should be consistent across each file and files of the same extension and type;
+-   The naming of the test cases should be consistent and distinguishable;
+-   All the codes should be well commented;
+-   Variable identifiers and function names should start with lowercase letters;
+-   Naming should follows the camelCase rule or the snake_case rule.
+
+### 4.2.2 OCaml
+
+-   All the OCaml files have an indentation of 2 spaces;
+-   Pattern matching starts at the same column.
+
+### 4.2.3 C and C++
+
+-   All the C and C++ files have an indentation of 4 spaces.
+
+### 4.2.4 Pixel++
+
+-   All the Pixel++ files have the extension of `.xpp`.
+-   All the Pixel++ files have an indentation of 4 spaces;
+-   Global variables are always declared at the top;
+-   Curly braces start from a new line.
+
+## 4.3 Project Timeline
+
+Date | Description
+--- | ---
+Jan 26 | First team meeting; brainstormed ideas; decided on writing image processing language Pixel++; discussed division of labor for project proposal.
+Feb 2 | Fine-tuned project proposal together and submitted.
+Feb 7 | Meeting with TA; confirmed idea and fixed some language specification according to TA’s advice.
+Feb 9 | Team meeting studying OCaml and MicroC; set up Github repository for collaboration; discussed language syntax for writing up scanner and parser.
+Feb 21 | Finished the scanner and parser deliverable.
+Feb 26 | Integrated and finished the language reference manual.
+Mar 1 | Fixed some specification based on TA’s advice.
+Mar 16 | Working on the semantic checker, linking C++ library and codegen part.
+Mar 26 | Finished arithmetic operations and simple filter application.
+Apr 11 | Confirmed standard library functions and implementations.
+Apr 18 | Finished all the standard library functions with extended testsuite.
+
+## 4.4 Roles and Responsibilities
+
+Name | Role | Description
+--- | --- | ---
+Jiayang Li | Language Guru | Technical lead responsible for `codegen.ml`, C library linking, and standard library building, also engaged in other components and documentations.
+Nana Pang | System Architect | Responsible for the architecture and semantic checker implementation, engaged in standard library functions writing and documentation.
+Yilan He | Manager | Responsible for the semantic checker implementation, engaged in standard library functions writing and documentation, organized meetings.
+Bowen Mao | Tester | Responsible for the testing, engaged in standard library functions writing, responsible for writing C++ verification program and integrating documentation.
+Yunxuan Sun | Tester | Responsible for the testing, engaged in standard library functions writing and documentation.
+
+## 4.5 Software Development Environment
+
+### Environment
+
+At the early stage, our development environment varies among each individual, which includes macOS 10.13, Ubuntu 16.04 and Ubuntu 17.10. To make sure everyone had the same working environment, we later set up a shared virtual machine with Ubuntu 14.04 hosted on Google Compute Engine. In this virtual machine, we used OCaml 4.02 and LLVM 6.0. We have tested our compiler on other environments as well. For more information, please refer to Section [2.1](#21-environment-setup).
+
+### Tool
+
+We used text editor includes Sublime Text and Vim for the development. For version control, we set up Github repository to cooperate. Google drive is also set up for recording our questions and meeting minutes.
+
+### Language
+
+**OCaml**: OCaml is the major language for writing Pixel++. All the components except for the standard library functions are written in OCaml.
+
+**C**: C libraries (including the Single-file header-file libraries for reading and writing images) are linked during the implementation of image processing. Some functions such as `print()` are also implemented by them.
+
+**C++**: We wrote C++ programs to verify the correctness of the standard library functions which involve image generations.
+
+In addition, we wrote Bash scripts to batch test our test cases.
+
 # 5 Architectural Design
 
 # 6 Test Plan
